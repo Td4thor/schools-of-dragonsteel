@@ -15,6 +15,11 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
+    // Dev-only client smoke harness (runClient -Pdsqa). Kept out of the release jar.
+    qa {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
 }
 
 minecraft {
@@ -31,7 +36,14 @@ minecraft {
             jvmArgs '-Xmx4G'
             mods { "${mod_id}" { source sourceSets.main } }
         }
-        client { }
+        client {
+            if (project.hasProperty('dsqa')) {
+                // Loads run/saves/<dsqaWorld>, equips each set, takes screenshots, then quits. See src/qa.
+                property 'dragonsteel_schools.qa', 'true'
+                args '--quickPlaySingleplayer', project.findProperty('dsqaWorld') ?: 'QA', '--width', '1280', '--height', '720'
+                mods { "${mod_id}" { source sourceSets.qa } }
+            }
+        }
         server { args '--nogui' }
         gameTestServer {
             workingDirectory project.file('build/gametest-run')

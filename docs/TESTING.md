@@ -19,3 +19,10 @@ Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Tes
 7. **Screenshots for the art pass.** Both armour sets front, back and side (and each piece alone), Dawn and Elsewhere
    in hand (first and third person), both staves, holy fire on a mob and on yourself in first person, the three
    cauldron liquids, and the Holy Fire effect icon.
+
+## Dev client smoke test (Hastur)
+
+`gradlew runClient -Pdsqa -PdsqaWorld=<save in run/saves>` loads that save, equips each school's full kit, lights holy
+fire, screenshots first person, third person front and back into `run/screenshots/`, and quits, logging
+`[DragonsteelSchools/qa] DONE`. The harness lives in `src/qa` and never ships in the jar. The GameTest server cannot
+catch client-only crashes (0.1.0-dev.1's armour crash was one), so run this after any client-side change.

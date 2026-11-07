@@ -105,6 +105,7 @@ public class SchoolPlateArmorItem extends ArmorItem implements GeoItem, IPresetS
 
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(new dev.dragonsteelschools.client.PlateArmorClientExtensions(school));
+        // Runs inside the Item constructor, before this.school is set: pass nothing from this object's fields.
+        consumer.accept(new dev.dragonsteelschools.client.PlateArmorClientExtensions());
     }
 }

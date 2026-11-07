@@ -15,19 +15,23 @@ import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
-/** Client half of the plate armour: Iron's GeckoLib armour renderer plus a full-bright glow-mask layer. */
+/**
+ * Client half of the plate armour: Iron's GeckoLib armour renderer plus a full-bright glow-mask layer.
+ *
+ * <p>Holds no school of its own. Forge calls {@code Item.initializeClient} from inside the {@code Item}
+ * constructor, before {@code SchoolPlateArmorItem} has set its fields, so anything captured there is still null
+ * (the 0.1.0-dev.1 crash). The school is read from the worn item at render time instead.
+ */
 public final class PlateArmorClientExtensions implements IClientItemExtensions {
-    private final SchoolSteel school;
     private GeoArmorRenderer<SchoolPlateArmorItem> renderer;
-
-    public PlateArmorClientExtensions(SchoolSteel school) {
-        this.school = school;
-    }
 
     @Override
     public @NotNull HumanoidModel<?> getHumanoidArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> original) {
+        if (!(stack.getItem() instanceof SchoolPlateArmorItem plate)) {
+            return original;
+        }
         if (renderer == null) {
-            GenericCustomArmorRenderer<SchoolPlateArmorItem> made = new GenericCustomArmorRenderer<>(new Model(school));
+            GenericCustomArmorRenderer<SchoolPlateArmorItem> made = new GenericCustomArmorRenderer<>(new Model(plate.school()));
             made.addRenderLayer(new AutoGlowingGeoLayer<>(made));
             renderer = made;
         }
