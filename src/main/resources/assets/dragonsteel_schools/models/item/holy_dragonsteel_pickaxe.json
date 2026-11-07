@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "dragonsteel_schools:item/holy_dragonsteel_pickaxe"
+  }
+}

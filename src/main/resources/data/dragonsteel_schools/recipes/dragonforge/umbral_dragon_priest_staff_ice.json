@@ -1,0 +1,24 @@
+{
+  "type": "iceandfire:dragonforge",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "iceandfire"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ice_and_fire_spellbooks"
+    }
+  ],
+  "dragon_type": "ice",
+  "cook_time": 1000,
+  "input": {
+    "item": "ice_and_fire_spellbooks:dragon_priest_staff"
+  },
+  "blood": {
+    "item": "dragonsteel_schools:ender_dragon_blood"
+  },
+  "result": {
+    "item": "dragonsteel_schools:umbral_dragon_priest_staff"
+  }
+}

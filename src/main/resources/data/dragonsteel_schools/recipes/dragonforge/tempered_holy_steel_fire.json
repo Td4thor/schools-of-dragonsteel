@@ -1,0 +1,20 @@
+{
+  "type": "iceandfire:dragonforge",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "iceandfire"
+    }
+  ],
+  "dragon_type": "fire",
+  "cook_time": 1000,
+  "input": {
+    "tag": "forge:ingots/iron"
+  },
+  "blood": {
+    "item": "dragonsteel_schools:holy_dragon_blood"
+  },
+  "result": {
+    "item": "dragonsteel_schools:tempered_holy_steel"
+  }
+}

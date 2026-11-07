@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "iceandfire:dragonforge_fire_core",
+      "required": false
+    },
+    {
+      "id": "iceandfire:dragonforge_fire_core_disabled",
+      "required": false
+    },
+    {
+      "id": "iceandfire:dragonforge_ice_core",
+      "required": false
+    },
+    {
+      "id": "iceandfire:dragonforge_ice_core_disabled",
+      "required": false
+    },
+    {
+      "id": "iceandfire:dragonforge_lightning_core",
+      "required": false
+    },
+    {
+      "id": "iceandfire:dragonforge_lightning_core_disabled",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "type": "dragonsteel_schools:apex_forging",
+  "school": "holy",
+  "input": {
+    "item": "dragonsteel_schools:tempered_holy_steel"
+  },
+  "result": {
+    "item": "dragonsteel_schools:holy_dragonsteel_ingot"
+  }
+}

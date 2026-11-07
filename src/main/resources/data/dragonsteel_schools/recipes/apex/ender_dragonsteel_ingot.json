@@ -1,0 +1,10 @@
+{
+  "type": "dragonsteel_schools:apex_forging",
+  "school": "ender",
+  "input": {
+    "item": "dragonsteel_schools:tempered_ender_steel"
+  },
+  "result": {
+    "item": "dragonsteel_schools:ender_dragonsteel_ingot"
+  }
+}
