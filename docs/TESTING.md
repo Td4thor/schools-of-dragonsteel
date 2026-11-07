@@ -22,7 +22,10 @@ Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Tes
 
 ## Dev client smoke test (Hastur)
 
-`gradlew runClient -Pdsqa -PdsqaWorld=<save in run/saves>` loads that save, equips each school's full kit, lights holy
-fire, screenshots first person, third person front and back into `run/screenshots/`, and quits, logging
-`[DragonsteelSchools/qa] DONE`. The harness lives in `src/qa` and never ships in the jar. The GameTest server cannot
+`bash tools/run_client_qa.sh [save folder]` copies a save (by default Tad's test-instance world) to `run/saves/QA`
+and runs `gradlew runClient -Pdsqa -PdsqaWorld=QA`. The client builds a sky platform at noon and puts each school's
+armour on four armour stands: front, three-quarter, side and back. It shoots a lineup plus a close front and back at
+FOV 30, then equips the full kit (sword main hand, axe off hand; Holy also burning with holy fire) and shoots first
+and third person. Screenshots go to `run/screenshots/`, and the run quits logging `[DragonsteelSchools/qa] DONE`.
+The script fails on any crash report or if the run never finishes. The harness lives in `src/qa` and never ships in the jar. The GameTest server cannot
 catch client-only crashes (0.1.0-dev.1's armour crash was one), so run this after any client-side change.

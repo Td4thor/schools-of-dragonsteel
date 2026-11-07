@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate the Dragonsteel Schools 'mage plate' armour art.
+"""Generate the Dragonsteel Schools plate armour art (v2: Holy radiant full plate, Ender Voidwalker).
 
 Deterministic and rerunnable:  python tools/generate_armor.py
 Writes (paths relative to the project root):
@@ -36,18 +36,19 @@ def _hex(c):
     return (int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16), 255)
 
 RAMPS = {
-    # Holy: polished white-silver and warm gold
-    "silver": ["#3a3d4b", "#575b6c", "#7b8195", "#a2a8ba", "#c4c9d6", "#dfe3eb", "#f3f5f9", "#ffffff"],
+    # Holy: polished white steel with cool shadows, burnished gold, radiant sun glow
+    "silver": ["#343747", "#515669", "#73798e", "#9aa1b5", "#bfc5d3", "#dce0e9", "#f1f3f8", "#ffffff"],
     "gold":   ["#4a2a08", "#74450f", "#a06a17", "#cc9324", "#e8b53a", "#f7d45a", "#ffeb94", "#fff9d6"],
-    "sun":    ["#c98a1c", "#f0b93a", "#ffd95a", "#ffe98c", "#fff4bf", "#fffbe8"],   # glowing gold
+    "sun":    ["#c27a12", "#e9a521", "#ffc833", "#ffd966", "#ffeaa0", "#fff6d6"],   # glowing gold
     "visor":  ["#1c1726", "#2e2638"],
-    # Ender: obsidian / void plate, deep purple, purpur + end stone accents, violet glow
-    "obsid":  ["#060409", "#0d0915", "#150f21", "#1e162e", "#291f3e", "#372a51", "#4a3a6a", "#655290"],
-    "void":   ["#170b26", "#24123b", "#341a54", "#46236f", "#5b2e8c", "#7340a8", "#9160c6", "#b48ae0"],
-    "purpur": ["#4a3150", "#664769", "#86618a", "#a57ca7", "#c19cc3", "#dbbedb", "#efdfee"],
-    "endst":  ["#6c6a43", "#97955d", "#c1bf81", "#dbdb9f", "#ecedc0", "#fafae0"],
-    "violet": ["#6a22c9", "#8c3cf0", "#ab63ff", "#c88dff", "#e2bdff", "#f6e8ff"],   # glowing violet
-    "star":   ["#5a4880", "#7e69ad", "#b3a3dc"],
+    # Ender v2: blue-violet night steel, amethyst trim, void cloth, enderman-magenta eyes, pearl teal, pale blade steel
+    "night":    ["#0e0b16", "#171223", "#211a31", "#2c2340", "#382e52", "#463b66", "#5a4e80", "#7468a0"],
+    "amethyst": ["#2e1247", "#421a63", "#5a2482", "#7330a3", "#8e43c0", "#aa62d8", "#c88cec"],
+    "cloth":    ["#0f0b17", "#181224", "#221a33", "#2d2343", "#3a2e55", "#4a3d6a"],
+    "magenta":  ["#80109f", "#b022d6", "#d64cf7", "#ea8cff", "#f8cfff"],                # glowing
+    "pearl":    ["#0b4a42", "#11705f", "#1d9c84", "#3fc7a8", "#86e6cf", "#d0fff2"],     # glowing
+    "blade":    ["#3e3a52", "#615b7a", "#8c86a8", "#bbb6d4", "#e6e2f7"],
+    "violet":   ["#6a22c9", "#8c3cf0", "#ab63ff", "#c88dff", "#e2bdff", "#f6e8ff"],     # glowing
 }
 RAMPS = {k: [_hex(c) for c in v] for k, v in RAMPS.items()}
 
@@ -100,73 +101,90 @@ class Face:
 # ----------------------------------------------------------------------------------------------
 # Base materials
 # ----------------------------------------------------------------------------------------------
-def plate(f, ramp, base, noise=0.07, streak=True, speckle=None):
+SIDES4 = ("front", "back", "left", "right")
+
+
+def plate(f, ramp, base, sheen=True):
+    """Polished plate lit from above: brighter top rows, darker foot, lit top rim, shaded far edge, one
+    vertical sheen column on wide faces. No random speckle: noise read as dirt at armour scale."""
     w, h, k = f.w, f.h, f.kind
     for y in range(h):
         for x in range(w):
             lvl = base
-            if k in ("front", "back", "left", "right"):
+            if k in SIDES4:
                 if h >= 4:
                     t = y / (h - 1)
-                    if t < 0.28: lvl += 1
-                    elif t > 0.78: lvl -= 1
+                    if t < 0.25:
+                        lvl += 1
+                    elif t > 0.75:
+                        lvl -= 1
             elif k == "top":
                 lvl += 1
-            elif k == "bottom":
+            else:
                 lvl -= 2
             f.set(x, y, ramp, lvl)
-    # bevelled plate edges: lit top/left rim, shadowed bottom/right rim
-    if k in ("front", "back", "left", "right"):
+    if k in SIDES4:
         if h >= 2:
             for x in range(w):
                 f.shift(x, 0, +1)
-                f.shift(x, h - 1, -1 if h < 3 else -2)
-        if w >= 3 and h >= 3:
+                if h >= 3:
+                    f.shift(x, h - 1, -1)
+        if w >= 4 and h >= 3:
             for y in range(1, h - 1):
-                f.shift(0, y, +1)
                 f.shift(w - 1, y, -1)
+        if sheen and w >= 4 and h >= 4:
+            sx = max(1, w // 4)
+            for y in range(1, h - 1):
+                f.shift(sx, y, +1)
     elif k == "top" and w >= 3 and h >= 3:
         for x in range(w):
             f.shift(x, h - 1, +1)       # front lip catches the light
-        for y in range(h):
-            f.shift(0, y, -1 if y else 0)
-            f.shift(w - 1, y, -1 if y else 0)
-    # hand-placed looking wear: sparse +-1 texels (seeded per cube face)
-    rng = f.rng
-    if w >= 3 and h >= 3:
-        for y in range(1, h - 1):
-            for x in range(1, w - 1):
-                r = rng.random()
-                if r < noise * 0.5: f.shift(x, y, -1)
-                elif r < noise: f.shift(x, y, +1)
-    # polished diagonal streak
-    if streak and w >= 4 and h >= 4 and k != "bottom":
-        off = rng.randrange(0, max(1, w // 2))
-        for y in range(h):
-            x = off + (y * 2) // 3
-            if 0 < x < w - 1 and 0 < y < h - 1:
-                f.shift(x, y, +1)
-    if speckle:
-        sramp, prob = speckle
-        for y in range(1, h - 1):
-            for x in range(1, w - 1):
-                r = rng.random()
-                if r < prob * 0.12: f.set(x, y, sramp, 2, glow=(r < prob * 0.03))
-                elif r < prob * 0.45: f.set(x, y, sramp, 1)
-                elif r < prob: f.set(x, y, sramp, 0)
+
+
+def cloth(f, ramp, base):
+    """Soft cloth: vertical folds every three texels, a shadow under the top lip, darker hem row."""
+    w, h, k = f.w, f.h, f.kind
+    for y in range(h):
+        for x in range(w):
+            lvl = base
+            if k in SIDES4:
+                lvl += {0: 0, 1: 1, 2: -1}[x % 3] if w >= 3 else 0
+                if y == 0 and h >= 3:
+                    lvl -= 1
+                if y == h - 1 and h >= 3:
+                    lvl -= 1
+            elif k == "top":
+                lvl += 1
+            else:
+                lvl -= 1
+            f.set(x, y, ramp, lvl)
+
+
+def glow_fill(f, ramp, side, top, bottom):
+    for y in range(f.h):
+        for x in range(f.w):
+            if f.kind == "top":
+                lvl = top
+            elif f.kind == "bottom":
+                lvl = bottom
+            else:
+                lvl = side + (1 if f.h >= 2 and y < f.h // 2 else 0)
+            f.set(x, y, ramp, lvl, True)
 
 
 MATERIALS = {
     "silver": lambda f: plate(f, "silver", 5),
     "silver_dim": lambda f: plate(f, "silver", 4),
-    "gold": lambda f: plate(f, "gold", 4, streak=False),
-    "gold_hi": lambda f: plate(f, "gold", 5, streak=False),
-    "sun": lambda f: [f.set(x, y, "sun", 3 if f.kind != "bottom" else 1, True) for y in range(f.h) for x in range(f.w)],
-    "obsid": lambda f: plate(f, "obsid", 3, noise=0.05, streak=False, speckle=("star", 0.10)),
-    "void": lambda f: plate(f, "void", 3, noise=0.06, streak=False, speckle=("star", 0.04)),
-    "purpur": lambda f: plate(f, "purpur", 3, noise=0.05, streak=False),
-    "endst": lambda f: plate(f, "endst", 3, noise=0.04, streak=False),
-    "violet": lambda f: [f.set(x, y, "violet", 3 if f.kind != "bottom" else 1, True) for y in range(f.h) for x in range(f.w)],
+    "gold": lambda f: plate(f, "gold", 4, sheen=False),
+    "gold_hi": lambda f: plate(f, "gold", 5, sheen=False),
+    "sun": lambda f: glow_fill(f, "sun", 3, 4, 1),
+    "night": lambda f: plate(f, "night", 4),
+    "night_hi": lambda f: plate(f, "night", 5),
+    "night_dk": lambda f: plate(f, "night", 3, sheen=False),
+    "amethyst": lambda f: plate(f, "amethyst", 3, sheen=False),
+    "cloth": lambda f: cloth(f, "cloth", 3),
+    "blade": lambda f: plate(f, "blade", 2, sheen=False),
+    "crystal": lambda f: glow_fill(f, "violet", 2, 4, 1),
 }
 
 # ----------------------------------------------------------------------------------------------
@@ -289,6 +307,40 @@ def runes(seedname, y=None, ramp="violet", lvl=2, count=1):
                     if g[j][i] == "x":
                         f.set(gx + i, gy + j, ramp, lvl, True)
     return op
+
+
+def rect(x0, y0, x1, y1, ramp, lvl, glow=False):
+    """Fill an inclusive rectangle (negative indices count from the far edge)."""
+    def op(f):
+        a, b = (x0 if x0 >= 0 else f.w + x0), (x1 if x1 >= 0 else f.w + x1)
+        c, d = (y0 if y0 >= 0 else f.h + y0), (y1 if y1 >= 0 else f.h + y1)
+        for y in range(c, d + 1):
+            for x in range(a, b + 1):
+                f.set(x, y, ramp, lvl, glow)
+    return op
+
+
+def outline(ramp, lvl, glow=False):
+    def op(f):
+        for e in ("top", "bottom", "left", "right"):
+            band(e, ramp, lvl, glow=glow, bevel=False)(f)
+    return op
+
+
+def ridge(col=None):
+    """Raised vertical ridge: a lit column with its shadow beside it."""
+    def op(f):
+        c = (f.w - 1) // 2 if col is None else (col if col >= 0 else f.w + col)
+        for y in range(1, f.h - 1):
+            f.shift(c, y, +2)
+            if c + 1 < f.w:
+                f.shift(c + 1, y, -1)
+    return op
+
+
+def under_lip(row=0):
+    """Shadow cast by the plate above onto this plate's top row."""
+    return shade_row(row, -2)
 
 
 # ----------------------------------------------------------------------------------------------
@@ -432,62 +484,52 @@ def halo_cells():
     return merged, rm
 
 
-SUNBURST_9x7 = [
-    "r...a...r",
-    ".r..a..r.",
-    "..r.....r",
-    "aaa...aaa",
+SUNBURST_9x7 = [          # eight equal rays round the medallion, so it reads as a sun rather than a cross
+    "r...r...r",
+    ".r.....r.",
     "..r...r..",
-    ".r..a..r.",
-    "r...a...r",
-]
-WINGS_9x7 = [
-    "hgg.c.ggh",
-    "shgg.ggh s",
-    ".shg.ghs.",
-    "..sh.hs..",
-    "...s.s...",
-    ".........",
-    ".........",
+    "rr.....rr",
+    "..r...r..",
+    ".r.....r.",
+    "r...r...r",
 ]
 
 
 def holy_model():
+    """Radiant heavy full plate. v2: gold kept to edges that mean something (brow, breastplate rim, pauldron
+    rims, cuffs, poleyns, toe caps); lames separate by shadow lines instead of gold stripes; domed pauldrons
+    with an upstanding gardbrace."""
     bones = skeleton()
     H, B, T = bones["armorHead"].cubes, bones["armorBody"].cubes, bones["armorLeggingTorsoLayer"].cubes
     RA, RL, RB, RX = (bones["armorRightArm"].cubes, bones["armorRightLeg"].cubes,
                       bones["armorRightBoot"].cubes, bones["armorTorsoExtensionRightLeg"].cubes)
-    LA = bones["armorLeftArm"].cubes
+    slits = {"k": ("visor", 0)}
 
-    # ---- helm (great helm with visor, crest comb, bevor/gorget and a sunburst halo) ----
+    # ---- great helm: gold brow, flank breathing slits, visor with glowing eye slit, keel, gorget, comb, halo ----
     H.append(Cube("helm", (-5, 5), (24, 33), (-5, 5), "silver", {
-        "sides": [hline(1, ramp="gold", lvl=4), hline(2, ramp="gold", lvl=2), rivets(4, step=3, start=1)],
-        "right": [stamp(["kk", "..", "kk", "..", "kk"], {"k": ("visor", 0)}, anchor="topleft", dx=6, dy=4)],
-        "left": [stamp(["kk", "..", "kk", "..", "kk"], {"k": ("visor", 0)}, anchor="topleft", dx=2, dy=4)],
-        "back": [vline(4, 2, -1, "gold", 3), vline(5, 2, -1, "gold", 2)],
-        "top": [vline(4, 0, -1, "gold", 5), vline(5, 0, -1, "gold", 4), rivets(1, step=7, start=1), rivets(-2, step=7, start=1)],
+        "sides": [hline(0, ramp="gold", lvl=5), shade_row(1, -2)],
+        "right": [stamp(["kk", "..", "kk", "..", "kk"], slits, anchor="topleft", dx=6, dy=3)],
+        "left": [stamp(["kk", "..", "kk", "..", "kk"], slits, anchor="topleft", dx=2, dy=3)],
+        "back": [stamp([".s.", "sws", ".s."], {"s": SUN(2), "w": SUN(4)}, anchor="topleft", dx=3, dy=3),
+                 stamp(["g...g", ".g.g."], {"g": G(5)}, anchor="topleft", dx=2, dy=6)],
+        "top": [vline(4, 0, -1, "gold", 5), vline(5, 0, -1, "gold", 3)],
     }))
     H.append(Cube("visor", (-4, 4), (25, 31), (-5.75, -4.75), "silver", {
         "front": [
-            hline(1, 0, -1, "silver", 7),
+            hline(0, 0, -1, "silver", 7),
             stamp(["sss..sss", "ggg..ggg", "ddd..ddd"],
-                  {"s": ("silver", 3), "g": ("sun", 4, True), "d": ("visor", 1)}, anchor="topleft", dy=1),
-            stamp(["k......k", ".k....k."], {"k": ("visor", 0)}, anchor="topleft", dy=4),
-            band("left", "gold", 4), band("right", "gold", 3), band("bottom", "gold", 3),
+                  {"s": ("silver", 4), "g": ("sun", 4, True), "d": ("visor", 1)}, anchor="topleft", dy=1),
+            stamp(["k......k", ".k....k."], slits, anchor="topleft", dy=4),
         ],
-        "top": [hline(0, ramp="gold", lvl=6)], "right": [band("left", "gold", 4)], "left": [band("left", "gold", 4)],
-    }))
-    H.append(Cube("keel", (-0.5, 0.5), (24.5, 32.5), (-6.25, -5.25), "gold_hi", {
-        "front": [vline(0, 0, -1, "gold", 6), stamp(["s"], {"s": SUN(4)}, anchor="topleft", dy=3)],
+        "top": [hline(0, ramp="gold", lvl=6)],
     }))
     H.append(Cube("bevor", (-5.5, 5.5), (22, 25), (-5.5, 5.5), "silver", {
-        "sides": [band("top", "gold", 5), band("bottom", "gold", 3), rivets(1, step=2, start=1, lvl=6)],
-        "front": [stamp(["s"], {"s": SUN(5)}, anchor="topleft", dx=5, dy=1)],
-        "top": [band("top", "gold", 5), band("bottom", "gold", 5), band("left", "gold", 5), band("right", "gold", 5)],
+        "sides": [band("top", "gold", 5)],
+        "front": [stamp(["s"], {"s": SUN(4)}, anchor="topleft", dx=5, dy=1)],
+        "top": [outline("gold", 5)],
     }))
     H.append(Cube("comb", (-0.5, 0.5), (33, 35), (-4, 4), "gold", {
         "sides": [hline(0, ramp="gold", lvl=6)], "top": [vline(0, ramp="gold", lvl=6)],
-        "right": [rivets(1, step=2, start=1, ramp="gold", lvl=2)], "left": [rivets(1, step=2, start=1, ramp="gold", lvl=2)],
     }))
     H.append(Cube("comb_top", (-0.5, 0.5), (35, 36), (-2, 3), "gold_hi", {"sides": [hline(0, ramp="gold", lvl=6)]}))
     H.append(Cube("halo_rod", (-0.75, 0.75), (30.25, 31.75), (5.25, 6.75), "gold", {}, inflate=0.25))
@@ -500,22 +542,22 @@ def holy_model():
     for n, (x0, x1, y0, y1) in enumerate(rays):
         H.append(Cube(f"ray{n}", (x0, x1), (y0, y1), (6.5, 7.5), "sun", {"all": [hline(0, ramp="sun", lvl=5, glow=True)]}))
 
-    # ---- cuirass ----
+    # ---- cuirass: sunburst breastplate, plackart lame, winged backplate ----
     B.append(Cube("cuirass", (-5.25, 5.25), (14.75, 24.25), (-3.25, 3.25), "silver", {
-        "sides": [band("top", "gold", 5), band("bottom", "gold", 3), rivets(1, step=3, start=1)],
+        "sides": [rivets(1, ramp="silver", lvl=7, step=3, start=1)],
         "right": [vline(2, 2, -2, "silver", 3)], "left": [vline(3, 2, -2, "silver", 3)],
         "top": [band("top", "gold", 5), band("bottom", "gold", 5)],
     }))
     B.append(Cube("breast", (-4.5, 4.5), (16, 23), (-4, -3), "silver", {
-        "front": [stamp(SUNBURST_9x7, {"r": SUN(3), "a": SUN(4)}), band("top", "gold", 5),
-                  band("left", "gold", 4), band("right", "gold", 3)],
+        "front": [stamp(SUNBURST_9x7, {"r": SUN(3)}), band("top", "gold", 5),
+                  band("left", "silver", 7, bevel=False), band("right", "silver", 3, bevel=False)],
         "sides": [band("top", "gold", 5)], "top": [hline(0, ramp="gold", lvl=6)],
     }))
     B.append(Cube("sun_medallion", (-1.5, 1.5), (18, 21), (-4.75, -3.75), "sun", {
         "front": [stamp(["bcb", "cwc", "bcb"], {"b": SUN(2), "c": SUN(4), "w": SUN(5)})],
     }))
     B.append(Cube("plackart", (-4.5, 4.5), (12, 16), (-3, 3), "silver", {
-        "sides": [hline(1, ramp="silver", lvl=2), hline(2, ramp="silver", lvl=6), band("bottom", "gold", 4)],
+        "sides": [under_lip(0), hline(2, ramp="silver", lvl=2), hline(3, ramp="silver", lvl=6)],
     }))
     B.append(Cube("backplate", (-4.5, 4.5), (16, 23), (3, 4), "silver", {
         "back": [stamp(["g...s...g", "gg.sws.gg", ".gg.s.gg.", "hhgg.gghh", ".hhg.ghh.", "..hh.hh..", "...h.h..."],
@@ -525,37 +567,39 @@ def holy_model():
     }))
     # ---- belt + faulds (LEGS slot, follows the body) ----
     T.append(Cube("fauld", (-5.5, 5.5), (10.5, 13.5), (-3.5, 3.5), "silver", {
-        "sides": [band("top", "gold", 5), band("bottom", "gold", 3), rivets(0, step=2, start=1, lvl=7)],
+        "sides": [band("top", "gold", 4), rivets(0, lvl=7, step=2, start=1)],
     }))
     T.append(Cube("buckle", (-1.25, 1.25), (10.75, 13.25), (-4.5, -3), "gold_hi", {
         "front": [stamp(["cw", "wc"], {"c": SUN(3), "w": SUN(5)})],
     }))
     # ---- tassets (CHEST slot, follow the legs) ----
     RX.append(Cube("tasset_hi", (-4.75, 0.75), (9.25, 12.75), (-4.25, -2.75), "silver", {
-        "front": [band("bottom", "gold", 4), rivets(0, step=4, start=0, lvl=7), vline(2, 1, -2, "silver", 7)],
-        "sides": [band("bottom", "gold", 3)],
+        "front": [under_lip(0), rivets(1, ramp="silver", lvl=7, step=4, start=0), vline(2, 1, -2, "silver", 7)],
     }))
     RX.append(Cube("tasset_lo", (-4.25, 0.25), (6.5, 10), (-3.75, -2.25), "silver", {
-        "front": [band("bottom", "gold", 5, glow=False), stamp(["s"], {"s": SUN(4)}, anchor="topleft", dx=1, dy=1),
-                  stamp(["s"], {"s": SUN(4)}, anchor="topleft", dx=2, dy=1)],
+        "front": [band("bottom", "gold", 5)],
         "sides": [band("bottom", "gold", 3)],
     }))
     RX.append(Cube("tasset_side", (-5.75, -4.25), (7.75, 12.25), (-2.25, 2.25), "silver", {
-        "right": [band("bottom", "gold", 4), band("top", "gold", 5), rivets(1, step=3, start=1, lvl=7)],
-        "sides": [band("bottom", "gold", 3)],
+        "right": [band("bottom", "gold", 4), rivets(1, ramp="silver", lvl=7, step=3, start=1)],
     }))
-    # ---- arms: big layered pauldrons, rerebrace, couter, vambrace ----
+    # ---- arms: domed pauldron with gardbrace, two flaring lames with a radiant hem; rerebrace, couter, vambrace ----
+    RA.append(Cube("pauldron_dome", (-8.5, -4.0), (25.25, 26.75), (-3.25, 3.25), "silver", {
+        "top": [outline("gold", 5), vline(1, 1, -2, "silver", 7)], "sides": [hline(0, ramp="silver", lvl=7)],
+    }))
+    RA.append(Cube("gardbrace", (-6.75, -5.25), (25, 28.5), (-2.75, 2.75), "silver", {
+        "sides": [hline(0, ramp="gold", lvl=5)], "right": [stamp(["s"], {"s": SUN(4)}, anchor="topleft", dx=2, dy=1)],
+        "top": [rect(0, 0, -1, -1, "gold", 5)],
+    }))
     RA.append(Cube("pauldron_cap", (-9.5, -3.5), (22.5, 25.5), (-3.5, 3.5), "silver", {
-        "sides": [band("bottom", "gold", 4)],
-        "right": [stamp(["s"], {"s": SUN(5)}, anchor="topleft", dx=3, dy=1), rivets(1, step=6, start=0, lvl=7)],
-        "top": [vline(1, 0, -1, "gold", 5), vline(2, 0, -1, "silver", 7), hline(0, ramp="gold", lvl=4), hline(-1, ramp="gold", lvl=5)],
+        "right": [stamp([".g.", "gsg", ".g."], {"g": G(5), "s": SUN(4)})],
+        "top": [vline(0, 0, -1, "gold", 5), hline(0, ramp="gold", lvl=4), hline(-1, ramp="gold", lvl=5)],
     }))
     RA.append(Cube("pauldron_lame1", (-10.25, -4.75), (20.25, 22.75), (-3.75, 3.75), "silver", {
-        "sides": [band("bottom", "gold", 4)], "top": [band("bottom", "gold", 5), vline(0, 0, -1, "gold", 5)],
+        "sides": [under_lip(0)], "top": [vline(0, 0, -1, "gold", 5)],
     }))
     RA.append(Cube("pauldron_lame2", (-10.75, -5.25), (18.25, 20.75), (-4.25, 4.25), "silver", {
-        "sides": [band("bottom", "sun", 2, glow=True)], "top": [vline(0, 0, -1, "gold", 5)],
-        "right": [stamp(["g.g.g"], {"g": G(6)}, anchor="topleft", dx=1, dy=0)],
+        "sides": [under_lip(0), band("bottom", "sun", 2, glow=True)], "top": [vline(0, 0, -1, "gold", 5)],
     }))
     RA.append(Cube("rerebrace", (-8.5, -3.5), (15.5, 20.5), (-2.5, 2.5), "silver_dim", {
         "sides": [hline(2, ramp="silver", lvl=2), hline(3, ramp="silver", lvl=6)],
@@ -564,30 +608,29 @@ def holy_model():
         "right": [stamp([".c.", "cwc", ".c."], {"c": G(6), "w": SUN(4)})],
     }))
     RA.append(Cube("vambrace", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "silver", {
-        "sides": [band("top", "gold", 5), band("bottom", "gold", 3)],
+        "sides": [band("top", "gold", 5)],
         "right": [stamp(["s.s", ".s."], {"s": SUN(3)}, anchor="topleft", dx=1, dy=1)],
         "front": [vline(2, 1, -2, "silver", 7)],
     }))
-    # ---- legs: cuisse + poleyn + knee fan ----
+    # ---- legs: cuisse with ridge, gold poleyn with a sun, knee fan ----
     RL.append(Cube("cuisse", (-4.75, 0.75), (5.75, 12.25), (-2.75, 2.75), "silver", {
         "front": [vline(2, 0, -1, "silver", 7), vline(3, 0, -1, "silver", 3)],
-        "sides": [band("bottom", "gold", 3), rivets(1, step=4, start=0, lvl=6)],
+        "sides": [rivets(1, ramp="silver", lvl=7, step=4, start=0)],
     }))
     RL.append(Cube("poleyn", (-3.75, -0.25), (4.25, 7.75), (-3.75, -2.25), "gold", {
-        "front": [stamp(["gcg", "cwc", "gcg"], {"g": G(6), "c": S(6), "w": SUN(4)})],
+        "front": [stamp(["s"], {"s": SUN(4)})],
     }))
     RL.append(Cube("knee_fan", (-5.5, -4.5), (4.5, 7.5), (-2, 1), "silver", {
-        "right": [stamp(["g.g", ".g.", "ggg"], {"g": G(5)})], "sides": [band("bottom", "gold", 3)],
+        "right": [stamp(["g.g", ".g.", "ggg"], {"g": G(5)})],
     }))
-    # ---- boots: greave, cuff, sabaton, toe cap ----
+    # ---- boots: greave, gold cuff, laminated sabaton, gold toe cap ----
     RB.append(Cube("greave", (-5, 1), (0.5, 6.5), (-3, 3), "silver", {
         "front": [vline(2, 0, -1, "silver", 7), vline(3, 0, -1, "silver", 4), stamp(["s"], {"s": SUN(4)}, anchor="topleft", dx=2, dy=1)],
-        "sides": [rivets(1, step=4, start=1, lvl=6)], "back": [vline(2, 0, -1, "silver", 3)],
+        "sides": [rivets(1, ramp="silver", lvl=7, step=4, start=1)], "back": [vline(2, 0, -1, "silver", 3)],
     }))
     RB.append(Cube("greave_cuff", (-5.25, 1.25), (5.75, 7.25), (-3.25, 3.25), "gold", {"sides": [hline(0, ramp="gold", lvl=6)]}))
     RB.append(Cube("sabaton", (-4.75, 0.75), (-0.75, 1.75), (-4.25, 2.25), "silver", {
         "top": [hline(1, ramp="silver", lvl=3), hline(3, ramp="silver", lvl=3), hline(5, ramp="silver", lvl=7)],
-        "front": [band("bottom", "gold", 3)], "sides": [band("bottom", "gold", 3)],
     }))
     RB.append(Cube("toecap", (-4.25, 0.25), (-0.25, 1.25), (-5.25, -3.75), "gold_hi", {}))
 
@@ -596,12 +639,18 @@ def holy_model():
 
 
 # ----------------------------------------------------------------------------------------------
-# ENDER: lean End-assassin plate (obsidian/void black, deep purple, purpur + end stone, violet glow)
+# ENDER v2: the Voidwalker. Lean End-assassin plate in blue-violet night steel under a void-cloth hood:
+# enderman-magenta eyes in a shadowed face, an Eye-of-Ender clasp at a V collar, hidden blades on both
+# forearms, a heavy left pauldron growing violet end crystals, and split coat tails that move with the legs.
+# Glow is kept to the eyes, the clasp and buckle, the crystals, the blade edges and one pauldron hem.
 # ----------------------------------------------------------------------------------------------
-O = lambda l, glow=False: ("obsid", l, glow)
-P = lambda l, glow=False: ("purpur", l, glow)
-V = lambda l: ("violet", l, True)
-VD = lambda l, glow=False: ("void", l, glow)
+N = lambda l: ("night", l)
+AM = lambda l: ("amethyst", l)
+MG = lambda l: ("magenta", l, True)
+PE = lambda l: ("pearl", l, True)
+VI = lambda l: ("violet", l, True)
+EYE_GEM = (["aBa", "BkB", "aBa"], {"a": PE(2), "B": PE(4), "k": N(0)})
+V_COLLAR = ["AddddddA", ".AddddA.", "..AddA..", "...AA..."]
 
 
 def ender_model():
@@ -611,120 +660,134 @@ def ender_model():
                       bones["armorRightBoot"].cubes, bones["armorTorsoExtensionRightLeg"].cubes)
     LA = bones["armorLeftArm"].cubes
 
-    # ---- cowl helm: closed mask, plated hood, peak, spine, neck guard ----
-    H.append(Cube("shell", (-4.625, 4.625), (23.375, 32.625), (-4.625, 4.625), "obsid", {
-        "sides": [band("bottom", "purpur", 3)],
+    # ---- hood: shadowed face with enderman eyes, shinobi mask, amethyst-rimmed opening, peak, tail and drape ----
+    H.append(Cube("face", (-4.625, 4.625), (23.375, 32.625), (-4.625, 4.625), "night_dk", {
+        "front": [rect(0, 0, -1, -1, "night", 1), rect(0, 0, -1, 2, "night", 0),
+                  stamp([".mMm.mMm."], {"m": MG(1), "M": MG(3)}, anchor="topleft", dy=4)],
     }))
-    H.append(Cube("hood", (-5.25, 5.25), (25.25, 33.75), (-4.25, 5.25), "void", {
-        "front": [band("left", "purpur", 4), band("right", "purpur", 3), band("top", "purpur", 4)],
-        "right": [seams(2, "obsid", 1), runes("hoodR", y=3), band("left", "purpur", 4)],
-        "left": [seams(2, "obsid", 1), runes("hoodL", y=3), band("right", "purpur", 4)],
-        "back": [seams(2, "obsid", 1), vline(4, 0, -1, "violet", 1), vline(5, 0, -1, "obsid", 1)],
-        "top": [hline(-1, ramp="purpur", lvl=4), hline(2, ramp="obsid", lvl=1), hline(5, ramp="obsid", lvl=1)],
+    H.append(Cube("hood_top", (-5.25, 5.25), (32.0, 33.5), (-5.25, 5.25), "cloth", {
+        "top": [hline(-1, ramp="amethyst", lvl=4)],
+        "front": [hline(0, ramp="amethyst", lvl=4)],
     }))
-    H.append(Cube("mask", (-3.5, 3.5), (24, 31), (-5.25, -4.25), "obsid", {
-        "front": [
-            stamp(["ppppppp",
-                   ".......",
-                   "ddddddd",
-                   "vvvvvvv",
-                   "p.d.d.p",
-                   ".p.d.p.",
-                   "..p.p.."],
-                  {"p": P(3), "d": O(0), "v": V(3)}),
-            band("left", "purpur", 4), band("right", "purpur", 2),
-        ],
-        "sides": [band("top", "purpur", 4)], "top": [hline(-1, ramp="purpur", lvl=5)],
+    H.append(Cube("hood_crown", (-3.75, 3.75), (33.0, 34.5), (-4.25, 4.25), "cloth", {
+        "top": [vline(3, ramp="cloth", lvl=5)], "back": [vline(3, ramp="cloth", lvl=5)],
     }))
-    H.append(Cube("peak", (-2.5, 2.5), (32.5, 33.5), (-5.5, -3.5), "purpur", {"front": [hline(0, ramp="purpur", lvl=5)]}))
-    H.append(Cube("peak_tip", (-0.5, 0.5), (31.5, 33.5), (-6, -5), "purpur", {"front": [vline(0, ramp="purpur", lvl=5)]}))
-    H.append(Cube("spine", (-0.5, 0.5), (33.5, 34.5), (-3.5, 4.5), "purpur", {
-        "top": [stamp(["v", ".", ".", "v", ".", ".", "v", "."], {"v": V(3)}, anchor="topleft")],
-        "sides": [stamp(["v..v..v."], {"v": V(2)}, anchor="topleft")],
+    side = Cube("hood_side", (-5.5, -4.0), (25.25, 32.75), (-5.25, 5.25), "cloth", {
+        "right": [vline(-1, ramp="amethyst", lvl=4), vline(-2, ramp="amethyst", lvl=2)],
+        "front": [vline(0, ramp="amethyst", lvl=4)],
+        "left": [rect(0, 0, -1, -1, "cloth", 1)],
+    })
+    H.append(side)
+    H.append(side.mirrored("hood_side_l"))
+    H.append(Cube("hood_back", (-4.75, 4.75), (23.75, 33.25), (4.25, 5.75), "cloth", {
+        "back": [stamp(["..a..", ".a.a.", "a.M.a", ".a.a.", "..a.."], {"a": AM(3), "M": MG(2)}, anchor="top", dy=1),
+                 vline(0, ramp="amethyst", lvl=1), vline(-1, ramp="amethyst", lvl=1), hline(-1, ramp="amethyst", lvl=3)],
     }))
-    H.append(Cube("neck_guard", (-4.5, 4.5), (22.5, 27.5), (3.75, 5.75), "obsid", {
-        "back": [seams(2, "void", 1), band("bottom", "purpur", 3)], "sides": [band("bottom", "purpur", 3)],
+    H.append(Cube("hood_peak", (-1.75, 1.75), (32.75, 34.25), (-6.25, -4.75), "night_hi", {
+        "front": [hline(0, ramp="amethyst", lvl=5)], "top": [hline(-1, ramp="amethyst", lvl=4)],
     }))
-    H.append(Cube("chin", (-1.5, 1.5), (22.5, 23.5), (-5, -3), "obsid", {"front": [hline(0, ramp="purpur", lvl=4)]}))
+    H.append(Cube("hood_tail", (-1.25, 1.25), (31.25, 33.75), (5.25, 6.75), "cloth", {}))
+    H.append(Cube("hood_drape", (-4.25, 4.25), (22.25, 24.75), (4.75, 6.25), "cloth", {
+        "back": [hline(-1, ramp="amethyst", lvl=3)],
+    }))
+    H.append(Cube("mask", (-3.75, 3.75), (23.75, 27.25), (-5.0, -3.5), "night_hi", {
+        "front": [hline(0, ramp="night", lvl=5), vline(3, 1, -1, "night", 6),
+                  stamp([".k...k.", ".k...k."], {"k": N(1)}, anchor="topleft", dy=1)],
+        "top": [hline(0, ramp="night", lvl=6)],
+    }))
 
-    # ---- lean lamellar cuirass ----
-    B.append(Cube("cuirass", (-4.75, 4.75), (13.75, 24.25), (-2.75, 2.75), "obsid", {
-        "sides": [seams(2, "void", 1, start=2), band("top", "purpur", 3)],
+    # ---- cuirass: V-collared breastplate with an Eye-of-Ender clasp, stepped lames, segmented spine ----
+    B.append(Cube("cuirass", (-4.75, 4.75), (13.75, 24.25), (-2.75, 2.75), "night", {
+        "right": [vline(2, 1, -2, "night", 2), vline(3, 1, -2, "night", 5)],
+        "left": [vline(1, 1, -2, "night", 5), vline(2, 1, -2, "night", 2)],
+        "top": [hline(0, ramp="amethyst", lvl=3), hline(-1, ramp="amethyst", lvl=3)],
     }))
-    B.append(Cube("chest", (-4.5, 4.5), (18.25, 23.25), (-3.5, -2.5), "void", {
-        "front": [stamp(["..pv.....", "ooopv....", "ooo.pv...", "oooo.pv..", "ooooo.pv."],
-                        {"p": P(4), "v": V(2), "o": O(3)}, anchor="topleft"),
-                  band("top", "purpur", 4)],
-        "sides": [band("top", "purpur", 4)],
+    B.append(Cube("collar", (-3.75, 3.75), (23.75, 25.25), (-0.25, 3.25), "amethyst", {}))
+    B.append(Cube("breastplate", (-4.25, 4.25), (18.25, 23.75), (-3.75, -2.25), "night_hi", {
+        "front": [stamp(V_COLLAR, {"A": AM(4), "d": N(1)}, anchor="topleft")],
+        "top": [hline(0, ramp="amethyst", lvl=4)],
     }))
-    B.append(Cube("lame_a", (-4.25, 4.25), (16.25, 18.75), (-3.25, -1.75), "void", {
-        "front": [hline(-1, ramp="violet", lvl=1, glow=True), hline(0, ramp="void", lvl=6)],
+    B.append(Cube("eye_clasp", (-1.75, 1.75), (19.0, 22.5), (-4.25, -2.75), "amethyst", {
+        "front": [stamp(*EYE_GEM)],
     }))
-    B.append(Cube("lame_b", (-4, 4), (14, 17), (-3, -2), "obsid", {
-        "front": [band("bottom", "purpur", 3), hline(-2, ramp="violet", lvl=0, glow=True)],
+    B.append(Cube("lame0", (-4.25, 4.25), (16.25, 18.75), (-3.25, -1.75), "night", {}))
+    B.append(Cube("lame1", (-4.25, 4.25), (14.25, 16.75), (-3.0, -1.5), "night", {}))
+    B.append(Cube("lame2", (-3.75, 3.75), (12.75, 15.25), (-2.9, -1.4), "night_dk", {}))
+    B.append(Cube("spine", (-1.25, 1.25), (13.25, 23.75), (2.25, 3.75), "night_hi", {
+        "back": [shade_row(1, -2), shade_row(3, -2), shade_row(5, -2), shade_row(7, -2), hline(0, ramp="amethyst", lvl=4)],
     }))
-    B.append(Cube("backplate", (-3.5, 3.5), (15, 23), (2.5, 3.5), "obsid", {
-        "back": [seams(2, "void", 1), vline(3, 0, -1, "violet", 1, glow=True)],
+    blade_r = Cube("shoulder_blade", (-4.5, -1.0), (18.25, 23.75), (2.0, 3.5), "night", {
+        "back": [hline(0, ramp="amethyst", lvl=4), under_lip(1)],
+    })
+    B.append(blade_r)
+    B.append(blade_r.mirrored("shoulder_blade_l"))
+    # ---- belt with a pearl buckle (LEGS slot, follows the body) ----
+    T.append(Cube("belt", (-5, 5), (11.5, 13.5), (-3, 3), "night_dk", {
+        "sides": [hline(0, ramp="amethyst", lvl=3)],
     }))
-    T.append(Cube("belt", (-5, 5), (11.5, 13.5), (-3, 3), "void", {
-        "sides": [rivets(0, ramp="purpur", lvl=5, step=3, start=1), band("bottom", "purpur", 2)],
+    T.append(Cube("buckle", (-1.25, 1.25), (11.25, 13.75), (-3.75, -2.25), "amethyst", {
+        "front": [stamp(["bA", "AA"], {"b": AM(6), "A": AM(4)})],
     }))
-    T.append(Cube("gem_buckle", (-1, 1), (11.25, 13.25), (-3.5, -2.5), "violet", {
-        "front": [stamp(["bc", "cb"], {"b": V(4), "c": V(2)})],
+    # ---- tasset and split coat tails (CHEST slot, follow the legs) ----
+    RX.append(Cube("tasset", (-4.25, -0.75), (8.75, 12.25), (-3.25, -1.75), "night_hi", {
+        "front": [ridge(1)],
     }))
-    RX.append(Cube("tasset_hi", (-5.25, -4.25), (9, 12), (-2, 2), "obsid", {
-        "right": [band("bottom", "purpur", 3), stamp(["v"], {"v": V(2)}, anchor="topleft", dx=1, dy=1)],
+    RX.append(Cube("coat_back", (-4.5, 0.0), (3.75, 12.25), (2.25, 3.75), "cloth", {
+        "back": [vline(0, ramp="cloth", lvl=0), vline(-1, ramp="amethyst", lvl=2),
+                 hline(-1, ramp="amethyst", lvl=3), stamp(["a.a."], {"a": ("cloth", 0)}, anchor="bottom")],
     }))
-    RX.append(Cube("tasset_lo", (-5, -4), (6.5, 9.5), (-1.5, 1.5), "void", {
-        "right": [band("bottom", "endst", 3)],
+    RX.append(Cube("coat_side", (-5.0, -3.5), (5.75, 12.25), (-2.25, 2.25), "cloth", {
+        "right": [hline(-1, ramp="amethyst", lvl=3), vline(-1, 0, -2, "amethyst", 2)],
     }))
-    # ---- arms: asymmetric (small right cap, layered left pauldron with an end-stone fin) ----
-    RA.append(Cube("cap", (-8.75, -3.75), (22.5, 24.5), (-3, 3), "obsid", {
-        "sides": [band("bottom", "purpur", 3)], "top": [hline(-1, ramp="purpur", lvl=4)],
+    # ---- right arm: light cap, plated sleeve, hidden blade on the forearm ----
+    RA.append(Cube("cap", (-9.0, -3.5), (22.25, 24.75), (-3.25, 3.25), "night_hi", {
+        "sides": [hline(-1, ramp="amethyst", lvl=3)], "top": [vline(0, ramp="amethyst", lvl=4)],
     }))
-    RA.append(Cube("upper", (-8.5, -3.5), (16.5, 22.5), (-2.5, 2.5), "obsid", {"sides": [seams(2, "void", 1)]}))
-    RA.append(Cube("bracer", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "void", {
-        "sides": [band("top", "purpur", 4), band("bottom", "purpur", 2)],
-        "right": [vline(2, 1, 2, "violet", 2, glow=True)], "front": [vline(2, 1, 2, "violet", 1, glow=True)],
+    RA.append(Cube("cap_top", (-8.75, -5.75), (24.5, 25.5), (-2.5, 2.5), "night_hi", {}))
+    sleeve = [
+        Cube("upper", (-8.5, -3.5), (16.5, 22.5), (-2.5, 2.5), "night_dk", {"sides": [shade_row(3, -1)]}),
+        Cube("elbow", (-9.25, -8.25), (16.0, 18.0), (-1.0, 1.0), "amethyst", {}),
+        Cube("bracer", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "night_hi", {"sides": [hline(0, ramp="amethyst", lvl=4)]}),
+        Cube("blade_housing", (-9.75, -8.25), (13.25, 15.75), (-1.25, 1.25), "amethyst", {}),
+        Cube("hidden_blade", (-9.5, -8.5), (9.25, 13.25), (-0.5, 0.5), "blade", {
+            "front": [vline(0, ramp="violet", lvl=2, glow=True)], "back": [vline(0, ramp="violet", lvl=1, glow=True)],
+            "bottom": [rect(0, 0, -1, -1, "blade", 4)]}),
+    ]
+    RA.extend(sleeve)
+    LA.extend(c.mirrored(c.name + "_l") for c in sleeve)
+    # ---- left arm: heavy layered pauldron growing violet end crystals ----
+    LA.append(Cube("pauldron_cap", (3.75, 9.25), (22.25, 24.75), (-3.75, 3.75), "night_hi", {
+        "top": [vline(-1, ramp="amethyst", lvl=4), hline(0, ramp="amethyst", lvl=3), hline(-1, ramp="amethyst", lvl=3)],
     }))
-    RA.append(Cube("fin", (-9.75, -8.75), (12.5, 15.5), (-1, 1), "endst", {"right": [vline(0, 0, -1, "endst", 5)]}))
-    RA.append(Cube("elbow", (-9.25, -8.25), (16, 18), (-1, 1), "purpur", {}))
-    LA.append(Cube("pauldron_cap", (3.75, 8.75), (22.5, 25.5), (-3.5, 3.5), "obsid", {
-        "sides": [band("bottom", "purpur", 3)], "left": [runes("pauldL", y=0)],
-        "top": [vline(-2, 0, -1, "purpur", 4)],
+    LA.append(Cube("pauldron_dome", (5.5, 9.5), (24.5, 25.5), (-2.5, 2.5), "night_hi", {}))
+    LA.append(Cube("pauldron_lame1", (4.75, 10.25), (20.25, 22.75), (-3.75, 3.75), "night", {
+        "sides": [under_lip(0), band("bottom", "violet", 1, glow=True)],
     }))
-    LA.append(Cube("pauldron_lame1", (4.25, 9.75), (20.25, 22.75), (-3.75, 3.75), "void", {
-        "sides": [band("bottom", "violet", 1, glow=True)],
+    LA.append(Cube("pauldron_lame2", (5.75, 10.75), (18.5, 20.5), (-3.5, 3.5), "night_dk", {
+        "sides": [under_lip(0), hline(-1, ramp="amethyst", lvl=3)],
     }))
-    LA.append(Cube("pauldron_lame2", (5.75, 9.25), (18.25, 20.75), (-3.25, 3.25), "obsid", {
-        "sides": [band("bottom", "purpur", 3)],
+    for n, (xb, yb, zb) in enumerate((((6.75, 7.75), (25.5, 29.5), (-1.75, -0.75)),
+                                      ((8.0, 9.0), (25.5, 28.5), (0.25, 1.25)),
+                                      ((5.75, 6.75), (25.5, 27.5), (1.5, 2.5)),
+                                      ((8.5, 9.5), (25.5, 26.5), (-2.5, -1.5)))):
+        LA.append(Cube(f"crystal{n}", xb, yb, zb, "crystal", {}))
+    # ---- legs: cuisse with a ridge and side seam, amethyst knee cop ----
+    RL.append(Cube("cuisse", (-4.5, 0.5), (5.5, 12.5), (-2.5, 2.5), "night", {
+        "front": [ridge(2)], "right": [vline(2, 1, -2, "night", 2)],
     }))
-    LA.append(Cube("shard", (5.5, 6.5), (25, 27), (-1.5, 0.5), "endst", {
-        "sides": [hline(0, ramp="violet", lvl=3, glow=True)], "top": [hline(0, ramp="violet", lvl=4, glow=True)],
+    RL.append(Cube("knee", (-3.25, -0.75), (5.25, 7.75), (-3.5, -2.0), "night_hi", {
+        "front": [hline(0, ramp="amethyst", lvl=4)], "top": [rect(0, 0, -1, -1, "amethyst", 4)]}))
+    # ---- boots: slim greave, raised shin guard, amethyst cuff, pointed sabaton ----
+    RB.append(Cube("greave", (-4.75, 0.75), (0.25, 6.75), (-2.75, 2.75), "night", {"back": [ridge(2)]}))
+    RB.append(Cube("shin", (-3.25, -0.75), (1.75, 6.25), (-3.25, -1.75), "night_hi", {
+        "front": [vline(0, 0, -1, "night", 7)],
     }))
-    # ---- legs and boots ----
-    RL.append(Cube("cuisse", (-4.5, 0.5), (5.5, 12.5), (-2.5, 2.5), "obsid", {
-        "sides": [seams(3, "void", 1, start=2)], "right": [vline(1, 1, 4, "violet", 1, glow=True)],
+    RB.append(Cube("foot", (-4.5, 0.5), (-0.5, 1.5), (-3.5, 2.5), "night", {
+        "top": [shade_row(2, -1), shade_row(4, -1)],
     }))
-    RL.append(Cube("knee", (-3.5, -0.5), (4.5, 7.5), (-3.25, -2.25), "void", {
-        "front": [stamp(["p.p", ".v.", "p.p"], {"p": P(4), "v": V(3)})],
-    }))
-    RL.append(Cube("knee_point", (-2.5, -1.5), (3.5, 4.5), (-3, -2), "endst", {}))
-    RB.append(Cube("greave", (-4.75, 0.75), (0.25, 6.75), (-2.75, 2.75), "obsid", {
-        "sides": [band("top", "purpur", 3)], "right": [runes("greaveR", y=2)],
-    }))
-    RB.append(Cube("shin", (-2.5, -1.5), (1.5, 6.5), (-3.25, -2.25), "void", {
-        "front": [vline(0, 1, 3, "violet", 2, glow=True)],
-    }))
-    RB.append(Cube("foot", (-4.5, 0.5), (-0.5, 1.5), (-3.5, 2.5), "obsid", {
-        "top": [hline(2, ramp="void", lvl=1), hline(4, ramp="void", lvl=1)], "front": [hline(0, ramp="purpur", lvl=3)],
-    }))
-    RB.append(Cube("toe", (-3, -1), (-0.25, 0.75), (-4.5, -3.5), "endst", {}))
+    RB.append(Cube("toe", (-3.25, -0.75), (-0.25, 1.25), (-4.75, -3.25), "night_hi", {}))
+    RB.append(Cube("toe_tip", (-2.5, -1.5), (-0.25, 0.75), (-5.5, -4.5), "blade", {}))
 
-    # left-arm extras that mirror the right forearm (asymmetry lives in the shoulders only)
-    for c in list(RA):
-        if c.name in ("upper", "bracer", "fin", "elbow"):
-            LA.append(c.mirrored(c.name + "_l"))
     for src, dst in (("armorRightLeg", "armorLeftLeg"), ("armorRightBoot", "armorLeftBoot"),
                      ("armorTorsoExtensionRightLeg", "armorTorsoExtensionLeftLeg")):
         for c in bones[src].cubes:
@@ -919,37 +982,37 @@ def coplanar_report(bones, armour_only=False):
 ICONS = {
     "helmet": {
         "holy": [
-            "....aabbbbaa....",
-            "...a........a...",
-            "..a...occo...a..",
-            "..a.oo4cc4oo.a..",
-            "..ao44455444oa..",
-            "...o45555554o...",
+            ".....GGGGGG.....",
+            "...GG......GG...",
+            "..G.oooooooo.G..",
+            "..G.o554443o.G..",
+            "..G.obbbbbbo.G..",
+            "...Go544443oG...",
+            "....okGkkGko....",
+            "....o544443o....",
+            "....o554433o....",
+            "....o544443o....",
             "...obbbbbbbbo...",
-            "...o4GGooGG3o...",
-            "...o4kkook k3o..",
-            "...o45434543o...",
-            "...o4k4334k3o...",
-            "...obbbbbbbbo...",
-            "....oooooooo....",
+            "...o55444433o...",
+            "...oooooooooo...",
             "................",
             "................",
             "................",
         ],
         "ender": [
             "................",
-            "......occo......",
-            "....oo3cc3oo....",
-            "...o32344232o...",
-            "..o3234cc4323o..",
-            "..o32o4444o23o..",
-            "..o3o222222o3o..",
-            "..o3o2GGGG2o3o..",
-            "..o3o221122o3o..",
-            "..o32o2112o23o..",
-            "..o322o11o2223o.",
-            "...o222oo2222o..",
-            "....oo2222ooo...",
+            ".......oo.......",
+            "......o3bo......",
+            ".....o3322o.....",
+            "....o332222o....",
+            "...o33222221o...",
+            "...o3baaaaa1o...",
+            "...o3adddda1o...",
+            "...o3aMddMa1o...",
+            "...o3abbbba1o...",
+            "...o3a2222a1o...",
+            "....o3a22a1o....",
+            ".....o3221o.....",
             "......oooo......",
             "................",
             "................",
@@ -976,19 +1039,19 @@ ICONS = {
         ],
         "ender": [
             "................",
-            "................",
-            "..ooo......oooo.",
-            ".o33oo....occ3o.",
-            ".o2222oooo2c32o.",
-            ".oo222cG2222ooo.",
-            "....o22cG22o....",
-            "....o222cG2o....",
-            "....oGGGGGGo....",
-            "....o333333o....",
-            "....oGGGGGGo....",
-            "....o222222o....",
-            "....occccccо....",
-            "....oooooooo....",
+            "............v...",
+            "..ooo......ovvo.",
+            ".o3bao....oabb1o",
+            ".o322aooooa2221o",
+            ".oo22aAddAa221oo",
+            "...o32aGGa21o...",
+            "...o322GG221o...",
+            "...o33333321o...",
+            "...o22222211o...",
+            "...o333v3321o...",
+            "...o22222211o...",
+            "...oaaaaaaaao...",
+            "...oooooooooo...",
             "................",
             "................",
         ],
@@ -1015,12 +1078,12 @@ ICONS = {
         "ender": [
             "................",
             "...oooooooooo...",
-            "...occcGGccco...",
+            "...occcccccco...",
             "...o22222222o...",
             "...o322oo223o...",
             "...o32o..o23o...",
             "...o32o..o23o...",
-            "...oG2o..o2Go...",
+            "...oc2o..o2co...",
             "...o32o..o23o...",
             "...o32o..o23o...",
             "...o32o..o23o...",
@@ -1058,7 +1121,7 @@ ICONS = {
             "..oooo....oooo..",
             "..occo....occo..",
             "..o32o....o32o..",
-            "..oG2o....o2Go..",
+            "..oc2o....o2co..",
             "..o32o....o32o..",
             ".o322o....o322o.",
             "o3222o...o3222o.",
@@ -1073,11 +1136,11 @@ ICONS = {
 
 ICON_LEGEND = {
     "holy": {"o": ("silver", 0), "1": ("silver", 2), "2": ("silver", 3), "3": ("silver", 4), "4": ("silver", 5),
-             "5": ("silver", 7), "a": ("gold", 4), "b": ("gold", 4), "c": ("gold", 6), "G": ("sun", 4),
+             "5": ("silver", 7), "a": ("gold", 4), "b": ("gold", 4), "c": ("gold", 6), "G": ("sun", 2),
              "k": ("visor", 0)},
-    "ender": {"o": ("obsid", 0), "1": ("obsid", 2), "2": ("obsid", 4), "3": ("void", 5), "4": ("void", 6),
-              "5": ("void", 7), "a": ("purpur", 3), "b": ("purpur", 3), "c": ("purpur", 4), "G": ("violet", 3),
-              "k": ("obsid", 1)},
+    "ender": {"o": ("night", 0), "1": ("night", 2), "2": ("night", 4), "3": ("night", 6), "4": ("night", 7),
+              "a": ("amethyst", 3), "b": ("amethyst", 5), "c": ("amethyst", 4), "A": ("amethyst", 5),
+              "d": ("night", 1), "G": ("pearl", 3), "M": ("magenta", 3), "v": ("violet", 3), "k": ("night", 1)},
 }
 
 

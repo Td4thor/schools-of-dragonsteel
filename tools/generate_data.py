@@ -58,6 +58,14 @@ BIG_SWORD_DISPLAY = {
     "firstperson_lefthand": {"rotation": [-20, -90, -80], "translation": [1.13, 5.2, -0.26], "scale": [1.36, 1.36, 0.68]},
     "gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1.1, 1.1, 1.1]},
 }
+# Ice and Fire's dragonsteel axe display: the 32x32 axe sprite drawn big in hand, like the sword
+BIG_AXE_DISPLAY = {
+    "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 5.0, 0], "scale": [1.7, 1.7, 0.85]},
+    "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 5.0, 0], "scale": [1.7, 1.7, 0.85]},
+    "firstperson_righthand": {"rotation": [-20, -90, 10], "translation": [1.13, 5.2, -0.26], "scale": [1.36, 1.36, 0.68]},
+    "firstperson_lefthand": {"rotation": [-20, -90, -80], "translation": [1.13, 5.2, -0.26], "scale": [1.36, 1.36, 0.68]},
+    "gui": {"rotation": [0, 0, 0], "translation": [-1, -1, 0], "scale": [1.1, 1.1, 1.1]},
+}
 # Iron's Spells staff display (graybeard_staff.json)
 STAFF_DISPLAY = {
     "thirdperson_righthand": {"translation": [0, 3, 1.25]},
@@ -94,7 +102,11 @@ def models():
             write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{name}"}})
         for t in TOOLS:
             name = f"{s}_dragonsteel_{t}"
-            write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{name}"}})
+            if t == "axe":   # Ice and Fire draws its dragonsteel axe big, from a 32x32 sprite
+                write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/generated",
+                                                          "textures": {"layer0": f"{MOD}:item/{name}"}, "display": BIG_AXE_DISPLAY})
+            else:
+                write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{name}"}})
         write(A / "models/item" / f"{cfg['sword']}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{cfg['sword']}"}, "display": BIG_SWORD_DISPLAY})
         write(A / "models/item" / f"{cfg['staff']}.json", staff_model(s))
