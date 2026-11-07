@@ -49,6 +49,17 @@ RAMPS = {
     "pearl":    ["#0b4a42", "#11705f", "#1d9c84", "#3fc7a8", "#86e6cf", "#d0fff2"],     # glowing
     "blade":    ["#3e3a52", "#615b7a", "#8c86a8", "#bbb6d4", "#e6e2f7"],
     "violet":   ["#6a22c9", "#8c3cf0", "#ab63ff", "#c88dff", "#e2bdff", "#f6e8ff"],     # glowing
+    # Blood: deep crimson plate, blackened iron underlayer, dim ember glow
+    "crimson":  ["#1a0306", "#2e060b", "#470a12", "#651019", "#841723", "#a3202e", "#c3343f", "#e05a62"],
+    "iron":     ["#08080a", "#111114", "#1a1a1f", "#24242a", "#303038", "#3e3e48", "#50505c", "#686876"],
+    "ember":    ["#5c0a0a", "#8f1414", "#c42020", "#ef3a30", "#ff7a5e"],                # glowing
+    # Placeholder plate for schools still waiting on their art pass
+    "evo_steel": ["#15171a", "#202328", "#2c3037", "#3a3f48", "#4b515c", "#606874", "#7a838f", "#99a2ad"],
+    "emerald":   ["#0a4d2a", "#11703c", "#20b863", "#3ddb7a", "#7ff0a9", "#c4ffd9"],     # glowing
+    "nat_steel": ["#141615", "#1f2321", "#2b302d", "#3a403c", "#4c534e", "#616963", "#7b847d", "#9aa29b"],
+    "moss":      ["#1f3217", "#2c4720", "#3d5f2a", "#527b34", "#6f9c40", "#95c25a", "#c2e584"],
+    "sculk":     ["#020a0d", "#051419", "#0a2027", "#0f2e37", "#154049", "#1d555f", "#2a6f78", "#3f8c93"],
+    "cyan":      ["#0b6b74", "#11949f", "#1fc0cc", "#29dfeb", "#7ff2f8", "#d4fdff"],     # glowing
 }
 RAMPS = {k: [_hex(c) for c in v] for k, v in RAMPS.items()}
 
@@ -185,6 +196,20 @@ MATERIALS = {
     "cloth": lambda f: cloth(f, "cloth", 3),
     "blade": lambda f: plate(f, "blade", 2, sheen=False),
     "crystal": lambda f: glow_fill(f, "violet", 2, 4, 1),
+    "crimson": lambda f: plate(f, "crimson", 4),
+    "crimson_hi": lambda f: plate(f, "crimson", 5),
+    "crimson_dk": lambda f: plate(f, "crimson", 3, sheen=False),
+    "iron": lambda f: plate(f, "iron", 3, sheen=False),
+    "ember": lambda f: glow_fill(f, "ember", 2, 3, 1),
+    "evocation_metal": lambda f: plate(f, "evo_steel", 4),
+    "evocation_accent": lambda f: plate(f, "gold", 4, sheen=False),
+    "evocation_glow": lambda f: glow_fill(f, "emerald", 2, 4, 1),
+    "nature_metal": lambda f: plate(f, "nat_steel", 4),
+    "nature_accent": lambda f: plate(f, "moss", 3, sheen=False),
+    "nature_glow": lambda f: glow_fill(f, "moss", 4, 5, 2),
+    "eldritch_metal": lambda f: plate(f, "sculk", 4),
+    "eldritch_accent": lambda f: plate(f, "sculk", 6, sheen=False),
+    "eldritch_glow": lambda f: glow_fill(f, "cyan", 2, 4, 1),
 }
 
 # ----------------------------------------------------------------------------------------------
@@ -341,6 +366,18 @@ def ridge(col=None):
 def under_lip(row=0):
     """Shadow cast by the plate above onto this plate's top row."""
     return shade_row(row, -2)
+
+
+def lames(rows):
+    """Overlapping plate lines: a shadow row under each lip, then the lit edge of the next lame."""
+    def op(f):
+        for r in rows:
+            r = r if r >= 0 else f.h + r
+            for x in range(f.w):
+                f.shift(x, r, -2)
+                if r + 1 < f.h:
+                    f.shift(x, r + 1, +1)
+    return op
 
 
 # ----------------------------------------------------------------------------------------------
@@ -795,6 +832,178 @@ def ender_model():
     return bones
 
 
+# ----------------------------------------------------------------------------------------------
+# BLOOD: the Blood Knight. Crimson heavy plate with gold filigree over blackened iron: a closed helm with a
+# pointed visor, swept bat-wing crests and a crest fin; layered spiked pauldrons; a gold chevron and blood
+# jewel on the breast, a black winged device on the back, a gold skull at the belt. Glow is only the eye slit.
+# ----------------------------------------------------------------------------------------------
+CR = lambda l: ("crimson", l)
+IR = lambda l: ("iron", l)
+EMB = lambda l: ("ember", l, True)
+CHEVRON = ["g.......g", "gg.....gg", ".gg...gg.", "..gg.gg..", "...gdg...", "....g....", "........."]
+BAT_DEVICE = ["k.......k", "kk..k..kk", ".kkkkkkk.", "..kkkkk..", "...kkk...", "....k....", "...k.k...", "..k...k.."]
+SKULL = [".GGG.", "GkGkG", "GGkGG", ".gGg."]
+
+
+def blood_model():
+    bones = skeleton()
+    H, B, T = bones["armorHead"].cubes, bones["armorBody"].cubes, bones["armorLeggingTorsoLayer"].cubes
+    RA, RL, RB, RX = (bones["armorRightArm"].cubes, bones["armorRightLeg"].cubes,
+                      bones["armorRightBoot"].cubes, bones["armorTorsoExtensionRightLeg"].cubes)
+
+    # ---- helm: crimson great helm, pointed visor with a dim ember eye slit, bat-wing crests, crest fin ----
+    H.append(Cube("helm", (-5, 5), (24, 33), (-5, 5), "crimson", {
+        "sides": [hline(0, ramp="gold", lvl=5), shade_row(1, -2), lames([6])],
+        "back": [vline(4, 1, -1, "iron", 2), vline(5, 1, -1, "iron", 1)],
+        "top": [vline(4, 0, -1, "iron", 3), vline(5, 0, -1, "iron", 2)],
+    }))
+    H.append(Cube("visor", (-4, 4), (25, 31), (-5.75, -4.75), "crimson", {
+        "front": [hline(0, 0, -1, "crimson", 7),
+                  stamp(["kkk..kkk", "EEE..EEE", "kkk..kkk", "........", "k.k..k.k"],
+                        {"k": IR(0), "E": EMB(1)}, anchor="topleft", dy=1)],
+        "top": [hline(0, ramp="gold", lvl=6)],
+    }))
+    H.append(Cube("visor_beak", (-1.5, 1.5), (24.5, 30.5), (-6.75, -5.75), "crimson_hi", {
+        "front": [vline(1, 0, -1, "crimson", 7), vline(2, 0, -1, "crimson", 3), band("bottom", "gold", 4)],
+        "top": [rect(0, 0, -1, -1, "gold", 6)],
+    }))
+    H.append(Cube("bevor", (-5.5, 5.5), (22, 25), (-5.5, 5.5), "crimson", {
+        "sides": [band("top", "gold", 5)], "top": [outline("gold", 5)],
+    }))
+    H.append(Cube("crest_fin", (-0.5, 0.5), (33, 35), (-4, 4), "iron", {
+        "sides": [hline(0, ramp="gold", lvl=5)], "top": [vline(0, ramp="gold", lvl=5)],
+    }))
+    H.append(Cube("crest_horn", (-0.5, 0.5), (35, 37), (-3, 1), "crimson_hi", {"sides": [hline(0, ramp="gold", lvl=6)]}))
+    H.append(Cube("crest_tip", (-0.5, 0.5), (37, 38), (-3, -1), "gold_hi", {}))
+    # bat wings: membrane panels stepping up, out and back from the temples, gold along the leading edge
+    membrane = {"front": [hline(0, ramp="gold", lvl=5), vline(-1, 1, -1, "crimson", 1)],
+                "back": [hline(0, ramp="gold", lvl=4), vline(0, 1, -1, "crimson", 1)],
+                "top": [rect(0, 0, -1, -1, "gold", 5)]}
+    wing = [Cube("wing_root", (-6.0, -5.0), (28, 31), (-1, 2), "iron", {"right": [hline(0, ramp="gold", lvl=5)]}),
+            Cube("wing_inner", (-8.0, -5.0), (29, 34), (0, 1), "crimson_dk", {
+                **membrane, "front": [hline(0, ramp="gold", lvl=5), vline(1, 1, -1, "crimson", 1), stamp(["k.k"], {"k": CR(1)}, anchor="bottom")]}),
+            Cube("wing_outer", (-10.0, -7.0), (32, 37), (1, 2), "crimson_dk", {
+                **membrane, "front": [hline(0, ramp="gold", lvl=5), vline(1, 1, -1, "crimson", 1), stamp(["k.k"], {"k": CR(1)}, anchor="bottom")]}),
+            Cube("wing_spar", (-11.0, -9.0), (36, 39), (2, 3), "crimson_hi", {"front": [hline(0, ramp="gold", lvl=5)], "top": [rect(0, 0, -1, -1, "gold", 5)]}),
+            Cube("wing_claw", (-12.0, -11.0), (38, 40), (2, 3), "gold_hi", {})]
+    H.extend(wing)
+    H.extend(c.mirrored(c.name + "_l") for c in wing)
+
+    # ---- cuirass: gold chevron and blood jewel on the breast, plackart lames, black winged device on the back ----
+    B.append(Cube("cuirass", (-5.25, 5.25), (14.75, 24.25), (-3.25, 3.25), "crimson", {
+        "sides": [rivets(1, ramp="gold", lvl=6, step=3, start=1)],
+        "right": [vline(2, 2, -2, "crimson", 2)], "left": [vline(3, 2, -2, "crimson", 2)],
+        "top": [band("top", "gold", 5), band("bottom", "gold", 5)],
+    }))
+    B.append(Cube("breast", (-4.5, 4.5), (16, 23), (-4, -3), "crimson_hi", {
+        "front": [stamp(CHEVRON, {"g": G(5), "d": EMB(2)}), band("top", "gold", 5), ridge(4),
+                  band("left", "crimson", 7, bevel=False), band("right", "crimson", 2, bevel=False)],
+        "sides": [band("top", "gold", 5)], "top": [hline(0, ramp="gold", lvl=6)],
+    }))
+    B.append(Cube("plackart", (-4.5, 4.5), (12, 16), (-3, 3), "crimson", {
+        "sides": [under_lip(0), hline(2, ramp="crimson", lvl=1), hline(3, ramp="crimson", lvl=6), band("bottom", "gold", 4)],
+    }))
+    B.append(Cube("backplate", (-4.5, 4.5), (15, 23), (3, 4), "crimson", {
+        "back": [stamp(BAT_DEVICE, {"k": IR(1)}), band("top", "gold", 5), band("bottom", "gold", 3)],
+        "sides": [band("top", "gold", 5)],
+    }))
+    # ---- belt, faulds and gold skull (LEGS slot, follows the body) ----
+    T.append(Cube("fauld", (-5.5, 5.5), (10.5, 13.5), (-3.5, 3.5), "crimson_dk", {
+        "sides": [band("top", "gold", 4)],
+    }))
+    T.append(Cube("skull", (-2.5, 2.5), (9.75, 13.75), (-4.5, -3.5), "gold", {
+        "front": [stamp(SKULL, {"g": G(2), "G": G(5), "k": IR(0)}, anchor="topleft")],
+    }))
+    # ---- tassets (CHEST slot, follow the legs) ----
+    RX.append(Cube("tasset_hi", (-4.75, 0.75), (9.25, 12.75), (-4.25, -2.75), "crimson", {
+        "front": [under_lip(0), band("bottom", "gold", 4)], "sides": [band("bottom", "gold", 3)],
+    }))
+    RX.append(Cube("tasset_lo", (-4.25, 0.25), (6.5, 10), (-3.75, -2.25), "crimson_dk", {
+        "front": [band("bottom", "gold", 5), vline(2, 0, -2, "crimson", 5)], "sides": [band("bottom", "gold", 3)],
+    }))
+    RX.append(Cube("tasset_side", (-5.75, -4.25), (7.75, 12.25), (-2.25, 2.25), "crimson", {
+        "right": [band("bottom", "gold", 4), lames([2])],
+    }))
+    # ---- arms: three-tier spiked pauldrons, blackened rerebrace, spiked couter, crimson vambrace ----
+    RA.append(Cube("pauldron_cap", (-9.5, -3.5), (22.5, 25.5), (-3.5, 3.5), "crimson", {
+        "right": [stamp([".g.", "gdg", ".g."], {"g": G(5), "d": EMB(1)})],
+        "top": [outline("gold", 5), vline(1, 1, -2, "crimson", 7)],
+    }))
+    RA.append(Cube("pauldron_lame1", (-10.25, -4.75), (20.25, 22.75), (-3.75, 3.75), "crimson", {
+        "sides": [under_lip(0)], "top": [vline(0, 0, -1, "gold", 5)],
+    }))
+    RA.append(Cube("pauldron_lame2", (-10.75, -5.25), (18.25, 20.75), (-4.25, 4.25), "crimson_dk", {
+        "sides": [under_lip(0), band("bottom", "gold", 5)], "top": [vline(0, 0, -1, "gold", 5)],
+    }))
+    RA.append(Cube("spike_base", (-8.75, -6.75), (25.5, 27.5), (-1, 1), "crimson_hi", {"sides": [band("bottom", "gold", 4)]}))
+    RA.append(Cube("spike_tip", (-8.25, -7.25), (27.5, 29.5), (-0.5, 0.5), "gold_hi", {}))
+    RA.append(Cube("rerebrace", (-8.5, -3.5), (15.5, 20.5), (-2.5, 2.5), "iron", {
+        "sides": [hline(2, ramp="iron", lvl=1), hline(3, ramp="iron", lvl=5)],
+    }))
+    RA.append(Cube("couter", (-9.25, -8.25), (14.75, 17.75), (-1.5, 1.5), "gold", {
+        "right": [stamp([".c.", "cGc", ".c."], {"c": G(6), "G": G(3)})],
+    }))
+    RA.append(Cube("couter_spike", (-10.25, -9.25), (15.75, 16.75), (-0.5, 0.5), "gold_hi", {}))
+    RA.append(Cube("vambrace", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "crimson", {
+        "sides": [band("top", "gold", 5), band("bottom", "gold", 3)], "front": [vline(2, 1, -2, "crimson", 7)],
+    }))
+    # ---- legs: crimson cuisse, gold poleyn with a forward knee spike ----
+    RL.append(Cube("cuisse", (-4.75, 0.75), (5.75, 12.25), (-2.75, 2.75), "crimson", {
+        "front": [vline(2, 0, -1, "crimson", 7), vline(3, 0, -1, "crimson", 2)], "sides": [lames([3])],
+    }))
+    RL.append(Cube("poleyn", (-3.75, -0.25), (4.25, 7.75), (-3.75, -2.25), "gold", {
+        "front": [stamp([".g.", "gdg", ".g."], {"g": G(6), "d": CR(3)})],
+    }))
+    RL.append(Cube("knee_spike", (-2.5, -1.5), (5.5, 6.5), (-4.75, -3.75), "gold_hi", {}))
+    RL.append(Cube("knee_wing", (-5.5, -4.5), (4.5, 7.5), (-2, 1), "crimson_dk", {"right": [band("top", "gold", 5)]}))
+    # ---- boots: crimson greave, gold cuff, blackened sabaton, pointed toe ----
+    RB.append(Cube("greave", (-5, 1), (0.5, 6.5), (-3, 3), "crimson", {
+        "front": [vline(2, 0, -1, "crimson", 7), vline(3, 0, -1, "crimson", 3)], "back": [vline(2, 0, -1, "crimson", 2)],
+    }))
+    RB.append(Cube("greave_cuff", (-5.25, 1.25), (5.75, 7.25), (-3.25, 3.25), "gold", {"sides": [hline(0, ramp="gold", lvl=6)]}))
+    RB.append(Cube("sabaton", (-4.75, 0.75), (-0.75, 1.75), (-4.25, 2.25), "iron", {
+        "top": [hline(1, ramp="iron", lvl=1), hline(3, ramp="iron", lvl=1), hline(5, ramp="iron", lvl=5)],
+    }))
+    RB.append(Cube("toecap", (-3.75, -0.25), (-0.25, 1.25), (-5.25, -3.75), "crimson_hi", {"top": [hline(-1, ramp="gold", lvl=5)]}))
+    RB.append(Cube("toe_point", (-2.5, -1.5), (-0.25, 0.75), (-6.25, -5.25), "gold", {}))
+
+    mirror_limbs(bones)
+    return bones
+
+
+def placeholder_model(school):
+    """Plain plate in the school's colours, standing in until the school's own art pass."""
+    def factory():
+        bones = skeleton()
+        H, B, T = bones["armorHead"].cubes, bones["armorBody"].cubes, bones["armorLeggingTorsoLayer"].cubes
+        RA, RL, RB = bones["armorRightArm"].cubes, bones["armorRightLeg"].cubes, bones["armorRightBoot"].cubes
+        m, a, g = f"{school}_metal", f"{school}_accent", f"{school}_glow"
+        H.append(Cube("helm", (-5, 5), (24, 33), (-5, 5), m, {"sides": [shade_row(1, -2)]}))
+        H.append(Cube("visor", (-4, 4), (26, 30), (-5.75, -4.75), m, {"front": [hline(1, 1, -2, "iron", 0)]}))
+        H.append(Cube("brow", (-4.5, 4.5), (30, 31), (-6, -5), a, {}))
+        H.append(Cube("eyes", (-2.5, 2.5), (27, 28), (-6, -5), g, {}))
+        H.append(Cube("bevor", (-5.5, 5.5), (22, 25), (-5.5, 5.5), m, {}))
+        B.append(Cube("cuirass", (-5.25, 5.25), (14.75, 24.25), (-3.25, 3.25), m, {"sides": [lames([5])]}))
+        B.append(Cube("gem", (-1, 1), (19, 21), (-4, -3), g, {}))
+        T.append(Cube("fauld", (-5.5, 5.5), (10.5, 13.5), (-3.5, 3.5), m, {}))
+        T.append(Cube("belt", (-5.75, 5.75), (12.75, 14.25), (-3.75, 3.75), a, {}))
+        RA.append(Cube("pauldron", (-9.5, -3.5), (22.5, 25.5), (-3.5, 3.5), m, {"sides": [band("bottom", "iron", 2)]}))
+        RA.append(Cube("pauldron_trim", (-9.75, -3.25), (21.75, 23.25), (-3.75, 3.75), a, {}))
+        RA.append(Cube("vambrace", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), m, {}))
+        RL.append(Cube("cuisse", (-4.75, 0.75), (5.75, 12.25), (-2.75, 2.75), m, {}))
+        RL.append(Cube("poleyn", (-3.75, -0.25), (4.25, 7.75), (-3.75, -2.25), a, {}))
+        RB.append(Cube("greave", (-5, 1), (0.5, 6.5), (-3, 3), m, {}))
+        RB.append(Cube("cuff", (-5.25, 1.25), (5.75, 7.25), (-3.25, 3.25), a, {}))
+        mirror_limbs(bones)
+        return bones
+    return factory
+
+
+BUILDERS = {"holy": holy_model, "ender": ender_model, "blood": blood_model,
+            "evocation": placeholder_model("evocation"), "nature": placeholder_model("nature"),
+            "eldritch": placeholder_model("eldritch")}
+
+
 def mirror_limbs(bones):
     for src, dst in MIRROR_BONE.items():
         for c in bones[src].cubes:
@@ -999,6 +1208,24 @@ ICONS = {
             "................",
             "................",
         ],
+        "blood": [
+            "..a..........a..",
+            ".ab....oo....ba.",
+            ".ab..oo55oo..ba.",
+            "..abo554443oba..",
+            "...ao544443oa...",
+            "....obbbbbbo....",
+            "....okGkkGko....",
+            "....o544443o....",
+            "....o54kk43o....",
+            "....o544443o....",
+            "...obbbbbbbbo...",
+            "...o55444433o...",
+            "...oooooooooo...",
+            "................",
+            "................",
+            "................",
+        ],
         "ender": [
             "................",
             ".......oo.......",
@@ -1141,11 +1368,23 @@ ICON_LEGEND = {
     "ender": {"o": ("night", 0), "1": ("night", 2), "2": ("night", 4), "3": ("night", 6), "4": ("night", 7),
               "a": ("amethyst", 3), "b": ("amethyst", 5), "c": ("amethyst", 4), "A": ("amethyst", 5),
               "d": ("night", 1), "G": ("pearl", 3), "M": ("magenta", 3), "v": ("violet", 3), "k": ("night", 1)},
+    "blood": {"o": ("iron", 0), "1": ("crimson", 2), "2": ("crimson", 3), "3": ("crimson", 4), "4": ("crimson", 5),
+              "5": ("crimson", 7), "a": ("gold", 4), "b": ("iron", 3), "c": ("gold", 6), "G": ("ember", 3), "k": ("iron", 0)},
+    "evocation": {"o": ("evo_steel", 0), "1": ("evo_steel", 2), "2": ("evo_steel", 3), "3": ("evo_steel", 4),
+                  "4": ("evo_steel", 5), "5": ("evo_steel", 7), "a": ("gold", 4), "b": ("gold", 4), "c": ("gold", 6),
+                  "G": ("emerald", 3), "k": ("iron", 0)},
+    "nature": {"o": ("nat_steel", 0), "1": ("nat_steel", 2), "2": ("nat_steel", 3), "3": ("nat_steel", 4),
+               "4": ("nat_steel", 5), "5": ("nat_steel", 7), "a": ("moss", 3), "b": ("moss", 3), "c": ("moss", 5),
+               "G": ("moss", 6), "k": ("iron", 0)},
+    "eldritch": {"o": ("sculk", 0), "1": ("sculk", 2), "2": ("sculk", 3), "3": ("sculk", 4), "4": ("sculk", 5),
+                 "5": ("sculk", 7), "a": ("sculk", 6), "b": ("sculk", 6), "c": ("sculk", 7), "G": ("cyan", 3), "k": ("sculk", 0)},
 }
 
 
 def icon(piece, school):
-    art = ICONS[piece][school]
+    art = ICONS[piece].get(school)
+    if art is None:   # schools awaiting their art pass borrow the Holy shapes, without the halo
+        art = [row.replace("G", ".") if piece == "helmet" and i < 6 else row for i, row in enumerate(ICONS[piece]["holy"])]
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     p = img.load()
     for y, row in enumerate(art[:16]):
@@ -1172,7 +1411,7 @@ def save_png(img, path):
 
 def main():
     report = {}
-    for school, build in (("holy", holy_model), ("ender", ender_model)):
+    for school, build in BUILDERS.items():
         bones = build()
         resolve_coplanar(bones)
         used_rows = pack(bones)

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "iceandfire"
+    }
+  ],
+  "category": "equipment",
+  "pattern": [
+    "d d",
+    "drd",
+    "sds"
+  ],
+  "key": {
+    "d": {
+      "item": "dragonsteel_schools:blood_dragonsteel_ingot"
+    },
+    "r": {
+      "item": "irons_spellbooks:blood_rune"
+    },
+    "s": {
+      "tag": "iceandfire:scales/dragon"
+    }
+  },
+  "result": {
+    "item": "dragonsteel_schools:blood_dragonsteel_chestplate"
+  },
+  "show_notification": true
+}

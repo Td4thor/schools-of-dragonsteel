@@ -15,6 +15,8 @@ following the legs).
 |---|---|---|---|
 | Holy | 80 (helm 37, incl. halo ring and rays) | 128x128 | 463 |
 | Ender | 62 | 128x128 | 103 |
+| Blood | 65 | 128x128 | 9 |
+| Evocation, Nature, Eldritch | 23 each (placeholder plate) | 128x128 | 38 |
 
 Box UV, one texel per model unit. Glowmask texels copy the base colour (GeckoLib draws the base texture full-bright
 wherever the mask is opaque).
@@ -41,6 +43,15 @@ wherever the mask is opaque).
   shoulder blades. Hidden blades on both forearms. A heavy left pauldron growing violet end crystals, with a glowing
   hem. Split coat tails and side panels that move with the legs. Slim greaves with raised shin guards, and pointed
   sabatons.
+
+- **Blood, the Blood Knight** (after Tad's Warhammer reference). Crimson heavy plate with gold filigree over
+  blackened iron. A closed helm with a pointed visor and a dim ember eye slit, crimson bat-wing crests with gold
+  claw tips, and a crest fin. Three-tier pauldrons with a gold-tipped spike, a gold chevron and blood jewel on the
+  breast, and a black winged device on the back. A gold skull at the belt, gold poleyns with a forward spike, and
+  pointed sabatons.
+- **Evocation, Nature, Eldritch:** placeholder plate in each school's colours until their own passes (Evocation
+  after Tad's spell-knight reference with emerald accents, Nature after his overgrown knight, Eldritch as faceless
+  abyssal plate).
 
 ## Verified
 1. Both `.geo.json` files parse and bake with the real GeckoLib 4.8.4 classes (`GeometryTree` +

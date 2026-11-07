@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "iceandfire"
+    }
+  ],
+  "category": "equipment",
+  "pattern": [
+    "M",
+    "H",
+    "H"
+  ],
+  "key": {
+    "M": {
+      "item": "dragonsteel_schools:blood_dragonsteel_ingot"
+    },
+    "H": {
+      "tag": "forge:bones/wither"
+    }
+  },
+  "result": {
+    "item": "dragonsteel_schools:blood_dragonsteel_shovel"
+  },
+  "show_notification": true
+}

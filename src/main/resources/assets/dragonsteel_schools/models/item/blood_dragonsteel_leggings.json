@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "dragonsteel_schools:item/blood_dragonsteel_leggings"
+  }
+}

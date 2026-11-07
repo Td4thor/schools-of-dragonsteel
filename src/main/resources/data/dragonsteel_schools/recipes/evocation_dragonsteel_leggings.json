@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "iceandfire"
+    }
+  ],
+  "category": "equipment",
+  "pattern": [
+    "srs",
+    "d d",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "dragonsteel_schools:evocation_dragonsteel_ingot"
+    },
+    "r": {
+      "item": "irons_spellbooks:evocation_rune"
+    },
+    "s": {
+      "tag": "iceandfire:scales/dragon"
+    }
+  },
+  "result": {
+    "item": "dragonsteel_schools:evocation_dragonsteel_leggings"
+  },
+  "show_notification": true
+}

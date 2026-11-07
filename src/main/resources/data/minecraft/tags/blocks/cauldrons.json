@@ -3,6 +3,10 @@
   "values": [
     "dragonsteel_schools:dragons_breath_cauldron",
     "dragonsteel_schools:holy_dragon_blood_cauldron",
-    "dragonsteel_schools:ender_dragon_blood_cauldron"
+    "dragonsteel_schools:ender_dragon_blood_cauldron",
+    "dragonsteel_schools:blood_dragon_blood_cauldron",
+    "dragonsteel_schools:evocation_dragon_blood_cauldron",
+    "dragonsteel_schools:nature_dragon_blood_cauldron",
+    "dragonsteel_schools:eldritch_dragon_blood_cauldron"
   ]
 }

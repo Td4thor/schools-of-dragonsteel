@@ -38,7 +38,51 @@ R = {
     "violet": hexes("#6420c2", "#8838ec", "#a85fff", "#c58aff", "#e0baff", "#f5e6ff"),
     "purpur": hexes("#4a3150", "#664769", "#86618a", "#a57ca7", "#c19cc3", "#dbbedb"),
     "endst": hexes("#6c6a43", "#97955d", "#c1bf81", "#dbdb9f", "#ecedc0"),
+    # Blood, Evocation, Nature, Eldritch
+    "crimson": hexes("#1c0204", "#3a060b", "#5c0b13", "#82111c", "#a81a27", "#cc2a36", "#e8505a", "#ff8a8f"),
+    "emerald": hexes("#05301a", "#0a4d2a", "#11703c", "#17944f", "#20b863", "#3ddb7a", "#7ff0a9", "#c4ffd9"),
+    "slate": hexes("#141615", "#1f2321", "#2b302d", "#3a403c", "#4c534e", "#616963", "#7b847d", "#9aa29b"),
+    "moss": hexes("#14200f", "#1f3217", "#2c4720", "#3d5f2a", "#527b34", "#6f9c40", "#95c25a", "#c2e584"),
+    "bark": hexes("#1a120b", "#2a1d12", "#3b2a1a", "#4f3923", "#644a2e", "#7c5d3a", "#987449", "#b48d5c"),
+    "sculk": hexes("#020a0d", "#051419", "#0a2027", "#0f2e37", "#154049", "#1d555f", "#2a6f78", "#3f8c93"),
+    "cyan": hexes("#0b6b74", "#11949f", "#1fc0cc", "#29dfeb", "#7ff2f8", "#d4fdff"),
+    "bone": hexes("#6f6a58", "#958f78", "#bab49b", "#d8d3bd", "#efebda"),
 }
+
+# Per-school colour roles. ramp names refer to R; ranges are (start, end) positions along the ramp.
+TEX = {
+    "holy": dict(metal=("silver", 0.3, 0.9), accent=("sun", 0.15, 1.0),
+                 tempered=("silver", 0.1, 0.85), fleck=("gold", 0.55), fleck_rule=(7, 3, 11),
+                 ingot_lo=("gold", 0.15, 1.0), ingot_hi=("sun", 0.2, 1.0), ingot_split=0.82,
+                 blood=("sun", 0.0, 1.0), liquid=("sun", 2.2), spark=None),
+    "ender": dict(metal=("obsid", 0.2, 0.95), accent=("violet", 0.1, 1.0),
+                  tempered=("obsid", 0.25, 1.0), fleck=("purpur", 0.4), fleck_rule=(5, 7, 13),
+                  ingot_lo=("void", 0.05, 1.0), ingot_hi=("violet", 0.3, 0.9), ingot_split=0.8,
+                  blood=("void", 0.15, 1.0), liquid=("void", 2.0), spark="violet"),
+    "blood": dict(metal=("crimson", 0.2, 0.9), accent=("gold", 0.3, 1.0),
+                  tempered=("silver", 0.05, 0.7), fleck=("crimson", 0.6), fleck_rule=(3, 5, 11),
+                  ingot_lo=("crimson", 0.05, 0.95), ingot_hi=("gold", 0.5, 0.95), ingot_split=0.84,
+                  blood=("crimson", 0.1, 1.0), liquid=("crimson", 1.8), spark="gold"),
+    "evocation": dict(metal=("slate", 0.25, 0.95), accent=("emerald", 0.2, 1.0),
+                      tempered=("silver", 0.05, 0.75), fleck=("emerald", 0.6), fleck_rule=(5, 3, 13),
+                      ingot_lo=("slate", 0.1, 1.0), ingot_hi=("emerald", 0.45, 1.0), ingot_split=0.78,
+                      blood=("emerald", 0.15, 1.0), liquid=("emerald", 2.0), spark="gold"),
+    "nature": dict(metal=("slate", 0.2, 0.9), accent=("moss", 0.35, 1.0),
+                   tempered=("slate", 0.15, 0.9), fleck=("moss", 0.6), fleck_rule=(7, 5, 11),
+                   ingot_lo=("bark", 0.05, 0.9), ingot_hi=("moss", 0.5, 1.0), ingot_split=0.78,
+                   blood=("moss", 0.2, 1.0), liquid=("moss", 2.0), spark="moss"),
+    "eldritch": dict(metal=("sculk", 0.2, 0.95), accent=("cyan", 0.1, 1.0),
+                     tempered=("sculk", 0.25, 1.0), fleck=("bone", 0.6), fleck_rule=(5, 7, 13),
+                     ingot_lo=("sculk", 0.05, 1.0), ingot_hi=("cyan", 0.3, 1.0), ingot_split=0.8,
+                     blood=("sculk", 0.3, 1.0), liquid=("sculk", 2.0), spark="cyan"),
+}
+SCHOOLS = tuple(TEX)
+SWORDS = {"ender": "elsewhere", "blood": "thirst", "evocation": "covenant", "nature": "briar", "eldritch": "hush"}
+
+
+def along(spec, t):
+    name, a, b = spec
+    return ramp(name, a + (b - a) * t)
 
 
 def ramp(name, t):
@@ -89,31 +133,33 @@ def is_accent(p):
 
 
 def steel_fn(school):
+    c = TEX[school]
+
     def fn(p, x, y):
         L = lum(p)
         if L < 14:
-            return R["silver"][0] if school == "holy" else R["obsid"][0]
+            return R[c["metal"][0]][0]
         if is_accent(p):
-            t = min(1.0, max(0.0, (L - 70) / 185))
-            return ramp("sun", 0.15 + 0.85 * t) if school == "holy" else ramp("violet", 0.1 + 0.9 * t)
-        t = min(1.0, max(0.0, (L - 14) / 80))
-        return ramp("silver", 0.3 + 0.6 * t) if school == "holy" else ramp("obsid", 0.2 + 0.75 * t)
+            return along(c["accent"], min(1.0, max(0.0, (L - 70) / 185)))
+        return along(c["metal"], min(1.0, max(0.0, (L - 14) / 80)))
     return fn
 
 
 def ingot_fn(school, tempered=False):
+    c = TEX[school]
+
     def fn(p, x, y):
         L = lum(p)
         t = min(1.0, max(0.0, (L - 20) / 235))
         if tempered:
-            if school == "holy":
-                c = ramp("silver", 0.1 + 0.75 * t)
-                return ramp("gold", 0.55) if (x * 7 + y * 3) % 11 == 0 and 0.3 < t < 0.9 else c
-            c = ramp("obsid", 0.25 + 0.75 * t)
-            return ramp("purpur", 0.4) if (x * 5 + y * 7) % 13 == 0 and 0.3 < t < 0.9 else c
-        if school == "holy":
-            return ramp("sun", (t - 0.82) / 0.18 * 0.8 + 0.2) if t > 0.82 else ramp("gold", 0.15 + 0.85 * t / 0.82)
-        return ramp("violet", 0.3 + (t - 0.8) / 0.2 * 0.6) if t > 0.8 else ramp("void", 0.05 + 0.95 * t / 0.8)
+            a, b, m = c["fleck_rule"]
+            if (x * a + y * b) % m == 0 and 0.3 < t < 0.9:
+                return ramp(*c["fleck"])
+            return along(c["tempered"], t)
+        split = c["ingot_split"]
+        if t > split:
+            return along(c["ingot_hi"], (t - split) / (1 - split))
+        return along(c["ingot_lo"], t / split)
     return fn
 
 
@@ -122,7 +168,7 @@ def blood_fn(school):
         L = lum(p)
         if p[2] > p[0] + 30:   # the blue liquid
             t = min(1.0, max(0.0, (L - 40) / 200))
-            return ramp("sun", t) if school == "holy" else ramp("void", 0.15 + 0.85 * t)
+            return along(TEX[school]["blood"], t)
         return p               # glass, highlight and cork stay as they are
     return fn
 
@@ -222,7 +268,9 @@ def staff_sheet(school):
     u, v, w, h = STAFF_LAYOUT["shaft"]
     for y in range(h):
         for x in range(w):
-            if school == "holy":
+            if school not in ("holy", "ender"):
+                c = generic_staff_px(school, "shaft", x, y, rng)
+            elif school == "holy":
                 band = (y % 8) in (0, 1)
                 c = ramp("gold", 0.75 if band else 0.35 + 0.1 * (x % 2)) if band or x in (0, 3) else ramp("silver", 0.8 - 0.15 * (x % 2))
             else:
@@ -234,12 +282,14 @@ def staff_sheet(school):
     u, v, w, h = STAFF_LAYOUT["collar"]
     for y in range(h):
         for x in range(w):
-            c = ramp("gold", 0.85 - 0.12 * y) if school == "holy" else ramp("purpur", 0.75 - 0.12 * y)
+            c = ramp("gold", 0.85 - 0.12 * y) if school == "holy" else ramp("purpur", 0.75 - 0.12 * y) if school == "ender" \
+                else along(TEX[school]["accent"], 0.85 - 0.12 * y)
             px[u + x, v + y] = c
     u, v, w, h = STAFF_LAYOUT["gem"]
     for y in range(h):
         for x in range(w):
-            c = ramp("sun", 1.0 - 0.15 * y) if school == "holy" else ramp("violet", 0.9 - 0.15 * y)
+            c = ramp("sun", 1.0 - 0.15 * y) if school == "holy" else ramp("violet", 0.9 - 0.15 * y) if school == "ender" \
+                else along(GEM[school], 1.0 - 0.15 * y)
             px[u + x, v + y] = c
     for key in ("disc", "side"):
         u, v, w, h = STAFF_LAYOUT[key]
@@ -249,7 +299,11 @@ def staff_sheet(school):
                 dx, dy = x + 0.5 - cx, y + 0.5 - cy
                 d = math.hypot(dx, dy)
                 ang = math.atan2(dy, dx)
-                if school == "holy":
+                if school not in ("holy", "ender"):
+                    c = generic_staff_head(school, d, ang, dx, dy)
+                    if c is None:
+                        continue
+                elif school == "holy":
                     ring = 3.6 <= d <= 4.9
                     ray = d > 4.9 and d < 6.0 and abs(math.sin(ang * 4)) > 0.82
                     core = d < 2.0
@@ -273,6 +327,46 @@ def staff_sheet(school):
                         continue
                 px[u + x, v + y] = c
     return img
+
+
+GEM = {"blood": ("crimson", 0.5, 1.0), "evocation": ("emerald", 0.4, 1.0), "nature": ("moss", 0.45, 1.0),
+       "eldritch": ("cyan", 0.2, 1.0)}
+
+
+def generic_staff_px(school, part, x, y, rng):
+    """Shaft for the newer schools: school metal with accent bands every 8 texels."""
+    c = TEX[school]
+    if (y % 8) in (0, 1):
+        return along(c["accent"], 0.75 if y % 8 == 0 else 0.5)
+    return along(c["metal"], 0.75 - 0.2 * (x % 2) - (0.1 if x == 3 else 0.0))
+
+
+def generic_staff_head(school, d, ang, dx, dy):
+    """Headpiece for the newer schools, one motif each around the gem."""
+    c = TEX[school]
+    if school == "blood":        # a crown of five thorns round a ring
+        ring = 3.4 <= d <= 4.6
+        thorn = 4.6 < d < 6.0 and abs(math.sin(ang * 2.5)) > 0.9 and dy < 1.5
+        if ring:
+            return along(c["metal"], 0.7 if d < 4.0 else 0.4)
+        return ramp("gold", 0.6) if thorn else None
+    if school == "evocation":    # gold ring with four emerald studs
+        ring = 3.6 <= d <= 4.9
+        stud = 4.9 < d < 6.0 and abs(math.sin(ang * 2)) > 0.92
+        if ring:
+            return ramp("gold", 0.75 if d < 4.2 else 0.45)
+        return ramp("emerald", 0.75) if stud else None
+    if school == "nature":       # a wreath of leaves, opening upward
+        wreath = 3.2 <= d <= 5.4 and dy > -3.0
+        leaf = wreath and int((ang + math.pi) * 3) % 2 == 0
+        if not wreath:
+            return None
+        return ramp("moss", 0.75 if leaf else 0.45) if d > 4.2 else ramp("bark", 0.6)
+    ring = 3.6 <= d <= 5.0       # eldritch: a lidless ring of small eyes
+    if not ring:
+        return None
+    eye = abs(math.sin(ang * 3)) > 0.93 and 4.0 < d < 4.6
+    return ramp("cyan", 0.8) if eye else along(c["metal"], 0.55 if d < 4.3 else 0.3)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -303,11 +397,11 @@ def tinted_liquid(school):
         if school is None:   # dragon's breath: vanilla's pink-magenta cloud colours
             base = (0.86, 0.38, 0.76)
             return tuple(min(255, int(255 * (b * (0.55 + 0.75 * L)))) for b in base) + (235,)
-        if school == "holy":
-            return ramp("sun", min(1.0, max(0.0, (L - 0.45) * 2.2)))[:3] + (245,)
-        c = ramp("void", min(1.0, max(0.0, (L - 0.45) * 2.0)))
-        if rng.random() < 0.012:
-            c = ramp("violet", 0.9)
+        name, k = TEX[school]["liquid"]
+        c = ramp(name, min(1.0, max(0.0, (L - 0.45) * k)))
+        spark = TEX[school]["spark"]
+        if spark and rng.random() < 0.012:
+            c = ramp(spark, 0.9)
         return c[:3] + (245,)
     return remap(water, fn), meta
 
@@ -323,7 +417,7 @@ def effect_icon():
 
 
 def main():
-    for school in ("holy", "ender"):
+    for school in SCHOOLS:
         fn = steel_fn(school)
         for tool in ("pickaxe", "axe", "shovel", "hoe"):
             save(remap(read_png(IAF_JAR, f"assets/iceandfire/textures/item/dragonsteel_ice_{tool}.png"), fn),
@@ -337,8 +431,9 @@ def main():
         liquid, meta = tinted_liquid(school)
         save(liquid, f"block/{school}_dragon_blood_still.png", meta)
     save(dawn(), "item/dawn.png")
-    save(remap(read_png(IAF_JAR, "assets/iceandfire/textures/item/dragonsteel_ice_sword.png"), steel_fn("ender")),
-         "item/elsewhere.png")
+    sword = read_png(IAF_JAR, "assets/iceandfire/textures/item/dragonsteel_ice_sword.png")
+    for school, name in SWORDS.items():
+        save(remap(sword, steel_fn(school)), f"item/{name}.png")
     liquid, meta = tinted_liquid(None)
     save(liquid, "block/dragons_breath_still.png", meta)
     for i in (0, 1):

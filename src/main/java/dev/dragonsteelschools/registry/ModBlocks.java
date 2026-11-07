@@ -28,9 +28,7 @@ public final class ModBlocks {
         for (SchoolSteel school : SchoolSteel.values()) {
             BLOOD_CAULDRON.put(school, BLOCKS.register(school.id() + "_dragon_blood_cauldron",
                     () -> new SchoolCauldronBlock(school, BlockBehaviour.Properties.copy(Blocks.CAULDRON)
-                            .lightLevel(state -> school == SchoolSteel.HOLY
-                                    ? 6 + 3 * state.getValue(LayeredCauldronBlock.LEVEL)
-                                    : 2 + state.getValue(LayeredCauldronBlock.LEVEL)),
+                            .lightLevel(state -> school.cauldronLight(state.getValue(LayeredCauldronBlock.LEVEL))),
                             ModCauldronInteractions.blood(school))));
         }
     }

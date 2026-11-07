@@ -34,6 +34,17 @@ public final class DSConfig {
     public static final ForgeConfigSpec.BooleanValue ELSEWHERE_SPELL_PROJECTILES;
     public static final ForgeConfigSpec.BooleanValue ELSEWHERE_OFFHAND;
 
+    public static final ForgeConfigSpec.DoubleValue THIRST_LIFESTEAL;
+
+    public static final ForgeConfigSpec.DoubleValue COVENANT_COOLDOWN_SECONDS;
+    public static final ForgeConfigSpec.IntValue COVENANT_FANGS;
+
+    public static final ForgeConfigSpec.IntValue BRIAR_POISON_SECONDS;
+    public static final ForgeConfigSpec.IntValue BRIAR_SLOW_SECONDS;
+
+    public static final ForgeConfigSpec.DoubleValue HUSH_BONUS_DAMAGE;
+    public static final ForgeConfigSpec.IntValue HUSH_DARKNESS_SECONDS;
+
     private static final List<Integer> DEFAULT_ARMOR = List.of(6, 9, 12, 6);
     private static volatile int generation;
     private static volatile Set<String> apexCache;
@@ -44,8 +55,13 @@ public final class DSConfig {
         b.push("forging");
         APEX_SPELLS = b.comment("Spells that finish dragonsteel in a dragon forge. Each spell forges its own school's",
                         "dragonsteel; a spell of a school without dragonsteel here does nothing. Defaults are Apex Arcana's.")
-                .defineListAllowEmpty("apexSpells", List.of("grandsigil:heaven_gate", "grandsigil:reckoning",
-                        "grandsigil:voidgrip", "grandsigil:dimension_cut"), o -> o instanceof String s && s.contains(":"));
+                // Key renamed from apexSpells in 0.1.0-dev.4 so existing configs pick up the new schools' spells.
+                .defineListAllowEmpty("apexSpellIds", List.of("grandsigil:heaven_gate", "grandsigil:reckoning",
+                        "grandsigil:voidgrip", "grandsigil:dimension_cut",
+                        "grandsigil:colosseum", "grandsigil:crimson_threads",
+                        "grandsigil:grand_sigil", "grandsigil:thousand_blades",
+                        "grandsigil:world_tree", "grandsigil:full_bloom",
+                        "grandsigil:black_coffin", "grandsigil:the_gaze"), o -> o instanceof String s && s.contains(":"));
         APEX_RANGE = b.comment("How far (blocks) an Apex caster may stand from the forge they are looking at.")
                 .defineInRange("apexRange", 48.0, 4.0, 128.0);
         CAULDRON_RANGE = b.comment("How far (blocks) a caster may stand from the cauldron of dragon's breath.")
@@ -79,6 +95,30 @@ public final class DSConfig {
         ELSEWHERE_SPELL_PROJECTILES = b.comment("Also dodge spell projectiles and other thrown entities, not only arrows and tridents.")
                 .define("dodgeSpellProjectiles", true);
         ELSEWHERE_OFFHAND = b.comment("Works from the offhand as well as the main hand.").define("worksInOffhand", true);
+        b.pop();
+
+        b.push("thirst");
+        THIRST_LIFESTEAL = b.comment("Share of the health Thirst's hits remove (sweeps included) that heals the wielder.")
+                .defineInRange("lifesteal", 0.2, 0.0, 10.0);
+        b.pop();
+
+        b.push("covenant");
+        COVENANT_COOLDOWN_SECONDS = b.comment("Seconds between Covenant's fang volleys (a fully charged hit calls one).")
+                .defineInRange("cooldownSeconds", 3.0, 0.0, 600.0);
+        COVENANT_FANGS = b.comment("Evoker fangs in each volley, in a row from the wielder toward the target.")
+                .defineInRange("fangs", 6, 1, 16);
+        b.pop();
+
+        b.push("briar");
+        BRIAR_POISON_SECONDS = b.comment("Seconds of Poison I per Briar hit (0 = none).").defineInRange("poisonSeconds", 4, 0, 600);
+        BRIAR_SLOW_SECONDS = b.comment("Seconds of Slowness II per Briar hit (0 = none).").defineInRange("slowSeconds", 2, 0, 600);
+        b.pop();
+
+        b.push("hush");
+        HUSH_BONUS_DAMAGE = b.comment("Extra damage per Hush hit, added after armour and protection.")
+                .defineInRange("bonusDamage", 4.0, 0.0, 1000.0);
+        HUSH_DARKNESS_SECONDS = b.comment("Seconds of Darkness on players Hush strikes (0 = none).")
+                .defineInRange("darknessSeconds", 3, 0, 600);
         b.pop();
 
         SPEC = b.build();

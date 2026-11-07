@@ -29,3 +29,21 @@ FOV 30, then equips the full kit (sword main hand, axe off hand; Holy also burni
 and third person. Screenshots go to `run/screenshots/`, and the run quits logging `[DragonsteelSchools/qa] DONE`.
 The script fails on any crash report or if the run never finishes. The harness lives in `src/qa` and never ships in the jar. The GameTest server cannot
 catch client-only crashes (0.1.0-dev.1's armour crash was one), so run this after any client-side change.
+
+## Blood, Evocation, Nature and Eldritch (0.1.0-dev.4)
+
+Their forging works exactly like Holy and Ender. Only Blood has its own armour so far; Evocation, Nature and
+Eldritch wear plain placeholder plate in their colours until their art passes.
+
+1. **Blood.** Cast any Blood spell (Heartstop works) at a cauldron of dragon's breath for Blood dragon blood. Temper
+   it in a dragon forge, then finish it with The Colosseum or Crimson Threads. Evocation (Shield), Nature (Oakskin)
+   and Eldritch (Abyssal Shroud, once learned) work the same way, finished by Grand Sigil or Thousand Blades,
+   World Tree or Full Bloom, and Black Coffin or The Gaze.
+2. **Thirst.** Take some damage, then hit a mob: you heal a fifth of the health each hit takes, sweeps included.
+   Spells cast while holding it heal nothing.
+3. **Covenant.** A fully charged hit sends a row of evoker fangs at the target; the sword then greys out for 3 s.
+4. **Briar.** Hits poison (not undead, as in vanilla) and slow.
+5. **Hush.** Hits deal 4 extra damage even through netherite. A player you hit goes dark for 3 s.
+6. **Blood armour.** Wear it in first and third person, walk, swing, and judge the look. Screenshots are welcome.
+7. **Apex domains linger.** Two Apex spells cast in the same place within a few seconds can clash. If a second
+   forging seems to do nothing, wait for the first spell's domain to fade.

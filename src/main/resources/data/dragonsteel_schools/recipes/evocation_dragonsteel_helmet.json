@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "drd",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "dragonsteel_schools:evocation_dragonsteel_ingot"
+    },
+    "r": {
+      "item": "irons_spellbooks:evocation_rune"
+    }
+  },
+  "result": {
+    "item": "dragonsteel_schools:evocation_dragonsteel_helmet"
+  },
+  "show_notification": true
+}

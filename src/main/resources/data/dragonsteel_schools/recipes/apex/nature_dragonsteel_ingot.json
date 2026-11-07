@@ -1,0 +1,10 @@
+{
+  "type": "dragonsteel_schools:apex_forging",
+  "school": "nature",
+  "input": {
+    "item": "dragonsteel_schools:tempered_nature_steel"
+  },
+  "result": {
+    "item": "dragonsteel_schools:nature_dragonsteel_ingot"
+  }
+}

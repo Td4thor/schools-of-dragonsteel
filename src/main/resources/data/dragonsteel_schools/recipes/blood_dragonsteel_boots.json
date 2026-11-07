@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "iceandfire"
+    }
+  ],
+  "category": "equipment",
+  "pattern": [
+    "s s",
+    "drd"
+  ],
+  "key": {
+    "d": {
+      "item": "dragonsteel_schools:blood_dragonsteel_ingot"
+    },
+    "r": {
+      "item": "irons_spellbooks:blood_rune"
+    },
+    "s": {
+      "tag": "iceandfire:scales/dragon"
+    }
+  },
+  "result": {
+    "item": "dragonsteel_schools:blood_dragonsteel_boots"
+  },
+  "show_notification": true
+}

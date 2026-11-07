@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     "dragonsteel_schools:dawn",
-    "dragonsteel_schools:elsewhere"
+    "dragonsteel_schools:elsewhere",
+    "dragonsteel_schools:thirst",
+    "dragonsteel_schools:covenant",
+    "dragonsteel_schools:briar",
+    "dragonsteel_schools:hush"
   ]
 }

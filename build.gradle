@@ -40,6 +40,7 @@ minecraft {
             if (project.hasProperty('dsqa')) {
                 // Loads run/saves/<dsqaWorld>, equips each set, takes screenshots, then quits. See src/qa.
                 property 'dragonsteel_schools.qa', 'true'
+                property 'dragonsteel_schools.qa.schools', project.findProperty('dsqaSchools') ?: ''
                 args '--quickPlaySingleplayer', project.findProperty('dsqaWorld') ?: 'QA', '--width', '1920', '--height', '1080'
                 mods { "${mod_id}" { source sourceSets.qa } }
             }

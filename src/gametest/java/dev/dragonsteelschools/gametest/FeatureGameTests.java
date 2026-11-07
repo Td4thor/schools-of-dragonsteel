@@ -141,6 +141,7 @@ public final class FeatureGameTests {
     /** Own batch: two Reckonings winding up at once (the spike's and this one) must not share a run. */
     @GameTest(template = "platform", timeoutTicks = 260, batch = "apex")
     public static void forge_holy_apex_finishes_tempered_steel_into_dragonsteel(GameTestHelper helper) {
+        ApexCleanup.clear(helper);
         BlockPos core = new BlockPos(7, 3, 9);
         ForgeFixtures.build(helper, core, "fire", Direction.NORTH);
         ServerPlayer player = TestPlayers.create(helper);
@@ -168,6 +169,7 @@ public final class FeatureGameTests {
                     "Reckoning finished all 10 tempered Holy steel into Holy dragonsteel, output " + out + ", on-cast tick " + onCast.get());
             helper.assertTrue(forge.getItem(0).is(ModItems.TEMPERED.get(SchoolSteel.ENDER).get()) && forge.getItem(0).getCount() == 3,
                     "a Holy Apex leaves Ender steel alone, input " + forge.getItem(0));
+            ApexCleanup.clear(helper);
             helper.succeed();
         });
     }

@@ -54,6 +54,7 @@ public final class SpikeGameTests {
 
     @GameTest(template = "platform", timeoutTicks = 260, batch = "spike_reckoning")
     public static void spike_reckoning_long_cast_fires_on_cast_after_windup(GameTestHelper helper) {
+        ApexCleanup.clear(helper);
         ServerPlayer caster = TestPlayers.create(helper);
         caster.moveTo(helper.absoluteVec(new net.minecraft.world.phys.Vec3(7.5, 2, 2.5)));
         caster.getAttribute(AttributeRegistry.MAX_MANA.get()).setBaseValue(5000);

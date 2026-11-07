@@ -1,0 +1,10 @@
+{
+  "type": "dragonsteel_schools:apex_forging",
+  "school": "eldritch",
+  "input": {
+    "item": "dragonsteel_schools:tempered_eldritch_steel"
+  },
+  "result": {
+    "item": "dragonsteel_schools:eldritch_dragonsteel_ingot"
+  }
+}

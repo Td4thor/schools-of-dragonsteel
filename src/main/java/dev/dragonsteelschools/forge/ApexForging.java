@@ -91,7 +91,7 @@ public final class ApexForging {
         int rgb = school.primaryColor();
         ParticleOptions dust = new DustParticleOptions(new Vector3f(((rgb >> 16) & 255) / 255F, ((rgb >> 8) & 255) / 255F, (rgb & 255) / 255F), 1.6F);
         level.sendParticles(dust, x, y + 1.0, z, 80, 1.2, 1.2, 1.2, 0.02);
-        level.sendParticles(school == SchoolSteel.HOLY ? ParticleTypes.END_ROD : ParticleTypes.REVERSE_PORTAL, x, y + 1.0, z, 60, 0.8, 1.4, 0.8, 0.08);
+        level.sendParticles(school.particle(), x, y + 1.0, z, 60, 0.8, 1.4, 0.8, 0.08);
         level.playSound(null, core, school.forgeSound(), SoundSource.BLOCKS, 1.4F, 1.0F);
         level.playSound(null, core, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 0.6F);
     }

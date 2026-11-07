@@ -54,16 +54,12 @@ public class SchoolCauldronBlock extends LayeredCauldronBlock {
             if (random.nextInt(3) == 0) {
                 level.addParticle(ParticleTypes.DRAGON_BREATH, x, surface, z, 0.0, 0.01, 0.0);
             }
-        } else if (school == SchoolSteel.HOLY) {
-            if (random.nextInt(2) == 0) {
-                level.addParticle(new DustParticleOptions(new Vector3f(1.0F, 0.86F, 0.45F), 0.8F), x, surface, z, 0.0, 0.02, 0.0);
-            }
-            if (random.nextInt(6) == 0) {
-                level.addParticle(ParticleTypes.END_ROD, x, surface, z, 0.0, 0.015, 0.0);
-            }
         } else {
             if (random.nextInt(2) == 0) {
-                level.addParticle(ParticleTypes.REVERSE_PORTAL, x, surface, z, 0.0, 0.02, 0.0);
+                level.addParticle(SchoolCauldrons.dust(school, 0.8F), x, surface, z, 0.0, 0.02, 0.0);
+            }
+            if (random.nextInt(4) == 0) {
+                level.addParticle(school.particle(), x, surface, z, 0.0, 0.015, 0.0);
             }
         }
     }

@@ -31,6 +31,42 @@ SCHOOLS = {
         "plate_lore": "Close-fitting void plate that drinks the light around it.",
         "staff_lore": "Its crystal shows a sky with no stars you know.",
     },
+    "blood": {
+        "name": "Blood", "sword": "thirst", "sword_name": "Thirst",
+        "staff": "sanguine_dragon_priest_staff", "staff_name": "Sanguine Dragon Priest Staff",
+        "rune": "irons_spellbooks:blood_rune",
+        "plate_lore": "Crimson plate for a knight who swore an oath in blood and kept it.",
+        "staff_lore": "It is warm to the touch, and the warmth has a pulse.",
+        "sword_lore": "It was quenched in its maker. It has been thirsty since.",
+        "sword_power": "Heals you for %s%% of the health its hits take",
+    },
+    "evocation": {
+        "name": "Evocation", "sword": "covenant", "sword_name": "Covenant",
+        "staff": "emerald_dragon_priest_staff", "staff_name": "Emerald Dragon Priest Staff",
+        "rune": "irons_spellbooks:evocation_rune",
+        "plate_lore": "Spell-knight's harness, set with emeralds an evoker would kill for.",
+        "staff_lore": "Each emerald on it was paid for in a bargain nobody won.",
+        "sword_lore": "Every blade is a promise. This one keeps its word with teeth.",
+        "sword_power": "A fully charged hit calls %s evoker fangs at the foe (every %s s)",
+    },
+    "nature": {
+        "name": "Nature", "sword": "briar", "sword_name": "Briar",
+        "staff": "verdant_dragon_priest_staff", "staff_name": "Verdant Dragon Priest Staff",
+        "rune": "irons_spellbooks:nature_rune",
+        "plate_lore": "Old plate the forest has claimed, and keeps.",
+        "staff_lore": "Something on it is still growing.",
+        "sword_lore": "A thorn the size of a sword, and just as patient.",
+        "sword_power": "Hits poison for %s s and slow for %s s",
+    },
+    "eldritch": {
+        "name": "Eldritch", "sword": "hush", "sword_name": "Hush",
+        "staff": "abyssal_dragon_priest_staff", "staff_name": "Abyssal Dragon Priest Staff",
+        "rune": "minecraft:echo_shard",   # Iron's Spells has no Eldritch rune
+        "plate_lore": "It was not made for a human shape. It fits anyway.",
+        "staff_lore": "Its eyes are closed. You hope they stay that way.",
+        "sword_lore": "Listen.",
+        "sword_power": "Hits deal %s extra damage armour cannot stop, and blind players for %s s",
+    },
 }
 
 # Everything that names Ice and Fire lives here.
@@ -198,6 +234,9 @@ def lang(cauldrons):
         for t in TOOLS:
             L[f"item.dragonsteel_schools.{s}_dragonsteel_{t}"] = f"{n} Dragonsteel {t.capitalize()}"
         L[f"item.dragonsteel_schools.{cfg['sword']}"] = cfg["sword_name"]
+        if "sword_power" in cfg:
+            L[f"item.dragonsteel_schools.{cfg['sword']}.lore"] = cfg["sword_lore"]
+            L[f"item.dragonsteel_schools.{cfg['sword']}.power"] = cfg["sword_power"]
         L[f"item.dragonsteel_schools.{cfg['staff']}"] = cfg["staff_name"]
         L[f"item.dragonsteel_schools.{cfg['staff']}.lore"] = cfg["staff_lore"]
         L[f"item.dragonsteel_schools.{s}_plate.lore"] = cfg["plate_lore"]

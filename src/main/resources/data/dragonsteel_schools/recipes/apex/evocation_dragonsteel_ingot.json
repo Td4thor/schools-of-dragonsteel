@@ -1,0 +1,10 @@
+{
+  "type": "dragonsteel_schools:apex_forging",
+  "school": "evocation",
+  "input": {
+    "item": "dragonsteel_schools:tempered_evocation_steel"
+  },
+  "result": {
+    "item": "dragonsteel_schools:evocation_dragonsteel_ingot"
+  }
+}

@@ -6,6 +6,7 @@ import dev.dragonsteelschools.item.ElsewhereItem;
 import dev.dragonsteelschools.item.LoreItem;
 import dev.dragonsteelschools.item.SchoolPlateArmorItem;
 import dev.dragonsteelschools.item.SchoolStaffItem;
+import dev.dragonsteelschools.item.SchoolSwordItem;
 import dev.dragonsteelschools.item.SchoolTiers;
 import dev.dragonsteelschools.school.SchoolSteel;
 import net.minecraft.world.item.ArmorItem;
@@ -66,6 +67,7 @@ public final class ModItems {
             SWORD.put(school, add(school.swordId(), () -> switch (school) {
                 case HOLY -> new DawnItem(SchoolTiers.of(school), 3, -2.4F, weaponProps());
                 case ENDER -> new ElsewhereItem(SchoolTiers.of(school), 3, -2.4F, weaponProps());
+                default -> new SchoolSwordItem(school, SchoolTiers.of(school), 3, -2.4F, weaponProps());
             }));
             PICKAXE.put(school, add(s + "_dragonsteel_pickaxe", () -> new PickaxeItem(tier(school), 4, -2.8F, toolProps())));
             AXE.put(school, add(s + "_dragonsteel_axe", () -> new AxeItem(tier(school), 8.0F, -3.0F, toolProps())));

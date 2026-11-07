@@ -1,0 +1,10 @@
+{
+  "type": "dragonsteel_schools:apex_forging",
+  "school": "blood",
+  "input": {
+    "item": "dragonsteel_schools:tempered_blood_steel"
+  },
+  "result": {
+    "item": "dragonsteel_schools:blood_dragonsteel_ingot"
+  }
+}

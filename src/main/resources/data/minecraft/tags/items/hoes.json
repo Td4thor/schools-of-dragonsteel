@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     "dragonsteel_schools:holy_dragonsteel_hoe",
-    "dragonsteel_schools:ender_dragonsteel_hoe"
+    "dragonsteel_schools:ender_dragonsteel_hoe",
+    "dragonsteel_schools:blood_dragonsteel_hoe",
+    "dragonsteel_schools:evocation_dragonsteel_hoe",
+    "dragonsteel_schools:nature_dragonsteel_hoe",
+    "dragonsteel_schools:eldritch_dragonsteel_hoe"
   ]
 }

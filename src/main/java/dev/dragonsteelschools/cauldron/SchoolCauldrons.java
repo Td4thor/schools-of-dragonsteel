@@ -36,16 +36,18 @@ public final class SchoolCauldrons {
         double x = pos.getX() + 0.5;
         double y = pos.getY() + 0.9;
         double z = pos.getZ() + 0.5;
-        if (school == SchoolSteel.HOLY) {
-            level.sendParticles(new DustParticleOptions(new Vector3f(1.0F, 0.88F, 0.5F), 1.2F), x, y, z, 30, 0.3, 0.3, 0.3, 0.02);
-            level.sendParticles(ParticleTypes.END_ROD, x, y, z, 16, 0.2, 0.4, 0.2, 0.04);
-        } else {
-            level.sendParticles(ParticleTypes.REVERSE_PORTAL, x, y, z, 40, 0.3, 0.3, 0.3, 0.05);
-            level.sendParticles(ParticleTypes.DRAGON_BREATH, x, y, z, 20, 0.3, 0.2, 0.3, 0.01);
-        }
+        level.sendParticles(dust(school, 1.2F), x, y, z, 30, 0.3, 0.3, 0.3, 0.02);
+        level.sendParticles(school.particle(), x, y, z, 24, 0.25, 0.4, 0.25, 0.04);
+        level.sendParticles(ParticleTypes.DRAGON_BREATH, x, y, z, 12, 0.3, 0.2, 0.3, 0.01);
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 1.0F);
         level.playSound(null, pos, school.forgeSound(), SoundSource.BLOCKS, 0.6F, 1.4F);
         caster.displayClientMessage(Component.translatable("message.dragonsteel_schools.cauldron.attuned", school.displayName()), true);
         return true;
+    }
+
+    /** Dust in the school's colour. */
+    public static DustParticleOptions dust(SchoolSteel school, float size) {
+        int rgb = school.primaryColor();
+        return new DustParticleOptions(new Vector3f(((rgb >> 16) & 255) / 255F, ((rgb >> 8) & 255) / 255F, (rgb & 255) / 255F), size);
     }
 }

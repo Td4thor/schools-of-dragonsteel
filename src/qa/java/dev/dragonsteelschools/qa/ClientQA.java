@@ -66,8 +66,12 @@ public final class ClientQA {
             player.onUpdateAbilities();
         }));
         add(300, "settle", mc -> { });   // let teleport and chunk particles die away before the first lineup
+        String only = System.getProperty("dragonsteel_schools.qa.schools", "");
         for (SchoolSteel school : SchoolSteel.values()) {
             String s = school.id();
+            if (!only.isBlank() && !java.util.Arrays.asList(only.split(",")).contains(s)) {
+                continue;
+            }
             add(10, s + "_stands", mc -> onServer(mc, player -> {
                 // move old stands out of sight before killing them, so their death smoke stays off camera
                 run(player, "tp @e[type=minecraft:armor_stand,tag=dsqa] ~ -200 ~");
