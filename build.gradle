@@ -1,0 +1,131 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '6.0.54'
+}
+
+version = mod_version
+group = mod_group
+base { archivesName = mod_id }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets {
+    // Native GameTests. Kept out of the release jar.
+    gametest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            // Iron's Spells, Ice and Fire, Citadel, Curios, GeckoLib and playerAnimator ship SRG refmaps.
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            jvmArgs '-Xmx4G'
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+        client { }
+        server { args '--nogui' }
+        gameTestServer {
+            workingDirectory project.file('build/gametest-run')
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { "${mod_id}" { source sourceSets.gametest } }
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = "Iron's Spells"
+        url = 'https://code.redspace.io/releases'
+        content { includeGroup 'io.redspace' }
+    }
+    maven {
+        name = 'Curios'
+        url = 'https://maven.theillusivec4.top/'
+        content { includeGroup 'top.theillusivec4.curios' }
+    }
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content { includeGroup 'software.bernie.geckolib' }
+    }
+    maven {
+        name = 'playerAnimator'
+        url = 'https://maven.kosmx.dev/'
+        content { includeGroup 'dev.kosmx.player-anim' }
+    }
+    // Ice and Fire, Citadel, Ice and Fire: Spellbooks and Apex Arcana: copied by tools/prepare_dependencies.py.
+    flatDir { dirs 'libs' }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    implementation fg.deobf("io.redspace:irons_spellbooks:${irons_spellbooks_version}")
+    implementation fg.deobf("io.redspace:irons_lib:${irons_lib_version}")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
+    implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${playeranimator_version}")
+
+    // Runtime only. The mod never imports these; GameTests drive them through their registries and reflection.
+    runtimeOnly fg.deobf("local:iceandfire:${iceandfire_version}")
+    runtimeOnly fg.deobf("local:citadel:${citadel_version}")
+    runtimeOnly fg.deobf("local:ice_and_fire_spellbooks:${iafsb_version}")
+    runtimeOnly fg.deobf("local:grandsigil:${grandsigil_version}")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+def resourceProps = [mod_id: mod_id, mod_version: mod_version]
+processResources {
+    inputs.properties resourceProps
+    filesMatching(['META-INF/mods.toml']) { expand resourceProps }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    systemProperty 'dragonsteel.projectDir', projectDir.absolutePath
+    testLogging { events 'passed', 'failed', 'skipped'; exceptionFormat 'full' }
+}
+
+// The refmap remapping file must exist before any run starts.
+tasks.matching { it.name.startsWith('prepareRun') }.configureEach { dependsOn 'createSrgToMcp' }
+
+tasks.configureEach {
+    if (name == 'runGameTestServer') {
+        // Every GameTest run starts from a fresh disposable world.
+        doFirst { delete layout.buildDirectory.dir('gametest-run/world').get().asFile }
+    }
+}
+
+tasks.register('verifyGameTests', Exec) {
+    description = 'Runs the GameTest server and rejects partial or misleading results.'
+    dependsOn 'runGameTestServer'
+    commandLine 'python', 'tools/verify_gametest_log.py', 'build/gametest-run/logs/latest.log'
+}
+
+tasks.named('jar', Jar) {
+    manifest {
+        attributes(
+            'Specification-Title'   : mod_id,
+            'Specification-Vendor'  : 'Td4thor and Hastur',
+            'Specification-Version' : '1',
+            'Implementation-Title'  : 'Dragonsteel Schools',
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'Td4thor and Hastur'
+        )
+    }
+    finalizedBy 'reobfJar'
+}

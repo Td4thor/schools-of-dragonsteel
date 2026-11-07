@@ -1,0 +1,307 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Neither the 'eclipse' nor the 'idea' plugins were found, but IDE resource copy has been enabled.
+
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+
+> Task :compileGametestJava
+C:\Users\owner\Projects\DragonsteelSchools\src\gametest\java\dev\dragonsteelschools\gametest\ForgeFixtures.java:25: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("iceandfire", path));
+                                                      ^
+C:\Users\owner\Projects\DragonsteelSchools\src\gametest\java\dev\dragonsteelschools\gametest\SpikeGameTests.java:61: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        AbstractSpell spell = SpellRegistry.getSpell(new ResourceLocation("grandsigil", "reckoning"));
+                                                     ^
+2 warnings
+
+> Task :processGametestResources UP-TO-DATE
+> Task :gametestClasses
+> Task :downloadMcpConfig
+> Task :extractSrg UP-TO-DATE
+> Task :createSrgToMcp UP-TO-DATE
+> Task :downloadMCMeta UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :extractNatives UP-TO-DATE
+> Task :makeSrcDirs
+> Task :prepareRuns
+> Task :prepareRunGameTestServer
+> Task :prepareRunGameTestServerCompile
+
+> Task :runGameTestServer
+2026-11-06 22:48:23,793 main WARN Advanced terminal features are not available in this environment
+[22:48:23] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgegametestserveruserdev, --gameDir, ., --fml.forgeVersion, 47.4.10, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412]
+[22:48:23] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.20.1 by Microsoft; OS Windows 11 arch amd64 version 10.0
+[22:48:24] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgegametestserveruserdev
+[22:48:24] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/owner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23128!/ Service=ModLauncher Env=SERVER
+[22:48:24] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\owner\.gradle\caches\modules-2\files-2.1\net.minecraftforge\javafmllanguage\1.20.1-47.4.10\ccc533c7dd67e0983217197d7549c8b49e7ab453\javafmllanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[22:48:24] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\owner\.gradle\caches\modules-2\files-2.1\net.minecraftforge\lowcodelanguage\1.20.1-47.4.10\e9a2879fe3612ea34b9728ec2633304a1e67d480\lowcodelanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[22:48:24] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\owner\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mclanguage\1.20.1-47.4.10\ec5cefbbc65c67302b8fac317010faab85fa14b9\mclanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[22:48:24] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\owner\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlcore\1.20.1-47.4.10\94dae566be650566ea9115a1414ab76bfcf5a804\fmlcore-1.20.1-47.4.10.jar is missing mods.toml file
+[22:48:24] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: Found 1 dependencies adding them to mods collection
+[22:48:25] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[22:48:25] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgegametestserveruserdev' with arguments [--gameDir, .]
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap geckolib.refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap player-animation-lib-minecraft_common-refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap irons_spellbooks.refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap irons_lib.refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap curios.refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap citadel.refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:25] [main/INFO] [mixin/]: Remapping refMap iceandfire.refmap.json using C:\Users\owner\Projects\DragonsteelSchools/build/createSrgToMcp/output.srg
+[22:48:30] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[22:48:30] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.10 Initialized
+[22:48:31] [modloading-worker-0/INFO] [de.dr.DragonsteelSchools/]: [DragonsteelSchools/runtime] loaded irons_spellbooks 1.20.1-3.16.3
+[22:48:31] [modloading-worker-0/INFO] [de.dr.DragonsteelSchools/]: [DragonsteelSchools/runtime] loaded iceandfire 2.1.13-1.20.1
+[22:48:31] [modloading-worker-0/INFO] [de.dr.DragonsteelSchools/]: [DragonsteelSchools/runtime] loaded ice_and_fire_spellbooks 2.3.2-1.20.1
+[22:48:31] [modloading-worker-0/INFO] [de.dr.DragonsteelSchools/]: [DragonsteelSchools/runtime] loaded grandsigil 1.3.0
+[22:48:31] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[22:48:31] [modloading-worker-0/INFO] [io.re.ir.IronsSpellbooks/]: Got IMC []
+[22:48:31] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: OUTDATED Current: 47.4.10 Target: 47.4.28
+[22:48:31] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[22:48:31] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/C:/Users/owner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.10_mapped_official_1.20.1/forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/assets/.mcassetsroot' uses unexpected schema
+[22:48:31] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/C:/Users/owner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.10_mapped_official_1.20.1/forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/data/.mcassetsroot' uses unexpected schema
+[22:48:32] [Worker-Main-15/ERROR] [ne.mi.co.ForgeHooks/]: Couldn't parse element loot_tables:irons_spellbooks:chests/catacombs/crypt_loot
+com.google.gson.JsonSyntaxException: Missing name, expected to find a string
+	at net.minecraft.util.GsonHelper.getAsString(GsonHelper.java:127) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootTableReference$Serializer.deserialize(LootTableReference.java:67) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootTableReference$Serializer.deserialize(LootTableReference.java:58) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:151) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:129) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:86) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:74) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:102) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:471) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:192) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:189) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:481) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:294) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:291) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1261) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraftforge.common.ForgeHooks.loadLootTable(ForgeHooks.java:872) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23190%23197!/:?] {re:classloading}
+	at net.minecraftforge.common.ForgeHooks.lambda$getLootTableDeserializer$3(ForgeHooks.java:849) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23190%23197!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataType.deserialize(LootDataType.java:45) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$4(LootDataManager.java:56) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at java.util.HashMap.forEach(HashMap.java:1421) ~[?:?] {}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$5(LootDataManager.java:55) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {}
+[22:48:32] [Worker-Main-15/ERROR] [ne.mi.co.ForgeHooks/]: Couldn't parse element loot_tables:irons_spellbooks:chests/citadel/citadel_tomes
+com.google.gson.JsonSyntaxException: Unknown type 'minecraft:set_written_book_pages'
+	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:99) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:481) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:149) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:129) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:86) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:74) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:102) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:471) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:192) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:189) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:481) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:294) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:291) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1261) ~[gson-2.10.jar%23130!/:?] {}
+	at net.minecraftforge.common.ForgeHooks.loadLootTable(ForgeHooks.java:872) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23190%23197!/:?] {re:classloading}
+	at net.minecraftforge.common.ForgeHooks.lambda$getLootTableDeserializer$3(ForgeHooks.java:849) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23190%23197!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataType.deserialize(LootDataType.java:45) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$4(LootDataManager.java:56) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at java.util.HashMap.forEach(HashMap.java:1421) ~[?:?] {}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$5(LootDataManager.java:55) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23191!/:?] {re:classloading}
+	at java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {}
+[22:48:32] [main/WARN] [minecraft/LootDataManager]: Found loot table element validation problem in {loot_tables:irons_spellbooks:chests/citadel/citadel_bookshelf}.pools[8].entries[0]: Unknown loot table called irons_spellbooks:chests/citadel/citadel_tomes
+[22:48:32] [main/INFO] [minecraft/RecipeManager]: Loaded 11 recipes
+[22:48:32] [main/INFO] [minecraft/AdvancementList]: Loaded 1701 advancements
+[22:48:32] [main/INFO] [to.th.cu.Curios/]: Loaded 11 curio slots
+[22:48:32] [main/INFO] [to.th.cu.Curios/]: Loaded 1 curio entities
+[22:48:33] [main/INFO] [ne.mi.ga.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [dragonsteel_schools]
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file .\world\serverconfig\curios-server.toml is not correct. Correcting
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key keepCurios was corrected from null to its default, DEFAULT. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.enableLegacyMenu was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental.minimumColumns was corrected from null to its default, 1. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental.maxSlotsPerPage was corrected from null to its default, 48. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file .\world\serverconfig\forge-server.toml is not correct. Correcting
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringBlockEntities was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringEntities was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.fullBoundingBoxLadders was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.zombieBaseSummonChance was corrected from null to its default, 0.1. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.zombieBabyChance was corrected from null to its default, 0.05. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.permissionHandler was corrected from null to its default, forge:default_handler. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.advertiseDedicatedServerToLan was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.useItemWithDurationZero was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file .\world\serverconfig\irons_spellbooks-server.toml is not correct. Correcting
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Blocks was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Blocks.portalFrameRestrictDye was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Blocks.portalFrameRestrictBreaking was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.rarityConfig was corrected from null to its default, [0.3, 0.25, 0.2, 0.15, 0.1]. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.swordsConsumeMana was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.swordsCooldownMultiplier was corrected from null to its default, 0.5. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.canAttackOwnSummons was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.maxUpgrades was corrected from null to its default, 3. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.manaSpawnPercent was corrected from null to its default, 0.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.scrollRecycleChance was corrected from null to its default, 0.5. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.allowCauldronBrewing was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.furledMapSkipsExistingChunks was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.applyAllMultihandAttributes was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.betterCreeperThunderHit was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.spellGriefing was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.additionalWanderingTraderTrades was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.disableAdventureModeCasting was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.hoglinOffspringProtection was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.manaRegenMultiplier was corrected from null to its default, 1.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.scrollMerging was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.creativeMana was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Misc.creativeCooldowns was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Upgrade Overrides was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Upgrade Overrides.upgradeWhitelist was corrected from null to its default, []. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Upgrade Overrides.upgradeBlacklist was corrected from null to its default, []. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Imbue Overrides was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Imbue Overrides.imbueWhitelist was corrected from null to its default, []. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Imbue Overrides.imbueBlacklist was corrected from null to its default, []. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Worldgen was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Worldgen.priestHouseWeight was corrected from null to its default, 4. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Worldgen.aquiferDetection was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Worldgen.iceSpiderPatrols was corrected from null to its default, true. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Tyros was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Tyros.additionalHealth was corrected from null to its default, 0.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Tyros.additionalAttackDamage was corrected from null to its default, 0.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Tyros.additionalSpellPower was corrected from null to its default, 0.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Tyros.tyrosOminousEnabled was corrected from null to its default, false. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Dead King was corrected from null to its default, SimpleCommentedConfig:{}. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Dead King.additionalHealth was corrected from null to its default, 0.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Dead King.additionalAttackDamage was corrected from null to its default, 0.0. 
+[22:48:33] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Boss Config.Dead King.additionalSpellPower was corrected from null to its default, 0.0. 
+[22:48:34] [Worker-Main-2/INFO] [citadel/]: vanilla surface rule behavior unchanged
+[22:48:35] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[22:48:35] [Worker-Main-5/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[22:48:35] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[22:48:36] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 1%
+[22:48:37] [Worker-Main-7/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 3%
+[22:48:37] [Worker-Main-13/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 3%
+[22:48:37] [Worker-Main-9/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 6%
+[22:48:38] [Worker-Main-15/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 11%
+[22:48:38] [Worker-Main-8/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 18%
+[22:48:39] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 26%
+[22:48:39] [Worker-Main-14/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 33%
+[22:48:40] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 42%
+[22:48:40] [Worker-Main-15/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 48%
+[22:48:41] [Worker-Main-11/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 56%
+[22:48:41] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 65%
+[22:48:42] [Worker-Main-9/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 72%
+[22:48:42] [Worker-Main-7/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 83%
+[22:48:43] [Worker-Main-9/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 90%
+[22:48:43] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 8401 ms
+[22:48:43] [Server thread/INFO] [minecraft/GameTestServer]: Started game test server
+[22:48:43] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[22:48:43] [Server thread/INFO] [co.gi.al.ic.IceAndFire/]: {iceandfire:fire_dragon_roost=true, iceandfire:fire_lily=true, iceandfire:spawn_dragon_skeleton_fire=true, iceandfire:lightning_dragon_roost=true, iceandfire:spawn_dragon_skeleton_lightning=true, iceandfire:ice_dragon_roost=true, iceandfire:ice_dragon_cave=true, iceandfire:lightning_dragon_cave=true, iceandfire:cyclops_cave=true, iceandfire:spawn_wandering_cyclops=true, iceandfire:spawn_sea_serpent=true, iceandfire:frost_lily=true, iceandfire:hydra_cave=true, iceandfire:lightning_lily=true, iceandfire:pixie_village=true, iceandfire:myrmex_hive_jungle=true, iceandfire:myrmex_hive_desert=true, iceandfire:silver_ore=true, iceandfire:siren_island=true, iceandfire:spawn_dragon_skeleton_ice=true, iceandfire:spawn_stymphalian_bird=true, iceandfire:fire_dragon_cave=true, iceandfire:sapphire_ore=true, iceandfire:spawn_hippocampus=true, iceandfire:spawn_death_worm=true}
+[22:48:43] [Server thread/INFO] [co.gi.al.ic.IceAndFire/]: {TROLL_S=true, HIPPOGRYPH=true, AMPHITHERE=true, COCKATRICE=true, TROLL_M=true, DREAD_LICH=true, TROLL_F=true}
+[22:48:43] [Server thread/INFO] [Grand Sigil/]: Apex Arcana ready -- entities=ok | grand_sigil: spell=ok school=irons_spellbooks:evocation damage=ok  |  sunfall: spell=ok school=irons_spellbooks:fire damage=ok  |  skybreak: spell=ok school=irons_spellbooks:lightning damage=ok  |  world_tree: spell=ok school=irons_spellbooks:nature damage=ok  |  heaven_gate: spell=ok school=irons_spellbooks:holy damage=ok
+[22:48:43] [ForkJoinPool.commonPool-worker-1/INFO] [io.re.ir.IronsLib/]: Loaded 266
+[22:48:43] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'defaultBatch:1' (2 tests)...
+[22:48:44] [Server thread/INFO] [minecraft/GameTestServer]: 2 tests are now running!
+[22:48:44] [Server thread/INFO] [minecraft/PlayerList]: ds2a5aade2-0[embedded] logged in with entity id 257 at (0.5, 61.0, 0.5)
+[22:48:44] [Server thread/INFO] [minecraft/MinecraftServer]: ds2a5aade2-0 joined the game
+[22:48:44] [Server thread/INFO] [minecraft/MinecraftServer]: ds2a5aade2-0 has made the advancement [Ice and Fire]
+[22:48:44] [Server thread/INFO] [de.dr.DragonsteelSchools/]: [spike] assembled core iceandfire:dragonforge_fire_core_disabled container size 3, flame timer after breath 40
+[22:48:45] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:45] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/MinecraftServer]: ds2a5aade2-0 has made the advancement [Monster Hunter]
+[22:48:46] [Server thread/INFO] [minecraft/MinecraftServer]: ds2a5aade2-0 has reached the goal [Reckoning]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:46] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:47] [Server thread/INFO] [minecraft/GameTestServer]: [+_]
+[22:48:47] [Server thread/INFO] [de.dr.DragonsteelSchools/]: [spike] Reckoning pre-cast at 0 on-cast at 100 (windup 100 ticks)
+[22:48:47] [Server thread/INFO] [minecraft/GameTestServer]: [++]
+[22:48:47] [Server thread/INFO] [minecraft/GameTestServer]: ========= 2 GAME TESTS COMPLETE ======================
+[22:48:47] [Server thread/INFO] [minecraft/GameTestServer]: All 2 required tests passed :)
+[22:48:47] [Server thread/INFO] [minecraft/GameTestServer]: ====================================================
+[22:48:47] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[22:48:47] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[22:48:47] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[22:48:47] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/irons_spellbooks:pocket_dimension
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (pocket_dimension): All chunks are saved
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22:48:48] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[22:48:48] [Server thread/INFO] [minecraft/GameTestServer]: Game test server shutting down
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 33s
+12 actionable tasks: 4 executed, 8 up-to-date

@@ -1,0 +1,68 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="dragonsteel_schools"
+version="${mod_version}"
+displayName="Dragonsteel Schools"
+authors="Td4thor and Hastur"
+description='''Dragonsteel for every school of magic.
+
+Fill a cauldron with dragon's breath and cast a spell of your school into it to brew that school's dragon blood. Load it into a dragon forge with iron, let a dragon breathe on it, and finish the work with your school's Apex spell.
+
+Holy and Ender come first.'''
+
+[[dependencies.dragonsteel_schools]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47.4.0,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.dragonsteel_schools]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.20.2)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.dragonsteel_schools]]
+    modId="irons_spellbooks"
+    mandatory=true
+    # Built and tested against 1.20.1-3.16.3.
+    versionRange="[1.20.1-3.16.3,1.20.1-3.17)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.dragonsteel_schools]]
+    modId="geckolib"
+    mandatory=true
+    versionRange="[4.4,)"
+    ordering="NONE"
+    side="BOTH"
+
+# The dragon forge comes from Ice and Fire. Nothing here imports it: the forge is found through block tags and
+# reached through the vanilla container interface, so the cauldron and the gear still load without it.
+[[dependencies.dragonsteel_schools]]
+    modId="iceandfire"
+    mandatory=false
+    versionRange="[2.1.13,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# The Dragon Priest staff upgrades start from Ice and Fire: Spellbooks' base staff.
+[[dependencies.dragonsteel_schools]]
+    modId="ice_and_fire_spellbooks"
+    mandatory=false
+    versionRange="[2.3.2,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# The Apex spells come from Apex Arcana; their ids are a config list, so any mod's spells can stand in.
+[[dependencies.dragonsteel_schools]]
+    modId="grandsigil"
+    mandatory=false
+    versionRange="[1.3.0,)"
+    ordering="AFTER"
+    side="BOTH"
