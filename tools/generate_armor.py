@@ -55,6 +55,9 @@ RAMPS = {
     "ember":    ["#5c0a0a", "#8f1414", "#c42020", "#ef3a30", "#ff7a5e"],                # glowing
     # Placeholder plate for schools still waiting on their art pass
     "evo_steel": ["#15171a", "#202328", "#2c3037", "#3a3f48", "#4b515c", "#606874", "#7a838f", "#99a2ad"],
+    # Evocation: spell-knight harness. Brown leather, purple-blue cloth (sleeves, sash)
+    "leather":   ["#1c0f08", "#2b170d", "#3d2213", "#512d1a", "#663a22", "#7d482b", "#965a37", "#b06e45"],
+    "sash":      ["#191233", "#241a4b", "#302464", "#3d2f7e", "#4c3c99", "#5f4eb3", "#7864c9", "#9883dc"],
     "emerald":   ["#0a4d2a", "#11703c", "#20b863", "#3ddb7a", "#7ff0a9", "#c4ffd9"],     # glowing
     "nat_steel": ["#141615", "#1f2321", "#2b302d", "#3a403c", "#4c534e", "#616963", "#7b847d", "#9aa29b"],
     "moss":      ["#1f3217", "#2c4720", "#3d5f2a", "#527b34", "#6f9c40", "#95c25a", "#c2e584"],
@@ -202,6 +205,15 @@ MATERIALS = {
     "iron": lambda f: plate(f, "iron", 3, sheen=False),
     "ember": lambda f: glow_fill(f, "ember", 2, 3, 1),
     "evocation_metal": lambda f: plate(f, "evo_steel", 4),
+    "esteel": lambda f: plate(f, "evo_steel", 4),
+    "esteel_hi": lambda f: plate(f, "evo_steel", 5),
+    "egold": lambda f: (plate(f, "gold", 4, sheen=False), engrave()(f)),
+    "egem": lambda f: glow_fill(f, "emerald", 2, 4, 1),
+    "leather": lambda f: leather(f, 4),
+    "leather_dk": lambda f: leather(f, 2),
+    "mail": lambda f: mail(f),
+    "sash": lambda f: cloth(f, "sash", 4),
+    "hood": lambda f: cloth(f, "iron", 2),
     "evocation_accent": lambda f: plate(f, "gold", 4, sheen=False),
     "evocation_glow": lambda f: glow_fill(f, "emerald", 2, 4, 1),
     "nature_metal": lambda f: plate(f, "nat_steel", 4),
@@ -366,6 +378,55 @@ def ridge(col=None):
 def under_lip(row=0):
     """Shadow cast by the plate above onto this plate's top row."""
     return shade_row(row, -2)
+
+
+def leather(f, base):
+    """Matte leather: lit top rim, darker foot, a row of stitches just inside the top edge of wide faces."""
+    plate(f, "leather", base, sheen=False)
+    if f.kind in SIDES4 and f.w >= 4 and f.h >= 4:
+        for x in range(1, f.w - 1, 2):
+            f.shift(x, 1, +1)
+
+
+def mail(f):
+    """Leather scale: staggered scales, each lit on top and shadowed at its lower edge."""
+    for y in range(f.h):
+        for x in range(f.w):
+            lvl = 3 + (1 if (x + (y // 2)) % 2 == 0 else 0) - (1 if y % 2 == 1 else 0)
+            f.set(x, y, "leather", lvl)
+
+
+ENGRAVE_TILE = [".k..", "k.k.", "...k", "..k."]
+
+
+def engrave():
+    """Scrollwork cut into gold: darkens a wavy pattern on gold texels only (glow and other metals untouched)."""
+    def op(f):
+        for y in range(f.h):
+            for x in range(f.w):
+                v = f.px[y][x]
+                if v and v[0] == "gold" and not f.glow[y][x] and ENGRAVE_TILE[y % 4][x % 4] == "k":
+                    f.shift(x, y, -2)
+    return op
+
+
+def panel(x0, y0, x1, y1, gem=None):
+    """An engraved gold panel inlaid in a face: bevelled rim, scrollwork, optional glowing emerald at (gx, gy)."""
+    def op(f):
+        a, b = (x0 if x0 >= 0 else f.w + x0), (x1 if x1 >= 0 else f.w + x1)
+        c, d = (y0 if y0 >= 0 else f.h + y0), (y1 if y1 >= 0 else f.h + y1)
+        for y in range(c, d + 1):
+            for x in range(a, b + 1):
+                lvl = 4
+                if y == c:
+                    lvl = 6
+                elif y == d and d > c:
+                    lvl = 3
+                f.set(x, y, "gold", lvl)
+        engrave()(f)
+        if gem is not None:
+            f.set(gem[0] if gem[0] >= 0 else f.w + gem[0], gem[1] if gem[1] >= 0 else f.h + gem[1], "emerald", 3, True)
+    return op
 
 
 def lames(rows):
@@ -971,6 +1032,103 @@ def blood_model():
     return bones
 
 
+# ----------------------------------------------------------------------------------------------
+# EVOCATION: the spell-knight (after Tad's reference). Dark steel and gold-engraved panels over brown leather,
+# buckled chest straps, purple sleeves, a purple sash with a hanging tail, a leather-scale front panel, and a
+# closed helm with a nasal guard. Emeralds glow at the brow, chest buckle, pauldrons, belt, knees and toes.
+# ----------------------------------------------------------------------------------------------
+EG = lambda l: ("emerald", l, True)
+LE = lambda l: ("leather", l)
+CHEST_STRAPS = ["PPP...PPP",
+                "PPP...PPP",
+                "ssssEssss",
+                "PPP...PPP",
+                "PPP...PPP",
+                "sssshssss",
+                "........."]
+
+
+def evocation_model():
+    bones = skeleton()
+    H, B, T = bones["armorHead"].cubes, bones["armorBody"].cubes, bones["armorLeggingTorsoLayer"].cubes
+    RA, RL, RB, RX = (bones["armorRightArm"].cubes, bones["armorRightLeg"].cubes,
+                      bones["armorRightBoot"].cubes, bones["armorTorsoExtensionRightLeg"].cubes)
+
+    # ---- closed helm: engraved dome panels, steel crest ridge, grille visor, gold brow with an emerald, nasal ----
+    H.append(Cube("helm", (-5, 5), (24, 33), (-5, 5), "esteel", {
+        "flanks": [panel(2, 1, 7, 3), lames([6])],
+        "back": [panel(3, 1, 6, 3), lames([6])],
+        "front": [panel(1, 0, 3, 1), panel(6, 0, 8, 1)],
+        "top": [panel(1, 1, 3, 8), panel(6, 1, 8, 8)],
+    }))
+    H.append(Cube("crest", (-0.5, 0.5), (33, 34), (-4.5, 4.5), "esteel_hi", {"top": [vline(0, ramp="gold", lvl=5)]}))
+    H.append(Cube("visor", (-4, 4), (25, 30), (-5.75, -4.75), "esteel", {
+        "front": [stamp(["kkk..kkk", "........", "k.k..k.k", "........"], {"k": IR(0)}, anchor="topleft")],
+    }))
+    H.append(Cube("brow", (-4, 4), (30, 31), (-6, -5), "egold", {
+        "front": [stamp(["EE"], {"E": EG(3)})], "top": [hline(-1, ramp="gold", lvl=6)],
+    }))
+    H.append(Cube("nasal", (-0.5, 0.5), (25, 30), (-6.5, -5.5), "egold", {}))
+    H.append(Cube("hood", (-4.75, 4.75), (22.25, 24.75), (-4.75, 4.75), "hood", {}))
+
+    # ---- leather cuirass: high collar, engraved chest panels under buckled straps, strapped back ----
+    B.append(Cube("cuirass", (-5.25, 5.25), (14.75, 24.25), (-3.25, 3.25), "leather", {
+        "back": [vline(2, 1, -1, "leather", 1), vline(7, 1, -1, "leather", 1), hline(5, ramp="leather", lvl=1),
+                 panel(3, 1, 6, 3)],
+        "flanks": [vline(2, 1, -1, "leather", 2)],
+    }))
+    B.append(Cube("collar", (-4.75, 4.75), (23.75, 25.25), (-3.75, 3.75), "leather_dk", {}))
+    B.append(Cube("chest", (-4.5, 4.5), (16, 23), (-4, -3), "leather", {
+        "front": [stamp(CHEST_STRAPS, {"P": ("gold", 4), "l": LE(2), "s": LE(1), "h": ("gold", 6), "E": EG(3)}, anchor="topleft"),
+                  engrave(), hline(0, 0, 2, "gold", 6), hline(0, 6, 8, "gold", 6), hline(3, 0, 2, "gold", 6), hline(3, 6, 8, "gold", 6)],
+        "top": [hline(0, ramp="leather", lvl=6)],
+    }))
+    # ---- sash, belt, emerald buckle and sash knot (LEGS slot, follows the body) ----
+    T.append(Cube("sash", (-5.25, 5.25), (12.75, 14.25), (-3.25, 3.25), "sash", {}))
+    T.append(Cube("belt", (-5.5, 5.5), (12, 13), (-3.5, 3.5), "leather_dk", {"sides": [rivets(0, ramp="gold", lvl=5, step=4, start=1)]}))
+    T.append(Cube("buckle", (-1.75, 1.75), (11.75, 13.25), (-4.25, -2.75), "egold", {"front": [stamp(["gEg"], {"g": ("gold", 6), "E": EG(3)})]}))
+    T.append(Cube("sash_knot", (0.25, 3.25), (12, 14), (-4.25, -3.25), "sash", {}))
+    # ---- leather-scale front panel and engraved side tassets (CHEST slot, follow the legs) ----
+    RX.append(Cube("mail_front", (-2.75, -0.25), (5.75, 12.25), (-3.75, -2.25), "mail", {"front": [hline(-1, ramp="leather", lvl=1)]}))
+    RX.append(Cube("tasset_side", (-5.75, -4.25), (7.75, 12.25), (-2.25, 2.25), "leather", {
+        "right": [panel(1, 0, 2, 2), hline(-1, ramp="leather", lvl=1)],
+    }))
+    # ---- arms: engraved steel pauldron with an emerald and a raised neck guard, purple sleeve, leather bracer ----
+    RA.append(Cube("pauldron", (-9.5, -3.5), (22.5, 25.5), (-3.5, 3.5), "esteel", {
+        "right": [panel(0, 0, -1, 1, gem=(3, 1))], "top": [panel(1, 1, 4, 5)],
+        "front": [panel(1, 0, 4, 1)], "back": [panel(1, 0, 4, 1)],
+    }))
+    RA.append(Cube("neck_guard", (-5.75, -4.25), (25, 27.5), (-2.75, 2.75), "esteel_hi", {"sides": [hline(0, ramp="gold", lvl=5)]}))
+    RA.append(Cube("pauldron_lame", (-10.25, -4.75), (20.25, 22.75), (-3.75, 3.75), "esteel", {
+        "sides": [under_lip(0), hline(-1, ramp="gold", lvl=4), engrave()],
+    }))
+    RA.append(Cube("sleeve", (-8.5, -3.5), (15.5, 20.5), (-2.5, 2.5), "sash", {}))
+    RA.append(Cube("bracer", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "leather", {"right": [panel(1, 0, 3, 3)]}))
+    RA.append(Cube("bracer_cuff", (-9, -3), (15.5, 16.5), (-3, 3), "leather_dk", {}))
+    # ---- legs: dark leather breeches, steel knee cops framing an emerald ----
+    RL.append(Cube("breeches", (-4.5, 0.5), (5.5, 12.5), (-2.5, 2.5), "leather_dk", {}))
+    RL.append(Cube("poleyn", (-3.75, -0.25), (4.25, 7.75), (-3.75, -2.25), "esteel", {
+        "front": [hline(0, ramp="gold", lvl=5), stamp(["E"], {"E": EG(3)}, anchor="topleft", dx=1, dy=1)], "top": [rect(0, 0, -1, -1, "gold", 5)],
+    }))
+    RL.append(Cube("knee_wing", (-5.5, -4.5), (4.5, 7.5), (-2, 1), "esteel", {"right": [band("top", "gold", 5)]}))
+    # ---- boots: engraved steel greave over leather boots, gold toe caps with emeralds ----
+    RB.append(Cube("greave", (-5, 1), (2.5, 6.5), (-3, 3), "esteel", {
+        "front": [panel(0, 0, -1, 1), hline(-1, ramp="gold", lvl=3)], "flanks": [hline(0, ramp="gold", lvl=5)],
+    }))
+    RB.append(Cube("greave_cuff", (-5.25, 1.25), (5.75, 7.25), (-3.25, 3.25), "egold", {}))
+    RB.append(Cube("boot", (-4.75, 0.75), (-0.25, 3.25), (-3.25, 2.25), "leather", {}))
+    RB.append(Cube("sole", (-5.25, 1.25), (-0.75, 1.75), (-4.75, 2.75), "leather_dk", {}))
+    RB.append(Cube("toecap", (-3.75, -0.25), (-0.25, 1.25), (-5.25, -3.75), "egold", {
+        "front": [stamp(["gEg"], {"g": ("gold", 5), "E": EG(3)})], "top": [stamp(["gEg"], {"g": ("gold", 6), "E": EG(3)})],
+    }))
+
+    mirror_limbs(bones)
+    # the sash tail hangs from the left hip and swings with the left leg
+    bones["armorLeftLeg"].cubes.append(Cube("sash_tail", (0.5, 2.5), (4.5, 12.5), (-4, -3), "sash", {
+        "front": [hline(-1, ramp="sash", lvl=2), vline(0, ramp="sash", lvl=6)]}))
+    return bones
+
+
 def placeholder_model(school):
     """Plain plate in the school's colours, standing in until the school's own art pass."""
     def factory():
@@ -1000,7 +1158,7 @@ def placeholder_model(school):
 
 
 BUILDERS = {"holy": holy_model, "ender": ender_model, "blood": blood_model,
-            "evocation": placeholder_model("evocation"), "nature": placeholder_model("nature"),
+            "evocation": evocation_model, "nature": placeholder_model("nature"),
             "eldritch": placeholder_model("eldritch")}
 
 
@@ -1190,6 +1348,24 @@ def coplanar_report(bones, armour_only=False):
 # ----------------------------------------------------------------------------------------------
 ICONS = {
     "helmet": {
+        "evocation": [
+            "................",
+            "......oooo......",
+            "....oo3333oo....",
+            "...o3gg44gg3o...",
+            "...o3gg44gg3o...",
+            "..o33gg44gg31o..",
+            "..ogggggEggggo..",
+            "..o3kkkggkkk1o..",
+            "..o3k2kggk2k1o..",
+            "..o3k2kggk2k1o..",
+            "..o31kkggkk11o..",
+            "...o31111111o...",
+            "...oddddddddo...",
+            "....oooooooo....",
+            "................",
+            "................",
+        ],
         "holy": [
             ".....GGGGGG.....",
             "...GG......GG...",
@@ -1246,6 +1422,24 @@ ICONS = {
         ],
     },
     "chestplate": {
+        "evocation": [
+            "................",
+            ".ooooo....ooooo.",
+            ".o4gEgo..ogEg1o.",
+            ".o3ggg3oo3ggg1o.",
+            ".ooppoLllLoppoo.",
+            "..oppLggLggLppo.",
+            "..oppLggLggLppo.",
+            "..oooSSSESSSooo.",
+            "....oLggLggLo...",
+            "....oLggLggLo...",
+            "....oSSSgSSSo...",
+            "....oLLLlLLLo...",
+            "....oooooooooo..",
+            "................",
+            "................",
+            "................",
+        ],
         "holy": [
             "................",
             "..oooo....oooo..",
@@ -1284,6 +1478,24 @@ ICONS = {
         ],
     },
     "leggings": {
+        "evocation": [
+            "................",
+            "...oooooooooo...",
+            "...obbbbEbbbo...",
+            "...oppppppppo...",
+            "...oLmnmnmnpo...",
+            "...oLnmoomnpo...",
+            "...oLmo..onpo...",
+            "...o4go..ogpo...",
+            "...o3Eo..oE3o...",
+            "...oLLo..oLLo...",
+            "...oLLo..oLLo...",
+            "...oLLo..oLLo...",
+            "...oooo..oooo...",
+            "................",
+            "................",
+            "................",
+        ],
         "holy": [
             "................",
             "...oooooooooo...",
@@ -1322,6 +1534,24 @@ ICONS = {
         ],
     },
     "boots": {
+        "evocation": [
+            "................",
+            "................",
+            "................",
+            "................",
+            "..oooo....oooo..",
+            "..oggo....oggo..",
+            "..o43o....o43o..",
+            "..oggo....oggo..",
+            "..oLLo....oLLo..",
+            ".oLLLo...oLLLo..",
+            "oLLLLo..oLLLLo..",
+            "ogEggo..ogEggo..",
+            "oooooo..oooooo..",
+            "................",
+            "................",
+            "................",
+        ],
         "holy": [
             "................",
             "................",
@@ -1370,9 +1600,10 @@ ICON_LEGEND = {
               "d": ("night", 1), "G": ("pearl", 3), "M": ("magenta", 3), "v": ("violet", 3), "k": ("night", 1)},
     "blood": {"o": ("iron", 0), "1": ("crimson", 2), "2": ("crimson", 3), "3": ("crimson", 4), "4": ("crimson", 5),
               "5": ("crimson", 7), "a": ("gold", 4), "b": ("iron", 3), "c": ("gold", 6), "G": ("ember", 3), "k": ("iron", 0)},
-    "evocation": {"o": ("evo_steel", 0), "1": ("evo_steel", 2), "2": ("evo_steel", 3), "3": ("evo_steel", 4),
-                  "4": ("evo_steel", 5), "5": ("evo_steel", 7), "a": ("gold", 4), "b": ("gold", 4), "c": ("gold", 6),
-                  "G": ("emerald", 3), "k": ("iron", 0)},
+    "evocation": {"o": ("iron", 1), "1": ("evo_steel", 2), "2": ("evo_steel", 3), "3": ("evo_steel", 4),
+                  "4": ("evo_steel", 6), "5": ("evo_steel", 7), "g": ("gold", 4), "E": ("emerald", 3), "k": ("iron", 0),
+                  "d": ("iron", 2), "L": ("leather", 4), "l": ("leather", 2), "S": ("leather", 1), "b": ("leather", 2),
+                  "m": ("leather", 3), "n": ("leather", 4), "p": ("sash", 5)},
     "nature": {"o": ("nat_steel", 0), "1": ("nat_steel", 2), "2": ("nat_steel", 3), "3": ("nat_steel", 4),
                "4": ("nat_steel", 5), "5": ("nat_steel", 7), "a": ("moss", 3), "b": ("moss", 3), "c": ("moss", 5),
                "G": ("moss", 6), "k": ("iron", 0)},

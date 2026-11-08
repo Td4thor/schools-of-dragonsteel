@@ -182,6 +182,11 @@ public final class ClientQA {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
+        // Never stall behind the pause menu when the window loses focus (Tad may be using the PC meanwhile).
+        mc.options.pauseOnLostFocus = false;
+        if (mc.screen instanceof net.minecraft.client.gui.screens.PauseScreen) {
+            mc.setScreen(null);
+        }
         if (mc.player == null || mc.level == null || mc.screen != null || stepIndex >= STEPS.size()) {
             return;
         }
