@@ -14,11 +14,15 @@ following the legs).
 | Set | Cubes | Texture | Glow texels |
 |---|---|---|---|
 | Holy | 80 (helm 37, incl. halo ring and rays) | 128x128 | 463 |
-| Ender | 62 | 128x128 | 103 |
+| Ender | 63 | 128x128 | 103 |
 | Blood | 65 | 128x128 | 9 |
-| Evocation | 46 | 128x128 | 12 |
-| Nature | 76 | 128x128 | 6 |
-| Eldritch | 23 (placeholder plate) | 128x128 | 38 |
+| Evocation | 47 | 128x128 | 12 |
+| Nature | 77 | 128x128 | 6 |
+| Eldritch | 70 | 128x128 | 163 |
+
+Every set covers the waist seam: Ender, Evocation, Nature and Eldritch carry a dark `gambeson` underlayer inside the
+cuirass (added in 0.1.0-dev.7) that shows only between the cuirass and the belt, where it reads as shadow. Before
+that the wearer's body showed through a 0.25 to 1 texel band there.
 
 Box UV, one texel per model unit. Glowmask texels copy the base colour (GeckoLib draws the base texture full-bright
 wherever the mask is opaque).
@@ -64,7 +68,13 @@ wherever the mask is opaque).
   leaves (GeckoLib armour renders with `armorCutoutNoCull`, so alpha-0 texels are holes). An antler crown rises over
   a leafy wreath, with a dim green life-glow in a stern visor and a red rose at the breast. A twisted-vine belt, and
   a vine with glowing berries winding round the left forearm only. No shield or cloak, per Tad.
-- **Eldritch:** placeholder plate in its colours until its own pass (faceless abyssal plate).
+- **Eldritch, the abyssal knight** (Hastur's design). Faceless sculk-black plate with ancient-city deepslate ribs.
+  A smooth helm whose blank mask holds an asymmetric cluster of small glowing eyes (a paired, symmetric layout read
+  as a smiley face), under a deepslate brow, with Warden-like tendrils sweeping up from its sides. A great open eye
+  on the breastplate: pale corners and a deep ringed iris round a black pupil (a half-lidded eye read as a grin, and
+  a slit opening from the top edge read as a U). A deepslate spine, living sculk with glowing pores spreading over
+  the left shoulder and the back, glowing-tipped tendrils hanging from the pauldrons and from under the tassets,
+  and sculk creeping up the greaves from the ground.
 
 ## Verified
 1. Both `.geo.json` files parse and bake with the real GeckoLib 4.8.4 classes (`GeometryTree` +

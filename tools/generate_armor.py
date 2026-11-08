@@ -71,6 +71,8 @@ RAMPS = {
     "moss":      ["#1f3217", "#2c4720", "#3d5f2a", "#527b34", "#6f9c40", "#95c25a", "#c2e584"],
     "sculk":     ["#020a0d", "#051419", "#0a2027", "#0f2e37", "#154049", "#1d555f", "#2a6f78", "#3f8c93"],
     "cyan":      ["#0b6b74", "#11949f", "#1fc0cc", "#29dfeb", "#7ff2f8", "#d4fdff"],     # glowing
+    # Eldritch: ancient-city deepslate ribs and trim over the sculk plate
+    "deepslate": ["#121216", "#1a1a20", "#23232b", "#2d2d37", "#383844", "#454553", "#565667", "#6b6b7e"],
 }
 RAMPS = {k: [_hex(c) for c in v] for k, v in RAMPS.items()}
 RAMPS["clear"] = [(0, 0, 0, 0)]   # cutout: GeckoLib armour renders with armorCutoutNoCull
@@ -223,6 +225,13 @@ MATERIALS = {
     "mail": lambda f: mail(f),
     "sash": lambda f: cloth(f, "sash", 4),
     "hood": lambda f: cloth(f, "iron", 2),
+    "abyss": lambda f: plate(f, "sculk", 4),
+    "abyss_hi": lambda f: plate(f, "sculk", 5),
+    "abyss_dk": lambda f: plate(f, "sculk", 2, sheen=False),
+    "deepslate": lambda f: plate(f, "deepslate", 3, sheen=False),
+    "void": lambda f: [f.set(x, y, "sculk", 0) for y in range(f.h) for x in range(f.w)],
+    "sculk_growth": lambda f: sculk_growth(f),
+    "tendril": lambda f: tendril(f),
     "nsteel": lambda f: plate(f, "old_steel", 4),
     "nsteel_hi": lambda f: plate(f, "old_steel", 5),
     "nsteel_dk": lambda f: plate(f, "old_steel", 3, sheen=False),
@@ -474,8 +483,36 @@ def vine_wrap(f):
                 f.set(x, y, "clear", 0)
 
 
-def mossy(where="top", density=0.55):
-    """Moss creeping over a face: patches on top faces, a ragged fringe along the top (or bottom) of side faces."""
+def sculk_growth(f):
+    """Living sculk: mottled black-teal with a few glowing cyan pores (like the vanilla block)."""
+    rng = f.rng
+    for y in range(f.h):
+        for x in range(f.w):
+            lvl = 2 + rng.choice((0, 0, 1, 1, 2)) + (1 if f.kind == "top" else -1 if f.kind == "bottom" else 0)
+            f.set(x, y, "sculk", lvl)
+            if f.kind != "bottom" and rng.random() < 0.08:
+                f.set(x, y, "cyan", rng.choice((0, 1)), True)
+
+
+def tendril(f):
+    """A hanging sculk tendril: dark teal, lit near its root, glowing at the tip."""
+    for y in range(f.h):
+        for x in range(f.w):
+            if f.kind == "bottom":
+                f.set(x, y, "cyan", 2, True)
+            elif f.kind == "top":
+                f.set(x, y, "sculk", 4)
+            elif y == f.h - 1:
+                f.set(x, y, "cyan", 2, True)
+            elif y == f.h - 2 and f.h >= 4:
+                f.set(x, y, "cyan", 0, True)
+            else:
+                f.set(x, y, "sculk", 3 + (1 if y < f.h // 3 else 0) - (1 if x == f.w - 1 and f.w > 1 else 0))
+
+
+def mossy(where="top", density=0.55, ramp="moss", base=2, pores=0.0):
+    """Moss (or sculk) creeping over a face: patches on top faces, a ragged fringe along the top (or bottom) of
+    side faces. With pores > 0 a share of the growth glows cyan."""
     def op(f):
         rng = f.rng
         for y in range(f.h):
@@ -491,7 +528,9 @@ def mossy(where="top", density=0.55):
                 else:
                     hit = False
                 if hit:
-                    f.set(x, y, "moss", 2 + rng.choice((0, 1, 1, 2)))
+                    f.set(x, y, ramp, base + rng.choice((0, 1, 1, 2)))
+                    if pores and rng.random() < pores:
+                        f.set(x, y, "cyan", 0, True)
     return op
 
 
@@ -989,6 +1028,8 @@ def ender_model():
                      ("armorTorsoExtensionRightLeg", "armorTorsoExtensionLeftLeg")):
         for c in bones[src].cubes:
             bones[dst].cubes.append(c.mirrored(c.name + "_l"))
+    # padded underlayer inside the cuirass: hidden except in the waist seam, where it reads as shadow
+    B.append(Cube("gambeson", (-4.25, 4.25), (12.25, 15.75), (-2.25, 2.25), "night_dk", {}))
     return bones
 
 
@@ -1221,6 +1262,8 @@ def evocation_model():
         "front": [stamp(["gEg"], {"g": ("gold", 5), "E": EG(3)})], "top": [stamp(["gEg"], {"g": ("gold", 6), "E": EG(3)})],
     }))
 
+    # padded underlayer inside the cuirass: hidden except in the waist seam, where it reads as shadow
+    B.append(Cube("gambeson", (-4.25, 4.25), (12.25, 15.75), (-2.25, 2.25), "leather_dk", {}))
     mirror_limbs(bones)
     # the sash tail hangs from the left hip and swings with the left leg
     bones["armorLeftLeg"].cubes.append(Cube("sash_tail", (0.5, 2.5), (4.5, 12.5), (-4, -3), "sash", {
@@ -1309,9 +1352,112 @@ def nature_model():
     RB.append(Cube("sabaton", (-4.75, 0.75), (-0.75, 1.75), (-4.25, 2.25), "nsteel_dk", {"top": [mossy(density=0.5)]}))
     RB.append(Cube("toecap", (-3.75, -0.25), (-0.25, 1.25), (-5.25, -3.75), "nsteel_hi", {"top": [mossy(density=0.6)]}))
 
+    # padded underlayer inside the cuirass: hidden except in the waist seam, where it reads as shadow
+    B.append(Cube("gambeson", (-4.25, 4.25), (12.25, 15.75), (-2.25, 2.25), "nsteel_dk", {}))
     mirror_limbs(bones)
     # the vine winds round the left forearm only
     LA.append(Cube("vine_wrap", (3, 9), (11.5, 16.5), (-3, 3), "vine_wrap", {}))
+    return bones
+
+
+# ----------------------------------------------------------------------------------------------
+# ELDRITCH: the abyssal knight (Hastur's design). Faceless sculk-black plate with ancient-city deepslate ribs. A
+# smooth helm whose blank mask holds a cluster of small glowing eyes, Warden-like tendrils sweeping up from its
+# sides, a great half-lidded eye on the breastplate, a deepslate spine, living sculk spreading over the left
+# shoulder only, and glowing-tipped tendrils hanging from the pauldrons and from under the tassets.
+# ----------------------------------------------------------------------------------------------
+EY = lambda l: ("cyan", l, True)
+DSL = lambda l: ("deepslate", l)
+FACE_EYES = ["e....e..",
+             "..EE...e",
+             ".eEE.e..",
+             "......e.",
+             "..e....."]
+GREAT_EYE = [".lllll.",           # an open eye: deepslate lids, pale corners, a deep ringed iris round a black pupil
+             "lcCCCcl",
+             "lCCkCCl",
+             "lcCCCcl",
+             ".lllll."]
+
+
+def eldritch_model():
+    bones = skeleton()
+    H, B, T = bones["armorHead"].cubes, bones["armorBody"].cubes, bones["armorLeggingTorsoLayer"].cubes
+    RA, RL, RB, RX = (bones["armorRightArm"].cubes, bones["armorRightLeg"].cubes,
+                      bones["armorRightBoot"].cubes, bones["armorTorsoExtensionRightLeg"].cubes)
+
+    # ---- faceless helm: smooth dome, blank mask full of eyes, overhanging brow, gorget, Warden tendrils ----
+    H.append(Cube("helm", (-5, 5), (24, 33), (-5, 5), "abyss", {"sides": [lames([6])], "top": [ridge()]}))
+    H.append(Cube("mask", (-4, 4), (25, 30), (-5.75, -4.75), "void", {
+        "front": [stamp(FACE_EYES, {"e": EY(1), "E": EY(3)}, anchor="topleft")],
+    }))
+    H.append(Cube("brow", (-4.75, 4.75), (30, 31.5), (-6.25, -4.75), "deepslate", {"front": [under_lip(-1)]}))
+    H.append(Cube("gorget", (-5.5, 5.5), (22, 25), (-5.5, 5.5), "abyss_dk", {"sides": [lames([1])]}))
+    H.append(Cube("crest_rib", (-0.5, 0.5), (32.5, 33.5), (-4.5, 5.5), "deepslate", {}))
+    horn = [Cube("tendril_root", (-6.5, -4.5), (29, 31), (-0.5, 1.5), "abyss_dk", {}),
+            Cube("tendril_mid", (-8.5, -6.5), (30, 32), (0, 1), "tendril", {"bottom": []}),
+            Cube("tendril_tip", (-9.5, -8.5), (31, 35), (0, 1), "tendril", {})]
+    horn[1].mat = "abyss_dk"
+    H.extend(horn)
+    H.extend(c.mirrored(c.name + "_l") for c in horn)
+
+    # ---- body: ribbed cuirass, the great lidded eye, deepslate collar and spine, sculk on the back ----
+    B.append(Cube("cuirass", (-5.25, 5.25), (14.75, 24.25), (-3.25, 3.25), "abyss", {
+        "flanks": [lames([2, 4, 6])], "back": [lames([4, 7])],
+    }))
+    B.append(Cube("breast", (-4.5, 4.5), (16, 23), (-4, -3), "abyss_hi", {"front": [lames([5])]}))
+    B.append(Cube("eye_socket", (-3.5, 3.5), (17.5, 22.5), (-4.75, -3.75), "deepslate", {
+        "front": [stamp(GREAT_EYE, {"l": DSL(2), "L": DSL(5), "c": EY(4), "C": EY(2), "k": ("sculk", 0), "K": ("sculk", 0)},
+                        anchor="topleft")],
+    }))
+    B.append(Cube("collar", (-4.75, 4.75), (23.75, 25.25), (-3.75, 3.75), "deepslate", {}))
+    for n, y in enumerate((21, 18.5, 16)):
+        B.append(Cube(f"vertebra{n}", (-0.75, 0.75), (y, y + 1.5), (3, 4.5), "deepslate", {"top": [hline(-1, ramp="deepslate", lvl=6)]}))
+    B.append(Cube("back_sculk", (1.25, 4.75), (15.25, 19.75), (2.75, 4.25), "sculk_growth", {}))
+
+    # ---- waist: layered faulds and a deepslate belt with a glowing slit (LEGS slot, follows the body) ----
+    T.append(Cube("fauld", (-5.5, 5.5), (10.5, 13.5), (-3.5, 3.5), "abyss", {"sides": [lames([1])]}))
+    T.append(Cube("belt", (-5.75, 5.75), (12.25, 13.75), (-3.75, 3.75), "deepslate", {}))
+    T.append(Cube("buckle", (-1.5, 1.5), (12, 14), (-4.25, -3.25), "deepslate", {"front": [stamp(["EE"], {"E": EY(2)})]}))
+
+    # ---- tassets with tendrils hanging from beneath them (CHEST slot, follow the legs) ----
+    RX.append(Cube("tasset", (-4.75, 0.75), (9.25, 12.75), (-4.25, -2.75), "abyss", {"front": [under_lip(0), lames([1])]}))
+    RX.append(Cube("tasset_side", (-5.75, -4.25), (7.75, 12.25), (-2.25, 2.25), "abyss", {"right": [lames([2])]}))
+    for n, (x0, y0, z0) in enumerate(((-4.25, 3.5, -4), (-2.25, 5.5, -4), (-0.25, 4.5, -4), (-5.75, 4.5, -1))):
+        RX.append(Cube(f"skirt_tendril{n}", (x0, x0 + 1), (y0, 9.5), (z0, z0 + 1), "tendril", {}))
+
+    # ---- arms: chitinous pauldron in lames with dangling tendrils, dark sleeve, segmented vambrace ----
+    RA.append(Cube("pauldron", (-9.5, -3.5), (22.5, 25.5), (-3.5, 3.5), "abyss", {"sides": [lames([1])], "top": [ridge()]}))
+    RA.append(Cube("pauldron_lame", (-10.25, -4.75), (20.25, 22.75), (-3.75, 3.75), "abyss", {"sides": [under_lip(0)]}))
+    RA.append(Cube("pauldron_lame2", (-10, -5), (18.5, 20.5), (-3, 3), "abyss_dk", {"sides": [under_lip(0)]}))
+    RA.append(Cube("pauldron_rim", (-10.5, -4.5), (22.25, 23.25), (-4, 4), "deepslate", {}))
+    RA.append(Cube("arm_tendril0", (-10.5, -9.5), (14.5, 20.5), (-2.5, -1.5), "tendril", {}))
+    RA.append(Cube("arm_tendril1", (-10.5, -9.5), (16.5, 20.5), (1, 2), "tendril", {}))
+    RA.append(Cube("sleeve", (-8.5, -3.5), (15.5, 20.5), (-2.5, 2.5), "abyss_dk", {}))
+    RA.append(Cube("vambrace", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "abyss", {"sides": [lames([1, 3])]}))
+    RA.append(Cube("vambrace_fin", (-9.75, -8.75), (12, 15), (-1, 1), "deepslate", {}))
+
+    # ---- legs: ribbed cuisses, ridged deepslate knee cops ----
+    RL.append(Cube("cuisse", (-4.75, 0.75), (5.75, 12.25), (-2.75, 2.75), "abyss", {"front": [ridge(2)], "flanks": [lames([2, 4])]}))
+    RL.append(Cube("poleyn", (-3.75, -0.25), (4.25, 7.75), (-3.75, -2.25), "deepslate", {"front": [ridge()]}))
+    RL.append(Cube("knee_wing", (-5.5, -4.5), (4.5, 7.5), (-2, 1), "deepslate", {}))
+
+    # ---- boots: greaves with sculk creeping up from the ground, deepslate sabatons, pointed toes ----
+    RB.append(Cube("greave", (-5, 1), (0.5, 6.5), (-3, 3), "abyss", {
+        "front": [ridge(2)], "sides": [mossy("bottom", ramp="sculk", base=1, pores=0.12)],
+    }))
+    RB.append(Cube("greave_cuff", (-5.25, 1.25), (5.75, 7.25), (-3.25, 3.25), "deepslate", {}))
+    RB.append(Cube("sabaton", (-4.75, 0.75), (-0.75, 1.75), (-4.25, 2.25), "deepslate", {}))
+    RB.append(Cube("toe", (-3.25, -0.75), (-0.25, 1.25), (-5.25, -3.75), "abyss_hi", {}))
+
+    # padded underlayer inside the cuirass: hidden except in the waist seam, where it reads as shadow
+    B.append(Cube("gambeson", (-4.25, 4.25), (12.25, 15.75), (-2.25, 2.25), "abyss_dk", {}))
+    mirror_limbs(bones)
+    # living sculk has spread over the left shoulder only
+    LA = bones["armorLeftArm"].cubes
+    LA.append(Cube("shoulder_sculk", (4.25, 9.75), (25.25, 27.75), (-3, 2.5), "sculk_growth", {}))
+    LA.append(Cube("shoulder_sculk2", (6, 9), (27, 28), (-1.5, 1.5), "sculk_growth", {}))
+    LA.append(Cube("sculk_drip", (9.25, 10.75), (21.75, 26.25), (-2.25, -0.75), "sculk_growth", {}))
     return bones
 
 
@@ -1345,7 +1491,7 @@ def placeholder_model(school):
 
 BUILDERS = {"holy": holy_model, "ender": ender_model, "blood": blood_model,
             "evocation": evocation_model, "nature": nature_model,
-            "eldritch": placeholder_model("eldritch")}
+            "eldritch": eldritch_model}
 
 
 def mirror_limbs(bones):
@@ -1534,6 +1680,24 @@ def coplanar_report(bones, armour_only=False):
 # ----------------------------------------------------------------------------------------------
 ICONS = {
     "helmet": {
+        "eldritch": [
+            "................",
+            "..E..........E..",
+            "..t..........t..",
+            "..tt..oooo..tt..",
+            "...tooo33ooot...",
+            "...o33344333o...",
+            "..o3344444433o..",
+            "..oDDDDDDDDDDo..",
+            "..o3ekkkkekk3o..",
+            "..o3kkEEkkke3o..",
+            "..o3keEEkkkk3o..",
+            "..o3kkkkkekk3o..",
+            "..o3kkekkkkk3o..",
+            "...o33333333o...",
+            "...oddddddddo...",
+            "....oooooooo....",
+        ],
         "nature": [
             "..a..........a..",
             ".aa.a......a.aa.",
@@ -1626,6 +1790,24 @@ ICONS = {
         ],
     },
     "chestplate": {
+        "eldritch": [
+            "................",
+            ".ooooo....oSSSo.",
+            ".o443ooooo3SeSo.",
+            ".o333oDDDDo333o.",
+            ".t.o33333333o.t.",
+            ".t.o3llllll3o.t.",
+            ".E.o3cCkkCc3o.E.",
+            "...o33cCCc33o...",
+            "...o33333333o...",
+            "...oDDDDDDDDo...",
+            "...o33333333o...",
+            "...oddddddddo...",
+            "....oooooooo....",
+            "................",
+            "................",
+            "................",
+        ],
         "nature": [
             "................",
             ".LLlL.....LlLL..",
@@ -1700,6 +1882,24 @@ ICONS = {
         ],
     },
     "leggings": {
+        "eldritch": [
+            "................",
+            "...oooooooooo...",
+            "...oddddEdddo...",
+            "...o33333333o...",
+            "...o34333343o...",
+            "...o33oooo33o...",
+            "..to34o..o43ot..",
+            "..to33o..o33ot..",
+            "..Eo34o..o43oE..",
+            "...oDDo..oDDo...",
+            "...o34o..o43o...",
+            "...o33o..o33o...",
+            "...oooo..oooo...",
+            "................",
+            "................",
+            "................",
+        ],
         "nature": [
             "................",
             "...oooooooooo...",
@@ -1774,6 +1974,24 @@ ICONS = {
         ],
     },
     "boots": {
+        "eldritch": [
+            "................",
+            "................",
+            "................",
+            "................",
+            "..oooo....oooo..",
+            "..oDDo....oDDo..",
+            "..o43o....o34o..",
+            "..o43o....o34o..",
+            "..o3eo....oe3o..",
+            ".oSS3o...oS3So..",
+            "oSeSdo..odSeSo..",
+            "oddddo..oddddo..",
+            "oooooo..oooooo..",
+            "................",
+            "................",
+            "................",
+        ],
         "nature": [
             "................",
             "................",
@@ -1865,8 +2083,9 @@ ICON_LEGEND = {
     "nature": {"o": ("old_steel", 0), "3": ("old_steel", 4), "4": ("old_steel", 6), "k": ("old_steel", 0),
                "G": ("lifeglow", 2), "a": ("antler", 5), "L": ("leaf", 5), "l": ("leaf", 3), "m": ("moss", 3),
                "R": ("rose", 4), "r": ("rose", 2), "v": ("leaf", 2)},
-    "eldritch": {"o": ("sculk", 0), "1": ("sculk", 2), "2": ("sculk", 3), "3": ("sculk", 4), "4": ("sculk", 5),
-                 "5": ("sculk", 7), "a": ("sculk", 6), "b": ("sculk", 6), "c": ("sculk", 7), "G": ("cyan", 3), "k": ("sculk", 0)},
+    "eldritch": {"o": ("deepslate", 0), "3": ("sculk", 4), "4": ("sculk", 6), "D": ("deepslate", 5), "d": ("deepslate", 3),
+                 "k": ("sculk", 0), "e": ("cyan", 1), "E": ("cyan", 3), "t": ("sculk", 3), "S": ("sculk", 2),
+                 "l": ("deepslate", 2), "c": ("cyan", 1), "C": ("cyan", 3)},
 }
 
 
