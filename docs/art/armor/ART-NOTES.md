@@ -17,7 +17,8 @@ following the legs).
 | Ender | 62 | 128x128 | 103 |
 | Blood | 65 | 128x128 | 9 |
 | Evocation | 46 | 128x128 | 12 |
-| Nature, Eldritch | 23 each (placeholder plate) | 128x128 | 38 |
+| Nature | 76 | 128x128 | 6 |
+| Eldritch | 23 (placeholder plate) | 128x128 | 38 |
 
 Box UV, one texel per model unit. Glowmask texels copy the base colour (GeckoLib draws the base texture full-bright
 wherever the mask is opaque).
@@ -57,8 +58,13 @@ wherever the mask is opaque).
   plates. A purple sash and belt with an emerald buckle, and a sash tail that swings with the left leg. A
   leather-scale front panel and engraved side tassets, steel knee cops with emeralds, engraved greaves, and leather
   boots with gold toe caps set with emeralds.
-- **Nature, Eldritch:** placeholder plate in each school's colours until their own passes (Nature after Tad's
-  overgrown knight, Eldritch as faceless abyssal plate).
+- **Nature, the overgrown knight** (after Tad's reference). Old dark plate the forest has claimed: moss on every
+  upper surface and creeping up the greaves from the ground. Leaf growth bursts from the shoulders, collar, chest
+  corners, back, tassets, knees, forearms and boot cuffs. It uses real cutout foliage, see-through like vanilla
+  leaves (GeckoLib armour renders with `armorCutoutNoCull`, so alpha-0 texels are holes). An antler crown rises over
+  a leafy wreath, with a dim green life-glow in a stern visor and a red rose at the breast. A twisted-vine belt, and
+  a vine with glowing berries winding round the left forearm only. No shield or cloak, per Tad.
+- **Eldritch:** placeholder plate in its colours until its own pass (faceless abyssal plate).
 
 ## Verified
 1. Both `.geo.json` files parse and bake with the real GeckoLib 4.8.4 classes (`GeometryTree` +

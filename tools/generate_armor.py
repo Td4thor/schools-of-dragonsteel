@@ -58,6 +58,14 @@ RAMPS = {
     # Evocation: spell-knight harness. Brown leather, purple-blue cloth (sleeves, sash)
     "leather":   ["#1c0f08", "#2b170d", "#3d2213", "#512d1a", "#663a22", "#7d482b", "#965a37", "#b06e45"],
     "sash":      ["#191233", "#241a4b", "#302464", "#3d2f7e", "#4c3c99", "#5f4eb3", "#7864c9", "#9883dc"],
+    # Nature: old weathered plate under living growth
+    "old_steel": ["#121412", "#1b1f1b", "#262b26", "#323831", "#41483f", "#535b50", "#6a7366", "#878f81"],
+    "leaf":      ["#0f2a0c", "#173d12", "#225419", "#2e6d20", "#3d8a29", "#52a834", "#72c447", "#9ade63"],
+    "antler":    ["#3b2f22", "#57452f", "#76603f", "#957d54", "#b39b6d", "#cfb98a", "#e6d4a8"],
+    "rose":      ["#3a0610", "#5e0b19", "#871325", "#b01e33", "#d63447", "#f2626f"],
+    "lifeglow":  ["#2f7a1f", "#4fae2c", "#7ddc45", "#b4f57a", "#e4ffc4"],                # glowing
+    "berry":     ["#a8641a", "#e8962a", "#ffcf5c"],                                      # glowing
+    "clear":     ["#00000000"],
     "emerald":   ["#0a4d2a", "#11703c", "#20b863", "#3ddb7a", "#7ff0a9", "#c4ffd9"],     # glowing
     "nat_steel": ["#141615", "#1f2321", "#2b302d", "#3a403c", "#4c534e", "#616963", "#7b847d", "#9aa29b"],
     "moss":      ["#1f3217", "#2c4720", "#3d5f2a", "#527b34", "#6f9c40", "#95c25a", "#c2e584"],
@@ -65,6 +73,7 @@ RAMPS = {
     "cyan":      ["#0b6b74", "#11949f", "#1fc0cc", "#29dfeb", "#7ff2f8", "#d4fdff"],     # glowing
 }
 RAMPS = {k: [_hex(c) for c in v] for k, v in RAMPS.items()}
+RAMPS["clear"] = [(0, 0, 0, 0)]   # cutout: GeckoLib armour renders with armorCutoutNoCull
 
 
 def seed_for(*parts):
@@ -214,6 +223,15 @@ MATERIALS = {
     "mail": lambda f: mail(f),
     "sash": lambda f: cloth(f, "sash", 4),
     "hood": lambda f: cloth(f, "iron", 2),
+    "nsteel": lambda f: plate(f, "old_steel", 4),
+    "nsteel_hi": lambda f: plate(f, "old_steel", 5),
+    "nsteel_dk": lambda f: plate(f, "old_steel", 3, sheen=False),
+    "leaves": lambda f: leaves(f),
+    "leaf": lambda f: leaf_blade(f),
+    "antler": lambda f: plate(f, "antler", 4, sheen=False),
+    "rose": lambda f: rose(f),
+    "vine": lambda f: vine(f),
+    "vine_wrap": lambda f: vine_wrap(f),
     "evocation_accent": lambda f: plate(f, "gold", 4, sheen=False),
     "evocation_glow": lambda f: glow_fill(f, "emerald", 2, 4, 1),
     "nature_metal": lambda f: plate(f, "nat_steel", 4),
@@ -394,6 +412,87 @@ def mail(f):
         for x in range(f.w):
             lvl = 3 + (1 if (x + (y // 2)) % 2 == 0 else 0) - (1 if y % 2 == 1 else 0)
             f.set(x, y, "leather", lvl)
+
+
+def leaves(f):
+    """Vanilla-style cutout foliage: ragged holes, mottled greens, brighter on top."""
+    rng = f.rng
+    for y in range(f.h):
+        for x in range(f.w):
+            edge = x in (0, f.w - 1) or y in (0, f.h - 1)
+            if rng.random() < (0.38 if edge else 0.24):
+                f.set(x, y, "clear", 0)
+                continue
+            lvl = 3 + rng.choice((-1, 0, 0, 1, 1, 2))
+            if f.kind == "top":
+                lvl += 1
+            elif f.kind == "bottom":
+                lvl -= 2
+            f.set(x, y, "leaf", lvl)
+
+
+def leaf_blade(f):
+    """A solid leaf tip: green blade with a lighter midrib."""
+    for y in range(f.h):
+        for x in range(f.w):
+            f.set(x, y, "leaf", 4 if f.kind != "bottom" else 2)
+    if f.w >= 2:
+        for y in range(f.h):
+            f.shift(f.w // 2, y, +2)
+    f.shift(0, 0, +1)
+
+
+def rose(f):
+    """A rose bloom: deep red petals spiralling to a dark heart."""
+    pattern = ["rRr", "RkR", "rRR"]
+    for y in range(f.h):
+        for x in range(f.w):
+            ch = pattern[y % 3][x % 3]
+            f.set(x, y, "rose", {"R": 5, "r": 3, "k": 2}[ch] + (0 if f.kind != "bottom" else -2))
+
+
+def vine(f):
+    """A solid twisted vine: dark green with lighter strands winding diagonally."""
+    for y in range(f.h):
+        for x in range(f.w):
+            f.set(x, y, "leaf", 4 if (x + y) % 3 == 0 else 2)
+
+
+def vine_wrap(f):
+    """A cutout shell: one vine spiralling round the limb, with leaf nubs and a few glow berries."""
+    for y in range(f.h):
+        for x in range(f.w):
+            if f.kind in ("top", "bottom"):
+                f.set(x, y, "clear", 0)
+            elif (x + 2 * y) % 6 in (0, 1):
+                f.set(x, y, "leaf", 2 if (x + y) % 2 else 3)
+            elif (x + 2 * y) % 6 == 2 and (x * 7 + y) % 5 == 0:
+                f.set(x, y, "leaf", 5)
+            elif (x + 2 * y) % 6 == 5 and (x * 3 + y * 5) % 7 == 0:
+                f.set(x, y, "berry", 1, True)
+            else:
+                f.set(x, y, "clear", 0)
+
+
+def mossy(where="top", density=0.55):
+    """Moss creeping over a face: patches on top faces, a ragged fringe along the top (or bottom) of side faces."""
+    def op(f):
+        rng = f.rng
+        for y in range(f.h):
+            for x in range(f.w):
+                v = f.px[y][x]
+                if v is None or v[0] == "clear" or f.glow[y][x]:
+                    continue
+                if f.kind == "top":
+                    hit = rng.random() < density
+                elif f.kind in SIDES4:
+                    row = y if where == "top" else f.h - 1 - y
+                    hit = row == 0 and rng.random() < 0.8 or row == 1 and rng.random() < 0.35
+                else:
+                    hit = False
+                if hit:
+                    f.set(x, y, "moss", 2 + rng.choice((0, 1, 1, 2)))
+    return op
 
 
 ENGRAVE_TILE = [".k..", "k.k.", "...k", "..k."]
@@ -1129,6 +1228,93 @@ def evocation_model():
     return bones
 
 
+# ----------------------------------------------------------------------------------------------
+# NATURE: the overgrown knight (after Tad's reference). Old dark plate the forest has claimed: moss on every
+# upper surface, cutout leaf growth bursting from the shoulders, collar, back, tassets and forearms, an antler
+# crown over a leafy wreath, a red rose at the breast, a vine round the left forearm with glow berries, and a dim
+# green life-glow in the visor.
+# ----------------------------------------------------------------------------------------------
+LG = lambda l: ("lifeglow", l, True)
+
+
+def nature_model():
+    bones = skeleton()
+    H, B, T = bones["armorHead"].cubes, bones["armorBody"].cubes, bones["armorLeggingTorsoLayer"].cubes
+    RA, RL, RB, RX = (bones["armorRightArm"].cubes, bones["armorRightLeg"].cubes,
+                      bones["armorRightBoot"].cubes, bones["armorTorsoExtensionRightLeg"].cubes)
+    LA = bones["armorLeftArm"].cubes
+
+    # ---- helm: closed old helm, pointed visor ridge, green life-glow eyes, leafy wreath, antler crown ----
+    H.append(Cube("helm", (-5, 5), (24, 33), (-5, 5), "nsteel", {
+        "sides": [lames([6]), mossy()], "top": [mossy(density=0.7)],
+    }))
+    H.append(Cube("visor", (-4, 4), (25, 30), (-5.75, -4.75), "nsteel", {
+        "front": [stamp(["kkk..kkk", "kkG..Gkk", "........", "k.k..k.k"],
+                        {"k": ("old_steel", 0), "G": LG(2)}, anchor="topleft", dy=1)],
+    }))
+    H.append(Cube("visor_ridge", (-0.5, 0.5), (24.5, 30.5), (-6.25, -5.25), "nsteel_hi", {"top": [mossy(density=1.0)]}))
+    H.append(Cube("bevor", (-5.5, 5.5), (22, 25), (-5.5, 5.5), "nsteel", {"top": [mossy(density=0.6)], "sides": [mossy()]}))
+    H.append(Cube("wreath", (-5.75, 5.75), (31.25, 33.75), (-5.75, 5.75), "leaves", {}))
+    tip = {"top": [rect(0, 0, -1, -1, "antler", 6)]}
+    antler = [Cube("pedicle", (-3.5, -1.5), (33, 34), (-0.5, 1.5), "antler", {}),
+              Cube("beam", (-3, -2), (34, 41), (0, 1), "antler", tip),
+              Cube("brow_tine", (-3, -2), (35, 36), (-2, 0), "antler", {"front": [rect(0, 0, -1, -1, "antler", 6)]}),
+              Cube("arm", (-6, -3), (37, 38), (0, 1), "antler", {}),
+              Cube("tine_mid", (-5, -4), (38, 40), (0, 1), "antler", tip),
+              Cube("tine_out", (-7, -6), (37, 40), (0, 1), "antler", tip),
+              Cube("back_tine", (-6, -5), (38, 39), (1, 3), "antler", {})]
+    H.extend(antler)
+    H.extend(c.mirrored(c.name + "_l") for c in antler)
+
+    # ---- body: ridged breastplate, leafy collar and growth on the chest corners and back, a rose at the breast ----
+    B.append(Cube("cuirass", (-5.25, 5.25), (14.75, 24.25), (-3.25, 3.25), "nsteel", {
+        "sides": [lames([4, 7]), mossy()], "top": [mossy(density=0.8)],
+    }))
+    B.append(Cube("breast", (-4.5, 4.5), (16, 23), (-4, -3), "nsteel_hi", {"front": [ridge(4), lames([4]), mossy()]}))
+    B.append(Cube("backplate", (-4.5, 4.5), (15, 23), (3, 4), "nsteel", {"back": [ridge(4), mossy()]}))
+    B.append(Cube("collar_leaves", (-5.75, 5.75), (22.25, 24.75), (-3.75, 3.75), "leaves", {}))
+    corner = Cube("chest_leaves", (-5.25, -2.75), (19.25, 22.75), (-4.75, -2.25), "leaves", {})
+    B.append(corner)
+    B.append(corner.mirrored("chest_leaves_l"))
+    B.append(Cube("back_leaves", (-3.75, 2.75), (19.25, 23.75), (3.25, 4.75), "leaves", {}))
+    B.append(Cube("rose", (1, 4), (19.5, 22.5), (-5, -4), "rose", {}))
+    B.append(Cube("rose_leaf", (0.5, 1.5), (19, 20), (-4.75, -3.75), "leaf", {}))
+    B.append(Cube("rose_leaf2", (3.5, 4.5), (19.5, 20.5), (-4.75, -3.75), "leaf", {}))
+    # ---- belt of twisted vine over the faulds (LEGS slot, follows the body) ----
+    T.append(Cube("fauld", (-5.5, 5.5), (10.5, 13.5), (-3.5, 3.5), "nsteel", {"sides": [mossy()]}))
+    T.append(Cube("vine_belt", (-5.75, 5.75), (12.25, 13.75), (-3.75, 3.75), "vine", {}))
+    # ---- tassets with a fringe of leaves (CHEST slot, follow the legs) ----
+    RX.append(Cube("tasset", (-4.75, 0.75), (9.25, 12.75), (-4.25, -2.75), "nsteel", {"front": [under_lip(0), mossy()]}))
+    RX.append(Cube("tasset_leaves", (-4.75, 0.75), (7.25, 9.75), (-4.5, -3.0), "leaves", {}))
+    RX.append(Cube("tasset_side", (-5.75, -4.25), (7.75, 12.25), (-2.25, 2.25), "nsteel", {"right": [lames([2]), mossy()]}))
+    # ---- arms: pauldrons buried in leaves with blade tips, old plate sleeves, leafy forearms ----
+    RA.append(Cube("pauldron", (-9.5, -3.5), (22.5, 25.5), (-3.5, 3.5), "nsteel", {"sides": [mossy()]}))
+    RA.append(Cube("pauldron_lame", (-10.25, -4.75), (20.25, 22.75), (-3.75, 3.75), "nsteel", {"sides": [under_lip(0)]}))
+    RA.append(Cube("shoulder_leaves", (-10.25, -3.75), (23.75, 27.25), (-4.25, 4.25), "leaves", {}))
+    RA.append(Cube("shoulder_fronds", (-11.75, -9.25), (22.25, 26.75), (-3.25, 2.25), "leaves", {}))
+    for n, (xb, yb, zb) in enumerate((((-9, -8), (27, 29), (-1, 0)), ((-6, -5), (27, 28), (1, 2)),
+                                      ((-11, -10), (26, 28), (2, 3)), ((-8, -7), (27, 28), (-3, -2)))):
+        RA.append(Cube(f"leaf_tip{n}", xb, yb, zb, "leaf", {}))
+    RA.append(Cube("upper", (-8.5, -3.5), (15.5, 20.5), (-2.5, 2.5), "nsteel_dk", {"sides": [lames([2])]}))
+    RA.append(Cube("couter", (-9.25, -8.25), (14.75, 17.75), (-1.5, 1.5), "nsteel_hi", {"sides": [mossy()]}))
+    RA.append(Cube("vambrace", (-8.75, -3.25), (11.75, 16.25), (-2.75, 2.75), "nsteel", {"sides": [mossy()]}))
+    RA.append(Cube("forearm_leaves", (-9.75, -7.25), (12.25, 15.75), (-2.25, 2.25), "leaves", {}))
+    # ---- legs: old cuisses, mossy knee cops with a sprig of leaves ----
+    RL.append(Cube("cuisse", (-4.75, 0.75), (5.75, 12.25), (-2.75, 2.75), "nsteel", {"front": [ridge(2)], "sides": [mossy()]}))
+    RL.append(Cube("poleyn", (-3.75, -0.25), (4.25, 7.75), (-3.75, -2.25), "nsteel_hi", {"top": [mossy(density=1.0)], "front": [mossy()]}))
+    RL.append(Cube("knee_leaves", (-5.25, -3.75), (5.25, 8.75), (-3.25, 0.25), "leaves", {}))
+    # ---- boots: greaves with moss creeping up from the ground, a leafy cuff, old sabatons ----
+    RB.append(Cube("greave", (-5, 1), (0.5, 6.5), (-3, 3), "nsteel", {"sides": [mossy("bottom")], "front": [ridge(2)]}))
+    RB.append(Cube("greave_cuff", (-5.25, 1.25), (5.75, 7.25), (-3.25, 3.25), "leaves", {}))
+    RB.append(Cube("sabaton", (-4.75, 0.75), (-0.75, 1.75), (-4.25, 2.25), "nsteel_dk", {"top": [mossy(density=0.5)]}))
+    RB.append(Cube("toecap", (-3.75, -0.25), (-0.25, 1.25), (-5.25, -3.75), "nsteel_hi", {"top": [mossy(density=0.6)]}))
+
+    mirror_limbs(bones)
+    # the vine winds round the left forearm only
+    LA.append(Cube("vine_wrap", (3, 9), (11.5, 16.5), (-3, 3), "vine_wrap", {}))
+    return bones
+
+
 def placeholder_model(school):
     """Plain plate in the school's colours, standing in until the school's own art pass."""
     def factory():
@@ -1158,7 +1344,7 @@ def placeholder_model(school):
 
 
 BUILDERS = {"holy": holy_model, "ender": ender_model, "blood": blood_model,
-            "evocation": evocation_model, "nature": placeholder_model("nature"),
+            "evocation": evocation_model, "nature": nature_model,
             "eldritch": placeholder_model("eldritch")}
 
 
@@ -1348,6 +1534,24 @@ def coplanar_report(bones, armour_only=False):
 # ----------------------------------------------------------------------------------------------
 ICONS = {
     "helmet": {
+        "nature": [
+            "..a..........a..",
+            ".aa.a......a.aa.",
+            "..aaa......aaa..",
+            "...aa.LLLL.aa...",
+            "....LLlLLlLL....",
+            "...LLo3333oLL...",
+            "...Lo344443oL...",
+            "....o3kkkk3o....",
+            "....o3kGGk3o....",
+            "....o34kk43o....",
+            "....o344443o....",
+            "...ommmmmmmmo...",
+            "...o33333333o...",
+            "...oooooooooo...",
+            "................",
+            "................",
+        ],
         "evocation": [
             "................",
             "......oooo......",
@@ -1422,6 +1626,24 @@ ICONS = {
         ],
     },
     "chestplate": {
+        "nature": [
+            "................",
+            ".LLlL.....LlLL..",
+            "LLlLLo...oLLlLL.",
+            "LlLLoLLLLLoLLlL.",
+            ".Loo3LlLlL3ooL..",
+            "...o34mm443o....",
+            "...oL34RR43o....",
+            "...oL34Rr43o....",
+            "...o3344433o....",
+            "...o3333333o....",
+            "...ovvvvvvvo....",
+            "...o3333333o....",
+            "...ooooooooo....",
+            "................",
+            "................",
+            "................",
+        ],
         "evocation": [
             "................",
             ".ooooo....ooooo.",
@@ -1478,6 +1700,24 @@ ICONS = {
         ],
     },
     "leggings": {
+        "nature": [
+            "................",
+            "...oooooooooo...",
+            "...ovvvvvvvvo...",
+            "...o33333333o...",
+            "...oLlLLLLlLo...",
+            "...o33oooo33o...",
+            "...o34o..o43o...",
+            "...om4o..o4mo...",
+            "...oLlo..olLo...",
+            "...o34o..o43o...",
+            "...o34o..o43o...",
+            "...o33o..o33o...",
+            "...oooo..oooo...",
+            "................",
+            "................",
+            "................",
+        ],
         "evocation": [
             "................",
             "...oooooooooo...",
@@ -1534,6 +1774,24 @@ ICONS = {
         ],
     },
     "boots": {
+        "nature": [
+            "................",
+            "................",
+            "................",
+            "................",
+            "..LlLL....LLlL..",
+            "..oLlo....olLo..",
+            "..o43o....o34o..",
+            "..o43o....o34o..",
+            "..om3o....o3mo..",
+            ".omm3o...om33o..",
+            "om3m3o..om3m3o..",
+            "ommmmo..ommmmo..",
+            "oooooo..oooooo..",
+            "................",
+            "................",
+            "................",
+        ],
         "evocation": [
             "................",
             "................",
@@ -1604,9 +1862,9 @@ ICON_LEGEND = {
                   "4": ("evo_steel", 6), "5": ("evo_steel", 7), "g": ("gold", 4), "E": ("emerald", 3), "k": ("iron", 0),
                   "d": ("iron", 2), "L": ("leather", 4), "l": ("leather", 2), "S": ("leather", 1), "b": ("leather", 2),
                   "m": ("leather", 3), "n": ("leather", 4), "p": ("sash", 5)},
-    "nature": {"o": ("nat_steel", 0), "1": ("nat_steel", 2), "2": ("nat_steel", 3), "3": ("nat_steel", 4),
-               "4": ("nat_steel", 5), "5": ("nat_steel", 7), "a": ("moss", 3), "b": ("moss", 3), "c": ("moss", 5),
-               "G": ("moss", 6), "k": ("iron", 0)},
+    "nature": {"o": ("old_steel", 0), "3": ("old_steel", 4), "4": ("old_steel", 6), "k": ("old_steel", 0),
+               "G": ("lifeglow", 2), "a": ("antler", 5), "L": ("leaf", 5), "l": ("leaf", 3), "m": ("moss", 3),
+               "R": ("rose", 4), "r": ("rose", 2), "v": ("leaf", 2)},
     "eldritch": {"o": ("sculk", 0), "1": ("sculk", 2), "2": ("sculk", 3), "3": ("sculk", 4), "4": ("sculk", 5),
                  "5": ("sculk", 7), "a": ("sculk", 6), "b": ("sculk", 6), "c": ("sculk", 7), "G": ("cyan", 3), "k": ("sculk", 0)},
 }

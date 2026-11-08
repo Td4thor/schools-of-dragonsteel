@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -51,26 +50,53 @@ public final class SchoolGameTests {
 
     // ------------------------------------------------------------------------------------------ cauldron
 
-    @GameTest(template = "platform", timeoutTicks = 400)
-    public static void cauldron_each_new_school_brews_its_own_blood(GameTestHelper helper) {
+    /** One test per school, each with a fresh caster, so effects from one school's spell can't touch the next cast. */
+    @GameTest(template = "platform", timeoutTicks = 80)
+    public static void cauldron_blood_spell_brews_blood_blood(GameTestHelper helper) {
+        brew(helper, 0);
+    }
+
+    @GameTest(template = "platform", timeoutTicks = 80)
+    public static void cauldron_evocation_spell_brews_evocation_blood(GameTestHelper helper) {
+        brew(helper, 1);
+    }
+
+    @GameTest(template = "platform", timeoutTicks = 80)
+    public static void cauldron_nature_spell_brews_nature_blood(GameTestHelper helper) {
+        brew(helper, 2);
+    }
+
+    @GameTest(template = "platform", timeoutTicks = 80)
+    public static void cauldron_eldritch_spell_brews_eldritch_blood(GameTestHelper helper) {
+        brew(helper, 3);
+    }
+
+    private static void brew(GameTestHelper helper, int index) {
+        SchoolSteel school = NEW.get(index);
+        String spell = CAULDRON_SPELLS.get(index);
+        BlockPos pos = new BlockPos(7, 2, 9);
+        helper.setBlock(pos.below(), Blocks.STONE);
+        helper.setBlock(pos, ModBlocks.BREATH_CAULDRON.get().defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
         ServerPlayer player = TestPlayers.create(helper);
         player.moveTo(helper.absoluteVec(new Vec3(7.5, 2, 2.5)));
-        GameTestSequence seq = helper.startSequence();
-        for (int i = 0; i < NEW.size(); i++) {
-            SchoolSteel school = NEW.get(i);
-            String spell = CAULDRON_SPELLS.get(i);
-            BlockPos pos = new BlockPos(3 + 3 * i, 2, 9);
-            seq.thenExecuteAfter(i == 0 ? 1 : 40, () -> {
-                helper.setBlock(pos.below(), Blocks.STONE);
-                helper.setBlock(pos, ModBlocks.BREATH_CAULDRON.get().defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
-                cast(helper, player, spell, pos);
-            }).thenExecuteAfter(30, () -> {
-                BlockState state = helper.getBlockState(pos);
-                helper.assertTrue(state.is(ModBlocks.BLOOD_CAULDRON.get(school).get()) && state.getValue(LayeredCauldronBlock.LEVEL) == 3,
-                        spell + " makes " + school + " blood, was " + state);
-            });
-        }
-        seq.thenExecute(() -> TestPlayers.remove(player)).thenSucceed();
+        StringBuilder completed = new StringBuilder();
+        java.util.function.Consumer<io.redspace.ironsspellbooks.api.events.SpellOnCastEvent> listener = e -> {
+            if (e.getEntity() == player) {
+                completed.append(e.getSpellId()).append(" @").append(helper.getTick()).append(' ');
+            }
+        };
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(listener);
+        helper.startSequence()
+                .thenExecuteAfter(1, () -> cast(helper, player, spell, pos))
+                .thenExecuteAfter(30, () -> {
+                    net.minecraftforge.common.MinecraftForge.EVENT_BUS.unregister(listener);
+                    BlockState state = helper.getBlockState(pos);
+                    TestPlayers.remove(player);
+                    helper.assertTrue(state.is(ModBlocks.BLOOD_CAULDRON.get(school).get()) && state.getValue(LayeredCauldronBlock.LEVEL) == 3,
+                            spell + " makes " + school + " blood, was " + state + "; completed casts: " + completed
+                                    + "; player at " + player.position() + " looking " + player.getXRot() + "/" + player.getYRot());
+                })
+                .thenSucceed();
     }
 
     // ------------------------------------------------------------------------------------------ apex (one batch each)

@@ -32,8 +32,8 @@ catch client-only crashes (0.1.0-dev.1's armour crash was one), so run this afte
 
 ## Blood, Evocation, Nature and Eldritch (0.1.0-dev.4)
 
-Their forging works exactly like Holy and Ender. Blood (dev.4) and Evocation (dev.5) have their own armour; Nature
-and Eldritch wear plain placeholder plate in their colours until their art passes.
+Their forging works exactly like Holy and Ender. Blood (dev.4), Evocation (dev.5) and Nature (dev.6) have their own
+armour; Eldritch wears plain placeholder plate in its colours until its art pass.
 
 1. **Blood.** Cast any Blood spell (Heartstop works) at a cauldron of dragon's breath for Blood dragon blood. Temper
    it in a dragon forge, then finish it with The Colosseum or Crimson Threads. Evocation (Shield), Nature (Oakskin)
@@ -44,7 +44,8 @@ and Eldritch wear plain placeholder plate in their colours until their art passe
 3. **Covenant.** A fully charged hit sends a row of evoker fangs at the target; the sword then greys out for 3 s.
 4. **Briar.** Hits poison (not undead, as in vanilla) and slow.
 5. **Hush.** Hits deal 4 extra damage even through netherite. A player you hit goes dark for 3 s.
-6. **Blood and Evocation armour.** Wear each in first and third person, walk, swing, and judge the look. The
-   Evocation sash tail should swing with the left leg. Screenshots are welcome.
+6. **Blood, Evocation and Nature armour.** Wear each in first and third person, walk, swing, and judge the look.
+   The Evocation sash tail should swing with the left leg. Nature's leaves should be see-through like leaf blocks,
+   and its vine sits on the left forearm only. Screenshots are welcome.
 7. **Apex domains linger.** Two Apex spells cast in the same place within a few seconds can clash. If a second
    forging seems to do nothing, wait for the first spell's domain to fade.
