@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="dragonsteel_schools_apex_only"
+version="${mod_version}"
+displayName="Ice and Fire: Schools of Dragonsteel - Apex Only"
+authors="Td4thor and Hastur"
+# Only the server's copy matters (the main mod tells clients which rule is in force), so clients may go without it.
+displayTest="IGNORE_ALL_VERSION"
+description='''Optional add-on for Ice and Fire: Schools of Dragonsteel. With it installed, only Apex spells (Apex Arcana's by default, set in the main mod's config) finish tempered steel into dragonsteel; Legendary casts of the school no longer do. Remove it to go back to the default.'''
+
+[[dependencies.dragonsteel_schools_apex_only]]
+    modId="dragonsteel_schools"
+    mandatory=true
+    versionRange="[${mod_version},)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.dragonsteel_schools_apex_only]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47.4.0,)"
+    ordering="NONE"
+    side="BOTH"

@@ -3,6 +3,7 @@ package dev.dragonsteelschools.registry;
 import dev.dragonsteelschools.DragonsteelSchools;
 import dev.dragonsteelschools.item.DawnItem;
 import dev.dragonsteelschools.item.ElsewhereItem;
+import dev.dragonsteelschools.forge.FinishingRule;
 import dev.dragonsteelschools.item.LoreItem;
 import dev.dragonsteelschools.item.SchoolPlateArmorItem;
 import dev.dragonsteelschools.item.SchoolStaffItem;
@@ -57,7 +58,8 @@ public final class ModItems {
             BLOOD.put(school, add(s + "_dragon_blood",
                     () -> new LoreItem(new Item.Properties().rarity(Rarity.UNCOMMON), "item.dragonsteel_schools.dragon_blood.lore", school)));
             TEMPERED.put(school, add("tempered_" + s + "_steel",
-                    () -> new LoreItem(new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON), "item.dragonsteel_schools.tempered_steel.lore", school)));
+                    () -> new LoreItem(new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON),
+                            () -> "item.dragonsteel_schools.tempered_steel.lore." + FinishingRule.forTooltip().langSuffix(), school)));
             INGOT.put(school, add(s + "_dragonsteel_ingot",
                     () -> new LoreItem(new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON), "item.dragonsteel_schools.dragonsteel_ingot.lore", school)));
             HELMET.put(school, add(s + "_dragonsteel_helmet", () -> new SchoolPlateArmorItem(school, ArmorItem.Type.HELMET, armorProps())));

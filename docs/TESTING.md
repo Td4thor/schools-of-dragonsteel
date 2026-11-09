@@ -1,4 +1,4 @@
-# Manual test plan (Dragonsteel Schools Test instance)
+# Manual test plan: Ice and Fire: Schools of Dragonsteel (Dragonsteel Schools Test instance)
 
 Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Test` (Ice and Fire beta-5, Spellbooks
 2.3.2, Iron's 3.16.3, Apex Arcana 1.3.0, JEI, this mod). Make a new creative world with cheats on.
@@ -8,10 +8,14 @@ Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Tes
    bottles. Repeat with Evasion (any Ender spell) for violet Ender blood. A Fire spell should change nothing.
 2. **Tempering.** Build any dragon forge, load iron ingots and Holy blood, and have a dragon of that element breathe
    on it: Tempered Holy Steel, one per 50 s of breath. JEI lists the recipe under the forge.
-3. **Apex.** With tempered steel in the forge (`/give @s dragonsteel_schools:tempered_holy_steel 16` saves time), cast
-   Reckoning or Gates of Heaven at the forge. All of it turns into Holy Dragonsteel Ingots. Try looking away during
-   Reckoning's windup; it should still work. Ender: Dimension Cut or Grip of the Void on tempered Ender steel. A Holy
-   Apex must leave Ender steel alone.
+3. **Finishing.** With tempered steel in the forge (`/give @s dragonsteel_schools:tempered_holy_steel 16` saves time),
+   cast a Holy spell of Legendary rarity at it (Heal at level 7 or 8, or Angel Wings at any level). All of it turns
+   into Holy Dragonsteel Ingots. A lower-rarity Holy spell only shows "Only a Holy spell of Legendary rarity can finish
+   this steel". Apex spells still work: Reckoning or Gates of Heaven (try looking away during Reckoning's windup).
+   Ender: Black Hole, or Dimension Cut / Grip of the Void. A Holy cast must leave Ender steel alone.
+   **Apex Only add-on:** put `schools_of_dragonsteel_apex_only-*.jar` in `mods/` too. Now only the Apex spells work,
+   a Legendary Heal shows "Only a Holy Apex spell can finish this steel", and the tempered steel's tooltip says
+   "...with a Holy Apex spell". The log says `finishing rule APEX_ONLY (forced by the Apex Only add-on)`.
 4. **Gear.** Craft armour (ingots, the school rune, any dragon scales), Dawn/Elsewhere and the tools (ingots and
    wither bones), and the staff (Spellbooks' base Dragon Priest staff plus school blood in the forge).
 5. **Dawn.** Hit a zombie: gold flames on it, big damage. Knock it into water: the flames stay. Milk cures a player.
@@ -36,9 +40,10 @@ Their forging works exactly like Holy and Ender. Every school has its own armour
 Nature (dev.6) and Eldritch (dev.7).
 
 1. **Blood.** Cast any Blood spell (Heartstop works) at a cauldron of dragon's breath for Blood dragon blood. Temper
-   it in a dragon forge, then finish it with The Colosseum or Crimson Threads. Evocation (Shield), Nature (Oakskin)
-   and Eldritch (Abyssal Shroud, once learned) work the same way, finished by Grand Sigil or Thousand Blades,
-   World Tree or Full Bloom, and Black Coffin or The Gaze.
+   it in a dragon forge, then finish it with a Legendary Blood spell, The Colosseum or Crimson Threads. Evocation
+   (Shield), Nature (Oakskin) and Eldritch (Abyssal Shroud, once learned) work the same way, finished by a Legendary
+   spell of the school (every Eldritch spell is Legendary at any level; Wololo never counts) or by Grand Sigil or
+   Thousand Blades, World Tree or Full Bloom, and Black Coffin or The Gaze.
 2. **Thirst.** Take some damage, then hit a mob: you heal a fifth of the health each hit takes, sweeps included.
    Spells cast while holding it heal nothing.
 3. **Covenant.** A fully charged hit sends a row of evoker fangs at the target; the sword then greys out for 3 s.

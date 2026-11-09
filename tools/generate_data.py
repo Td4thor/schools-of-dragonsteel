@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate every Dragonsteel Schools JSON: item models, blockstates, lang, recipes, tags, loot, damage type.
+"""Generate every Ice and Fire: Schools of Dragonsteel JSON: item models, blockstates, lang, recipes, tags, loot, damage type.
 
 Deterministic and rerunnable:  python tools/generate_data.py
 
@@ -158,7 +158,7 @@ def staff_model(s):
         {"from": [7.25, 16.25, 7.25], "to": [8.75, 17.75, 8.75],
          "faces": {d: face(gem) for d in ("north", "east", "south", "west", "up", "down")}},
     ]
-    return {"credit": "Dragonsteel Schools (tools/generate_data.py)", "texture_size": [32, 32],
+    return {"credit": "Ice and Fire: Schools of Dragonsteel (tools/generate_data.py)", "texture_size": [32, 32],
             "textures": {"0": f"{MOD}:item/{s}_staff", "particle": f"{MOD}:item/{s}_staff"},
             "elements": elements, "display": STAFF_DISPLAY}
 
@@ -188,18 +188,21 @@ def blocks():
 # ---------------------------------------------------------------------------------------------
 def lang(cauldrons):
     L = {
-        "itemGroup.dragonsteel_schools": "Dragonsteel Schools",
+        "itemGroup.dragonsteel_schools": "Ice and Fire: Schools of Dragonsteel",
         "effect.dragonsteel_schools.holy_fire": "Holy Fire",
         "death.attack.dragonsteel_schools.holy_fire": "%1$s was purified by holy fire",
         "death.attack.dragonsteel_schools.holy_fire.player": "%1$s was purified by holy fire lit by %2$s",
         "block.dragonsteel_schools.dragons_breath_cauldron": "Cauldron of Dragon's Breath",
         "item.dragonsteel_schools.dragon_blood.lore": "Dragon's breath taken by the %s school",
-        "item.dragonsteel_schools.tempered_steel.lore": "Breath-tempered. Finish it with a %s Apex spell cast at the dragon forge",
+        "item.dragonsteel_schools.tempered_steel.lore.legendary": "Breath-tempered. Finish it at the dragon forge with a %s spell of Legendary rarity",
+        "item.dragonsteel_schools.tempered_steel.lore.apex": "Breath-tempered. Finish it at the dragon forge with a %s Apex spell",
         "item.dragonsteel_schools.dragonsteel_ingot.lore": "%s dragonsteel",
         "message.dragonsteel_schools.cauldron.attuned": "The dragon's breath takes the %s school",
         "message.dragonsteel_schools.forge.done": "Forged %s × %s",
         "message.dragonsteel_schools.forge.nothing": "No tempered %s steel in this forge",
-        "message.dragonsteel_schools.forge.too_much": "Too much tempered %s steel: one Apex cast finishes at most %s",
+        "message.dragonsteel_schools.forge.too_much": "Too much tempered %s steel: one cast finishes at most %s",
+        "message.dragonsteel_schools.forge.needs.legendary": "Only a %s spell of Legendary rarity can finish this steel",
+        "message.dragonsteel_schools.forge.needs.apex": "Only a %s Apex spell can finish this steel",
         "item.dragonsteel_schools.dawn.holy_fire": "Sets foes alight with holy fire for %s s (water will not quench it)",
         "item.dragonsteel_schools.dawn.undead": "+%s damage against undead",
         "item.dragonsteel_schools.elsewhere.dodge_all": "While held, step aside from arrows and spell projectiles",

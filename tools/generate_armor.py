@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate the Dragonsteel Schools plate armour art (v2: Holy radiant full plate, Ender Voidwalker).
+"""Generate the Ice and Fire: Schools of Dragonsteel plate armour art (v2: Holy radiant full plate, Ender Voidwalker).
 
 Deterministic and rerunnable:  python tools/generate_armor.py
 Writes (paths relative to the project root):

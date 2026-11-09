@@ -1,4 +1,4 @@
-# Porting to Ice and Fire 2
+# Porting Ice and Fire: Schools of Dragonsteel to Ice and Fire 2
 
 Main code never imports Ice and Fire. Everything that names it sits in two places:
 
@@ -13,7 +13,7 @@ Main code never imports Ice and Fire. Everything that names it sits in two place
 
 The dragon's part of the work is an ordinary Ice and Fire forge recipe, so Ice and Fire itself decides when a dragon
 is breathing. Nothing reads its internals. If Ice and Fire 2 has no recipe-driven forge at all, the fallback is to
-temper in a different way (for example, breath on a cauldron) and keep the Apex step as it is.
+temper in a different way (for example, breath on a cauldron) and keep the finishing step (Legendary or Apex cast) as it is.
 
 Test fixtures (`src/gametest/.../ForgeFixtures.java`) build the 2.1.13 forge from registry names and call
 `onHitWithFlame` reflectively; they need the same update.

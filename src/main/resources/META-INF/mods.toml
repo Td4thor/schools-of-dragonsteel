@@ -5,13 +5,11 @@ license="All Rights Reserved"
 [[mods]]
 modId="dragonsteel_schools"
 version="${mod_version}"
-displayName="Dragonsteel Schools"
+displayName="Ice and Fire: Schools of Dragonsteel"
 authors="Td4thor and Hastur"
-description='''Dragonsteel for every school of magic.
+description='''Dragonsteel for every school of magic. Holy, Ender, Blood, Evocation, Nature and Eldritch each get their own dragonsteel armour, sword, tools and Dragon Priest staff.
 
-Fill a cauldron with dragon's breath and cast a spell of your school into it to brew that school's dragon blood. Load it into a dragon forge with iron, let a dragon breathe on it, and finish the work with your school's Apex spell.
-
-Holy and Ender come first.'''
+Fill a cauldron with dragon's breath and cast a spell of your school into it to brew that school's dragon blood. Temper iron with it in a dragon forge while a dragon breathes on it, then cast a spell of that school at Legendary rarity at the forge to finish the steel. Apex Arcana's Apex spells finish it too; the optional Apex Only add-on makes them the only way.'''
 
 [[dependencies.dragonsteel_schools]]
     modId="forge"
@@ -59,7 +57,7 @@ Holy and Ender come first.'''
     ordering="AFTER"
     side="BOTH"
 
-# The Apex spells come from Apex Arcana; their ids are a config list, so any mod's spells can stand in.
+# Apex Arcana's Apex spells also finish dragonsteel (a config list). Without it, Legendary casts of the school do.
 [[dependencies.dragonsteel_schools]]
     modId="grandsigil"
     mandatory=false

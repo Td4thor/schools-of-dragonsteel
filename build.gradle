@@ -3,9 +3,9 @@ plugins {
     id 'net.minecraftforge.gradle' version '6.0.54'
 }
 
-version = mod_version
+version = "${minecraft_version}-${mod_version}"
 group = mod_group
-base { archivesName = mod_id }
+base { archivesName = 'schools_of_dragonsteel' }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -14,6 +14,10 @@ sourceSets {
     gametest {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    // The optional Apex Only add-on: its own tiny jar (apexOnlyJar). Its presence makes only Apex spells finish steel.
+    apexonly {
+        compileClasspath += sourceSets.main.compileClasspath
     }
     // Dev-only client smoke harness (runClient -Pdsqa). Kept out of the release jar.
     qa {
@@ -104,6 +108,10 @@ processResources {
     inputs.properties resourceProps
     filesMatching(['META-INF/mods.toml']) { expand resourceProps }
 }
+tasks.named('processApexonlyResources', ProcessResources) {
+    inputs.properties resourceProps
+    filesMatching(['META-INF/mods.toml']) { expand resourceProps }
+}
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 
@@ -135,10 +143,27 @@ tasks.named('jar', Jar) {
             'Specification-Title'   : mod_id,
             'Specification-Vendor'  : 'Td4thor and Hastur',
             'Specification-Version' : '1',
-            'Implementation-Title'  : 'Dragonsteel Schools',
+            'Implementation-Title'  : 'Ice and Fire: Schools of Dragonsteel',
             'Implementation-Version': project.version,
             'Implementation-Vendor' : 'Td4thor and Hastur'
         )
     }
     finalizedBy 'reobfJar'
 }
+
+// The Apex Only add-on references nothing from Minecraft (only FML's @Mod), so it needs no reobfuscation.
+tasks.register('apexOnlyJar', Jar) {
+    archiveBaseName = 'schools_of_dragonsteel_apex_only'
+    from sourceSets.apexonly.output
+    manifest {
+        attributes(
+            'Specification-Title'   : 'dragonsteel_schools_apex_only',
+            'Specification-Vendor'  : 'Td4thor and Hastur',
+            'Specification-Version' : '1',
+            'Implementation-Title'  : 'Ice and Fire: Schools of Dragonsteel - Apex Only',
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'Td4thor and Hastur'
+        )
+    }
+}
+tasks.named('build') { dependsOn 'apexOnlyJar' }

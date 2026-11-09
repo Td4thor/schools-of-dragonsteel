@@ -72,6 +72,10 @@ def main():
     for key in sorted(set(re.findall(r'"((?:item|message|effect|block|itemGroup|death)\.dragonsteel_schools(?:\.[a-z_.]+)?)"', java))):
         if not key.endswith(".") and key not in lang:   # keys ending in "." are prefixes built at runtime
             problems.append(f"lang key used in Java but missing: {key}")
+    for rule in ("legendary", "apex"):   # FinishingRule.langSuffix() keys, built at runtime
+        for key in (f"item.{MOD}.tempered_steel.lore.{rule}", f"message.{MOD}.forge.needs.{rule}"):
+            if key not in lang:
+                problems.append(f"finishing-rule lang key missing: {key}")
     print(f"checked {counts}")
     for p in problems:
         print("PROBLEM", p)

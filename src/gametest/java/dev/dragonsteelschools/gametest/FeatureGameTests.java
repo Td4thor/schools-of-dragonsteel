@@ -1,5 +1,7 @@
 package dev.dragonsteelschools.gametest;
 
+import io.redspace.ironsspellbooks.api.spells.SpellRarity;
+import dev.dragonsteelschools.forge.FinishingRule;
 import dev.dragonsteelschools.DragonsteelSchools;
 import dev.dragonsteelschools.forge.ForgeBatchMath;
 import dev.dragonsteelschools.registry.ModBlocks;
@@ -188,9 +190,66 @@ public final class FeatureGameTests {
                 .thenExecuteAfter(15, () -> {
                     TestPlayers.remove(player);
                     ItemStack out = ((Container) helper.getBlockEntity(core)).getItem(2);
-                    helper.assertTrue(out.is(ModItems.TEMPERED.get(SchoolSteel.HOLY).get()) && out.getCount() == 5, "only an Apex spell finishes steel, output " + out);
+                    helper.assertTrue(out.is(ModItems.TEMPERED.get(SchoolSteel.HOLY).get()) && out.getCount() == 5, "a level 1 Heal (Uncommon) does not finish steel, output " + out);
                 })
                 .thenSucceed();
+    }
+
+    /** A Holy spell one level short of Legendary leaves the steel; the same spell at Legendary rarity finishes it. */
+    @GameTest(template = "platform", timeoutTicks = 100)
+    public static void forge_legendary_holy_spell_finishes_steel(GameTestHelper helper) {
+        BlockPos core = new BlockPos(7, 3, 9);
+        ForgeFixtures.build(helper, core, "fire", Direction.NORTH);
+        ServerPlayer player = TestPlayers.create(helper);
+        AbstractSpell heal = SpellRegistry.getSpell(new ResourceLocation("irons_spellbooks", "heal"));
+        int top = firstLegendaryLevel(heal);
+        helper.assertTrue(top > 1 && heal.getRarity(top - 1) != SpellRarity.LEGENDARY, "Heal turns Legendary at level " + top);
+        helper.startSequence()
+                .thenExecuteAfter(5, () -> {
+                    ((Container) helper.getBlockEntity(core)).setItem(2, new ItemStack(ModItems.TEMPERED.get(SchoolSteel.HOLY).get(), 12));
+                    player.moveTo(helper.absoluteVec(new Vec3(7.5, 3, 2.5)));
+                    helper.assertTrue(startCast(helper, player, "irons_spellbooks:heal", core, top - 1), "Heal " + (top - 1) + " starts");
+                })
+                .thenExecuteAfter(15, () -> {
+                    ItemStack out = ((Container) helper.getBlockEntity(core)).getItem(2);
+                    helper.assertTrue(out.is(ModItems.TEMPERED.get(SchoolSteel.HOLY).get()) && out.getCount() == 12,
+                            "Heal " + (top - 1) + " (" + heal.getRarity(top - 1) + ") leaves the steel, output " + out);
+                    helper.assertTrue(startCast(helper, player, "irons_spellbooks:heal", core, top), "Heal " + top + " starts");
+                })
+                .thenExecuteAfter(15, () -> {
+                    TestPlayers.remove(player);
+                    ItemStack out = ((Container) helper.getBlockEntity(core)).getItem(2);
+                    helper.assertTrue(out.is(ModItems.INGOT.get(SchoolSteel.HOLY).get()) && out.getCount() == 12,
+                            "a Legendary Heal finished all 12 into Holy dragonsteel, output " + out);
+                })
+                .thenSucceed();
+    }
+
+    /** The rule itself: Apex spells always count, Legendary casts only under LEGENDARY, the level-1 Legendaries never. */
+    @GameTest(template = "platform")
+    public static void forge_finishing_rule_choices(GameTestHelper helper) {
+        int top = firstLegendaryLevel(SpellRegistry.getSpell(new ResourceLocation("irons_spellbooks", "heal")));
+        helper.assertTrue(FinishingRule.active() == FinishingRule.LEGENDARY, "default rule is LEGENDARY, was " + FinishingRule.active());
+        helper.assertTrue(FinishingRule.finishes("irons_spellbooks:heal", top, FinishingRule.LEGENDARY), "a Legendary Heal finishes");
+        helper.assertFalse(FinishingRule.finishes("irons_spellbooks:heal", top - 1, FinishingRule.LEGENDARY), "an Epic Heal does not");
+        helper.assertFalse(FinishingRule.finishes("irons_spellbooks:heal", top, FinishingRule.APEX_ONLY), "APEX_ONLY refuses a Legendary Heal");
+        helper.assertTrue(FinishingRule.finishes("grandsigil:reckoning", 1, FinishingRule.APEX_ONLY), "APEX_ONLY keeps the Apex spells");
+        helper.assertTrue(FinishingRule.finishes("grandsigil:reckoning", 1, FinishingRule.LEGENDARY), "LEGENDARY keeps the Apex spells");
+        AbstractSpell wololo = SpellRegistry.getSpell(new ResourceLocation("irons_spellbooks", "wololo"));
+        helper.assertTrue(wololo.getRarity(1) == SpellRarity.LEGENDARY, "Wololo is Legendary at level 1 (why it is excluded)");
+        helper.assertFalse(FinishingRule.finishes("irons_spellbooks:wololo", 1, FinishingRule.LEGENDARY), "Wololo is excluded");
+        helper.assertTrue(FinishingRule.finishes("irons_spellbooks:sonic_boom", 1, FinishingRule.LEGENDARY), "an Eldritch spell is Legendary at level 1");
+        helper.assertFalse(FinishingRule.finishes("nosuchmod:nothing", 10, FinishingRule.LEGENDARY), "an unknown spell does not finish");
+        helper.succeed();
+    }
+
+    private static int firstLegendaryLevel(AbstractSpell spell) {
+        for (int level = spell.getMinLevel(); level <= spell.getMaxLevel(); level++) {
+            if (spell.getRarity(level) == SpellRarity.LEGENDARY) {
+                return level;
+            }
+        }
+        throw new IllegalStateException(spell.getSpellId() + " never reaches Legendary");
     }
 
     @GameTest(template = "platform")
@@ -334,13 +393,18 @@ public final class FeatureGameTests {
     }
 
     private static boolean startCast(GameTestHelper helper, ServerPlayer player, String spellId, BlockPos target) {
+        return startCast(helper, player, spellId, target, -1);
+    }
+
+    /** {@code level} -1 = the spell's lowest level. */
+    private static boolean startCast(GameTestHelper helper, ServerPlayer player, String spellId, BlockPos target, int level) {
         player.getAttribute(AttributeRegistry.MAX_MANA.get()).setBaseValue(10000);
         MagicData.getPlayerMagicData(player).setMana(10000);
         MagicData.getPlayerMagicData(player).getPlayerCooldowns().clearCooldowns();
         player.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(helper.absolutePos(target)));
         AbstractSpell spell = SpellRegistry.getSpell(new ResourceLocation(spellId));
         helper.assertTrue(spell != SpellRegistry.none(), spellId + " is registered");
-        return spell.attemptInitiateCast(ItemStack.EMPTY, spell.getMinLevel(), helper.getLevel(), player, CastSource.SPELLBOOK, true, "mainhand");
+        return spell.attemptInitiateCast(ItemStack.EMPTY, level < 0 ? spell.getMinLevel() : level, helper.getLevel(), player, CastSource.SPELLBOOK, true, "mainhand");
     }
 
     private static double sum(Collection<AttributeModifier> modifiers) {

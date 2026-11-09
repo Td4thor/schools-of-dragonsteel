@@ -1,5 +1,6 @@
 package dev.dragonsteelschools.config;
 
+import dev.dragonsteelschools.forge.FinishingRule;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.common.ForgeConfigSpec;
 
@@ -14,8 +15,10 @@ import java.util.Set;
 public final class DSConfig {
     public static final ForgeConfigSpec SPEC;
 
+    public static final ForgeConfigSpec.EnumValue<FinishingRule> FINISHING_RULE;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> APEX_SPELLS;
-    public static final ForgeConfigSpec.DoubleValue APEX_RANGE;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> LEGENDARY_EXCLUDED;
+    public static final ForgeConfigSpec.DoubleValue FINISHING_RANGE;
     public static final ForgeConfigSpec.DoubleValue CAULDRON_RANGE;
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> ARMOR_VALUES;
@@ -48,13 +51,21 @@ public final class DSConfig {
     private static final List<Integer> DEFAULT_ARMOR = List.of(6, 9, 12, 6);
     private static volatile int generation;
     private static volatile Set<String> apexCache;
+    private static volatile Set<String> excludedCache;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
         b.push("forging");
-        APEX_SPELLS = b.comment("Spells that finish dragonsteel in a dragon forge. Each spell forges its own school's",
-                        "dragonsteel; a spell of a school without dragonsteel here does nothing. Defaults are Apex Arcana's.")
+        FINISHING_RULE = b.comment("Which spells finish tempered steel into dragonsteel when cast at a dragon forge.",
+                        "  LEGENDARY: any spell of the steel's school cast at Legendary rarity, as Iron's Spells rates it (the top",
+                        "             levels of most spells; every level of a spell that is Legendary outright, such as all",
+                        "             Eldritch spells), plus every spell in apexSpellIds.",
+                        "  APEX_ONLY: only the spells in apexSpellIds.",
+                        "The optional Apex Only add-on jar forces APEX_ONLY, whatever this says.")
+                .defineEnum("finishingRule", FinishingRule.LEGENDARY);
+        APEX_SPELLS = b.comment("Apex spells: they finish their own school's tempered steel under either rule. A spell of a",
+                        "school without dragonsteel (Fire, Ice, Lightning) does nothing. Defaults are Apex Arcana's.")
                 // Key renamed from apexSpells in 0.1.0-dev.4 so existing configs pick up the new schools' spells.
                 .defineListAllowEmpty("apexSpellIds", List.of("grandsigil:heaven_gate", "grandsigil:reckoning",
                         "grandsigil:voidgrip", "grandsigil:dimension_cut",
@@ -62,8 +73,11 @@ public final class DSConfig {
                         "grandsigil:grand_sigil", "grandsigil:thousand_blades",
                         "grandsigil:world_tree", "grandsigil:full_bloom",
                         "grandsigil:black_coffin", "grandsigil:the_gaze"), o -> o instanceof String s && s.contains(":"));
-        APEX_RANGE = b.comment("How far (blocks) an Apex caster may stand from the forge they are looking at.")
-                .defineInRange("apexRange", 48.0, 4.0, 128.0);
+        LEGENDARY_EXCLUDED = b.comment("Spells that never count as Legendary casts. Wololo is a Legendary novelty that recolours sheep.")
+                .defineListAllowEmpty("legendaryExcludedSpellIds", List.of("irons_spellbooks:wololo"),
+                        o -> o instanceof String s && s.contains(":"));
+        FINISHING_RANGE = b.comment("How far (blocks) a caster may stand from the forge they are looking at to finish its steel.")
+                .defineInRange("finishingRange", 48.0, 4.0, 128.0);
         CAULDRON_RANGE = b.comment("How far (blocks) a caster may stand from the cauldron of dragon's breath.")
                 .defineInRange("cauldronRange", 24.0, 2.0, 64.0);
         b.pop();
@@ -139,6 +153,7 @@ public final class DSConfig {
     public static void onReload() {
         generation++;
         apexCache = null;
+        excludedCache = null;
     }
 
     /** Bumped on every config load or reload so cached attribute maps rebuild. */
@@ -151,6 +166,15 @@ public final class DSConfig {
         if (cache == null) {
             cache = new HashSet<>(get(APEX_SPELLS));
             apexCache = cache;
+        }
+        return cache.contains(spellId);
+    }
+
+    public static boolean isLegendaryExcluded(String spellId) {
+        Set<String> cache = excludedCache;
+        if (cache == null) {
+            cache = new HashSet<>(get(LEGENDARY_EXCLUDED));
+            excludedCache = cache;
         }
         return cache.contains(spellId);
     }

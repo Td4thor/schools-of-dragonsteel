@@ -39,5 +39,6 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         HolyFireClient.clear();
+        dev.dragonsteelschools.forge.FinishingRule.setSynced(null);
     }
 }

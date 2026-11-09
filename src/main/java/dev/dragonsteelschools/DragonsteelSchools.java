@@ -3,6 +3,8 @@ package dev.dragonsteelschools;
 import com.mojang.logging.LogUtils;
 import dev.dragonsteelschools.cauldron.ModCauldronInteractions;
 import dev.dragonsteelschools.config.DSConfig;
+import dev.dragonsteelschools.forge.FinishingRule;
+import dev.dragonsteelschools.forge.FinishingRuleSync;
 import dev.dragonsteelschools.item.SchoolTiers;
 import dev.dragonsteelschools.network.DSNetwork;
 import dev.dragonsteelschools.registry.ModBlocks;
@@ -22,11 +24,13 @@ import org.slf4j.Logger;
 import java.util.List;
 
 /**
- * Dragonsteel for every school of magic. Holy and Ender first.
+ * Ice and Fire: Schools of Dragonsteel. Dragonsteel for every school of magic without its own: Holy, Ender, Blood,
+ * Evocation, Nature and Eldritch.
  *
  * <p>Flow: Dragon's Breath bottles fill a cauldron; any spell of a school cast at it brews that school's dragon blood;
  * iron and school blood in an Ice and Fire dragon forge are tempered by a dragon's breath (an Ice and Fire recipe);
- * the school's Apex spell cast at the forge finishes every piece of tempered steel into dragonsteel.
+ * a Legendary cast of the school, or one of its Apex spells, cast at the forge finishes every piece of tempered steel
+ * into dragonsteel ({@link FinishingRule}; the optional Apex Only add-on allows only the Apex spells).
  */
 @Mod(DragonsteelSchools.MODID)
 public final class DragonsteelSchools {
@@ -46,7 +50,10 @@ public final class DragonsteelSchools {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DSConfig.SPEC);
         modBus.addListener(this::commonSetup);
         modBus.addListener((ModConfigEvent.Loading e) -> DSConfig.onReload());
-        modBus.addListener((ModConfigEvent.Reloading e) -> DSConfig.onReload());
+        modBus.addListener((ModConfigEvent.Reloading e) -> {
+            DSConfig.onReload();
+            FinishingRuleSync.broadcast();
+        });
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -60,5 +67,7 @@ public final class DragonsteelSchools {
                 LOG.info("[DragonsteelSchools/runtime] absent {}", mod);
             }
         }
+        LOG.info("[DragonsteelSchools/runtime] finishing rule {}{}", FinishingRule.active(),
+                FinishingRule.addonLoaded() ? " (forced by the Apex Only add-on)" : " (config)");
     }
 }

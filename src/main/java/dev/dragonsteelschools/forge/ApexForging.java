@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * An Apex spell landing on a dragon forge. The dragon has already done its part: its breath tempered iron and school
- * blood into tempered steel (an ordinary Ice and Fire forge recipe). The Apex finishes every piece of its own
- * school's tempered steel in the forge at once, up to a full stack, turning it into dragonsteel where it lies.
+ * A finishing cast landing on a dragon forge (see {@link FinishingRule}: a Legendary cast of the school or an Apex
+ * spell). The dragon has already done its part: its breath tempered iron and school blood into tempered steel (an
+ * ordinary Ice and Fire forge recipe). The cast finishes every piece of its own school's tempered steel in the forge at
+ * once, up to a full stack, turning it into dragonsteel where it lies.
  */
 public final class ApexForging {
     public enum Outcome { NOT_A_FORGE, PROTECTED, NOTHING_TEMPERED, TOO_MUCH, FORGED }
@@ -82,6 +83,25 @@ public final class ApexForging {
         caster.displayClientMessage(Component.translatable("message.dragonsteel_schools.forge.done", made, lastResult.getHoverName()), true);
         DragonsteelSchools.LOG.debug("{} finished {} x {} at {} with {}", caster.getGameProfile().getName(), made, lastResult, core, school);
         return Outcome.FORGED;
+    }
+
+    /** Whether the forge at or around {@code hit} holds tempered steel this school can finish. */
+    public static boolean holdsTempered(ServerLevel level, BlockPos hit, SchoolSteel school) {
+        Optional<BlockPos> core = DragonForges.findCore(level, hit);
+        Container forge = core.map(c -> DragonForges.container(level, c)).orElse(null);
+        if (forge == null) {
+            return false;
+        }
+        List<ApexForgingRecipe> recipes = level.getRecipeManager().getAllRecipesFor(ModRegistries.APEX_FORGING.get()).stream()
+                .filter(r -> r.school() == school)
+                .toList();
+        for (int slot : SLOTS) {
+            ItemStack stack = forge.getItem(slot);
+            if (!stack.isEmpty() && recipes.stream().anyMatch(r -> r.accepts(stack))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void celebrate(ServerLevel level, BlockPos core, SchoolSteel school) {

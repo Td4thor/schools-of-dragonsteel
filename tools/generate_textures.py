@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate the Dragonsteel Schools item, block, effect and fire textures.
+"""Generate the Ice and Fire: Schools of Dragonsteel item, block, effect and fire textures.
 
 Deterministic and rerunnable:  python tools/generate_textures.py
 
