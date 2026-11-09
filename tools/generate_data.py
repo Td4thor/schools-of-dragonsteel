@@ -21,50 +21,34 @@ SCHOOLS = {
         "name": "Holy", "sword": "dawn", "sword_name": "Dawn",
         "staff": "gilded_dragon_priest_staff", "staff_name": "Gilded Dragon Priest Staff",
         "rune": "irons_spellbooks:holy_rune",
-        "plate_lore": "Radiant plate, tempered in dragon fire and hallowed by an Apex rite.",
-        "staff_lore": "A sun is caught in its headpiece and will not set.",
     },
     "ender": {
         "name": "Ender", "sword": "elsewhere", "sword_name": "Elsewhere",
         "staff": "umbral_dragon_priest_staff", "staff_name": "Umbral Dragon Priest Staff",
         "rune": "irons_spellbooks:ender_rune",
-        "plate_lore": "Close-fitting void plate that drinks the light around it.",
-        "staff_lore": "Its crystal shows a sky with no stars you know.",
     },
     "blood": {
         "name": "Blood", "sword": "thirst", "sword_name": "Thirst",
         "staff": "sanguine_dragon_priest_staff", "staff_name": "Sanguine Dragon Priest Staff",
         "rune": "irons_spellbooks:blood_rune",
-        "plate_lore": "Crimson plate for a knight who swore an oath in blood and kept it.",
-        "staff_lore": "It is warm to the touch, and the warmth has a pulse.",
-        "sword_lore": "It was quenched in its maker. It has been thirsty since.",
         "sword_power": "Heals you for %s%% of the health its hits take",
     },
     "evocation": {
         "name": "Evocation", "sword": "covenant", "sword_name": "Covenant",
         "staff": "emerald_dragon_priest_staff", "staff_name": "Emerald Dragon Priest Staff",
         "rune": "irons_spellbooks:evocation_rune",
-        "plate_lore": "Spell-knight's harness, set with emeralds an evoker would kill for.",
-        "staff_lore": "Each emerald on it was paid for in a bargain nobody won.",
-        "sword_lore": "Every blade is a promise. This one keeps its word with teeth.",
         "sword_power": "A fully charged hit calls %s evoker fangs at the foe (every %s s)",
     },
     "nature": {
         "name": "Nature", "sword": "briar", "sword_name": "Briar",
         "staff": "verdant_dragon_priest_staff", "staff_name": "Verdant Dragon Priest Staff",
         "rune": "irons_spellbooks:nature_rune",
-        "plate_lore": "Old plate the forest has claimed, and keeps.",
-        "staff_lore": "Something on it is still growing.",
-        "sword_lore": "A thorn the size of a sword, and just as patient.",
         "sword_power": "Hits poison for %s s and slow for %s s",
     },
     "eldritch": {
         "name": "Eldritch", "sword": "hush", "sword_name": "Hush",
         "staff": "abyssal_dragon_priest_staff", "staff_name": "Abyssal Dragon Priest Staff",
         "rune": "minecraft:echo_shard",   # Iron's Spells has no Eldritch rune
-        "plate_lore": "It was not made for a human shape. It fits anyway.",
-        "staff_lore": "Its eyes are closed. You hope they stay that way.",
-        "sword_lore": "Listen.",
         "sword_power": "Hits deal %s extra damage armour cannot stop, and blind players for %s s",
     },
 }
@@ -216,10 +200,8 @@ def lang(cauldrons):
         "message.dragonsteel_schools.forge.done": "Forged %s × %s",
         "message.dragonsteel_schools.forge.nothing": "No tempered %s steel in this forge",
         "message.dragonsteel_schools.forge.too_much": "Too much tempered %s steel: one Apex cast finishes at most %s",
-        "item.dragonsteel_schools.dawn.lore": "The first light, forged to end long nights.",
         "item.dragonsteel_schools.dawn.holy_fire": "Sets foes alight with holy fire for %s s (water will not quench it)",
         "item.dragonsteel_schools.dawn.undead": "+%s damage against undead",
-        "item.dragonsteel_schools.elsewhere.lore": "Strike where it was. It is already elsewhere.",
         "item.dragonsteel_schools.elsewhere.dodge_all": "While held, step aside from arrows and spell projectiles",
         "item.dragonsteel_schools.elsewhere.dodge_arrows": "While held, step aside from arrows",
     }
@@ -235,11 +217,8 @@ def lang(cauldrons):
             L[f"item.dragonsteel_schools.{s}_dragonsteel_{t}"] = f"{n} Dragonsteel {t.capitalize()}"
         L[f"item.dragonsteel_schools.{cfg['sword']}"] = cfg["sword_name"]
         if "sword_power" in cfg:
-            L[f"item.dragonsteel_schools.{cfg['sword']}.lore"] = cfg["sword_lore"]
             L[f"item.dragonsteel_schools.{cfg['sword']}.power"] = cfg["sword_power"]
         L[f"item.dragonsteel_schools.{cfg['staff']}"] = cfg["staff_name"]
-        L[f"item.dragonsteel_schools.{cfg['staff']}.lore"] = cfg["staff_lore"]
-        L[f"item.dragonsteel_schools.{s}_plate.lore"] = cfg["plate_lore"]
         L[f"block.dragonsteel_schools.{s}_dragon_blood_cauldron"] = f"Cauldron of {n} Dragon Blood"
     for c in cauldrons:
         assert f"block.dragonsteel_schools.{c}" in L, c

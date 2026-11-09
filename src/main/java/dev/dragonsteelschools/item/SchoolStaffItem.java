@@ -5,16 +5,8 @@ import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import io.redspace.ironsspellbooks.item.weapons.AttributeContainer;
 import io.redspace.ironsspellbooks.item.weapons.StaffItem;
 import io.redspace.ironsspellbooks.item.weapons.StaffTier;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * School Dragon Priest staff. Same tier as Spellbooks' Crimson, Silver and Thunderous staves: 7 attack damage,
@@ -36,11 +28,5 @@ public class SchoolStaffItem extends StaffItem {
 
     public SchoolSteel school() {
         return school;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> lines, TooltipFlag flag) {
-        lines.add(Component.translatable("item.dragonsteel_schools." + school.staffId() + ".lore").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-        super.appendHoverText(stack, level, lines, flag);
     }
 }

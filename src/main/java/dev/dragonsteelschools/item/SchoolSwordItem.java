@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * A school's named dragonsteel sword (Thirst, Covenant, Briar, Hush). Its power lives in {@link SwordPowers};
- * the tooltip shows the lore line and the power with its configured numbers.
+ * the tooltip shows the power with its configured numbers.
  */
 public class SchoolSwordItem extends SwordItem {
     private final SchoolSteel school;
@@ -41,7 +41,6 @@ public class SchoolSwordItem extends SwordItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> lines, TooltipFlag flag) {
         String key = "item.dragonsteel_schools." + school.swordId();
-        lines.add(Component.translatable(key + ".lore").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         lines.add(Component.translatable(key + ".power", SwordPowers.tooltipArgs(school)).withStyle(style -> style.withColor(school.primaryColor())));
     }
 }

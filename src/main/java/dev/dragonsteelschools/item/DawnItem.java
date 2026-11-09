@@ -30,7 +30,6 @@ public class DawnItem extends SwordItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> lines, TooltipFlag flag) {
-        lines.add(Component.translatable("item.dragonsteel_schools.dawn.lore").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         lines.add(Component.translatable("item.dragonsteel_schools.dawn.holy_fire",
                 DSConfig.get(DSConfig.DAWN_HOLY_FIRE_SECONDS)).withStyle(ChatFormatting.GOLD));
         lines.add(Component.translatable("item.dragonsteel_schools.dawn.undead",
