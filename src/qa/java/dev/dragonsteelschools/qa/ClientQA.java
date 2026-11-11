@@ -60,7 +60,7 @@ public final class ClientQA {
             run(player, "time set 6000");
             run(player, "weather clear");
             run(player, "gamerule doDaylightCycle false");
-            run(player, "gamemode creative");
+            run(player, "gamemode creative @a");   // the command source is the server, so name the target
             // the QA save is a throwaway copy: clear mobs and items near the stage so their particles stay out of shot
             run(player, "kill @e[type=!minecraft:player,distance=..128]");
             run(player, fill(-5, 0, -2, 5, 0, 2, "minecraft:smooth_quartz"));
@@ -127,10 +127,14 @@ public final class ClientQA {
     private ClientQA() {
     }
 
-    /** Elsewhere's in-hand blade at the peak of a swing (3 of its 6 ticks) and early in a dodge's scatter. */
+    /**
+     * Elsewhere's in-hand blade mid-swing (3 ticks in), then with the arm back at rest while the pieces are still
+     * apart (8 ticks in, the moment dev.15 missed), then early in a dodge's scatter, then at rest.
+     */
     private static void elsewhereShots(String s, String view) {
         add(10, s + "_" + view + "_swing", mc -> mc.player.swing(InteractionHand.MAIN_HAND));
         add(3, s + "_" + view + "_swing_shot", mc -> shot(mc, s + "_" + view + "b_elsewhere_swing"));
+        add(5, s + "_" + view + "_swing_held_shot", mc -> shot(mc, s + "_" + view + "b2_elsewhere_swing_held"));
         add(20, s + "_" + view + "_scatter", mc -> dev.dragonsteelschools.client.ElsewhereClient.scatter(mc.player.getId()));
         add(4, s + "_" + view + "_scatter_shot", mc -> shot(mc, s + "_" + view + "c_elsewhere_scatter"));
         add(30, s + "_" + view + "_rest_shot", mc -> shot(mc, s + "_" + view + "d_elsewhere_rest"));

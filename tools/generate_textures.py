@@ -451,19 +451,24 @@ def covenant():
 
 
 def briar():
-    """A living blade: a bough of dark thornwood that starts true and bows up to the point like a sabre, green
-    along its cutting edge, three hooked thorns down its back. Two veined leaves, the lit one longer, make the
-    guard round a red rose; vine binds the grip to a root-knot pommel."""
+    """A living blade: a bough of dark thornwood with a sabre's gentle bow, green along its cutting edge, three
+    hooked thorns down its back. Two veined leaves, the lit one longer, make the guard round a red rose; vine binds
+    the grip to a root-knot pommel.
+
+    Guard to point it runs on the same diagonal as every other sword, so it sits in the hand the same way; the bow
+    (up to 3 px toward the edge) lives in between. The dev.11-14 blade swept up to vertical, and in the hand it
+    pointed off at its own angle (Tad, 0.1.0-dev.15)."""
     px = {}
-    back = {20: 8, 19: 9, 18: 10, 17: 11, 16: 12, 15: 13, 14: 14, 13: 15, 12: 16, 11: 17, 10: 17, 9: 18, 8: 18,
-            7: 19, 6: 19, 5: 19, 4: 20, 3: 20, 2: 20, 1: 20}
+    bow = {20: 0, 19: 0, 18: 1, 17: 1, 16: 2, 15: 2, 14: 2, 13: 3, 12: 3, 11: 3, 10: 3, 9: 2, 8: 2, 7: 2, 6: 1,
+           5: 1, 4: 0, 3: 0, 2: 0}
+    back = {y: 28 - y + b for y, b in bow.items()}
     for y, x in back.items():
-        row = ["#b48d5c" if y in (7, 8, 10) else "#987449", "#7c5d3a", "#4f3923", "#3d852c",
+        row = ["#b48d5c" if y in (8, 9, 11) else "#987449", "#7c5d3a", "#4f3923", "#3d852c",
                "#a8de7c" if y % 3 == 0 else "#7cc456"]
-        row = {4: row[:2] + row[3:], 3: [row[1], row[3], row[4]], 2: [row[3], row[4]], 1: ["#a8de7c"]}.get(y, row)
+        row = {4: row[:2] + row[3:], 3: [row[1], row[3], row[4]], 2: ["#a8de7c"]}.get(y, row)
         for k, code in enumerate(row):
             px[x + k, y] = hx(code)
-    for y in (17, 13, 9):                                                    # thorns, hooked back toward the hilt
+    for y in (17, 12, 8):                                                    # thorns, hooked back toward the hilt
         px[back[y] - 1, y] = hx("#4f3923")
         px[back[y] - 2, y] = hx("#c9a36b")
     leaf = {"v": [(7, 20), (6, 19), (5, 18), (4, 17)], "t": [(3, 16)], "u": [(7, 19), (6, 18), (5, 17)],
