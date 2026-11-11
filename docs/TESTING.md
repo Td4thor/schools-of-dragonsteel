@@ -65,3 +65,11 @@ in third person (F5, both views), by day and at night: the sun core and rays, th
 jewel, the emeralds, the berries, and the great eye with every tendril tip should glow in the dark. Look for
 flicker where parts overlap, parts that seem to hang loose, and whether the heads sit well in the hand next to
 Spellbooks' Crimson, Silver and Thunderous staves.
+
+## Swords (0.1.0-dev.11)
+
+Elsewhere, Thirst, Covenant, Briar and Hush have their own drawn sprites now (they were recolours of Ice and Fire's
+ice dragonsteel sword). `/give @s dragonsteel_schools:elsewhere` (also `thirst`, `covenant`, `briar`, `hush`). Check
+each in the inventory and the hotbar, in first person, in third person (F5) and in an item frame. The hand should
+close on the grip, as it does on Dawn; the sprites share Dawn's hilt position and reach. Covenant and Briar are a
+little shorter than the others by design (a forked point and a bowed blade). The powers are unchanged.

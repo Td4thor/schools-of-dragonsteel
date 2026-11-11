@@ -3,6 +3,9 @@
 
     python tools/sword_concepts.py            writes docs/art/concepts/*.png and docs/art/sword_concepts.png
 
+ARCHIVED: all five designs were approved and moved into tools/generate_textures.py in 0.1.0-dev.11. This script is
+kept as the record of the concept round and no longer runs from here.
+
 CONCEPTS ONLY: nothing here is written into the mod's assets. Each sword is drawn the way Dawn is (see
 generate_textures.dawn): every pixel is placed by t (along the sword from the pommel, bottom-left, to the tip)
 and s (across it; negative is the lit upper-left side). When Tad approves a design, its function moves into
