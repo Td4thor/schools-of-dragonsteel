@@ -294,44 +294,66 @@ def lit_side(name, s, lit, shade):
 
 
 # ---------------------------------------------------------------------------------------------
+def plot_sword(pixels, edge, keep_open=None):
+    """Hand-placed pixels plus the 1 px outline. Cells where keep_open(x, y) is true get no outline, so a cut
+    through the blade can stay open."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    px = img.load()
+    for (x, y), colour in pixels.items():
+        px[x, y] = colour
+    outline(img, edge)
+    if keep_open:
+        for y in range(32):
+            for x in range(32):
+                if (x, y) not in pixels and keep_open(x, y):
+                    px[x, y] = (0, 0, 0, 0)
+    return img
+
+
+def hx(code):
+    return hexes(code)[0]
+
+
 def elsewhere():
-    """A blade caught mid-step: three shards of night steel, each slipped a little out of line, held together
-    by violet light. A crescent guard, one horn taller, round an Eye of Ender."""
-    segs = ((8.0, 14.4, 0.0), (17.2, 23.4, -1.0), (26.2, SWORD_LENGTH + 0.4, 0.8))
+    """A blade cut clean through in two places, the middle length slid out of line, the pieces held by a thread
+    of violet light. A crescent guard, one horn taller, round an Eye of Ender.
 
-    def fn(t, s):
-        a = abs(s)
-        if t < -0.9:
-            return None
-        if t < 2.0:                                              # pommel: a small end crystal
-            return tone("violet", 0.75 if s < 0 else 0.35) if a + abs(t - 0.7) <= 1.7 else None
-        if t < 6.0:                                              # grip: void cloth
-            return tone("void", 0.5 if int(t * 1.4) % 2 else 0.3) if a <= 0.75 else None
-        if t < 7.4:                                              # crescent guard and its eye
-            if a <= 1.4:
-                return (4, 26, 22, 255) if a < 0.4 else tone("teal", 0.9 if s < 0 else 0.6)
-            return lit_side("obsid", s, 0.95, 0.7) if a <= 4.7 and t > 6.1 else None
-        if s < 0 and 3.7 <= a <= 4.7 and t < 11.2:               # the tall horn
-            return tone("violet", 0.45) if t > 10.2 else tone("obsid", 0.95)
-        if s > 0 and 3.7 <= a <= 4.7 and t < 8.9:                # the short horn
-            return tone("obsid", 0.7)
-        for t0, t1, off in segs:
-            if t0 <= t <= t1:
-                ss = s - off
-                w = 1.55 if t < SWORD_LENGTH - 3.0 else max(0.0, 1.55 * (SWORD_LENGTH + 0.4 - t) / 3.4)
-                if abs(ss) > w + 0.2:
-                    return None
-                if abs(ss) < 0.5:
-                    return tone("violet", 0.45 + 0.5 * t / SWORD_LENGTH)
-                return lit_side("obsid", ss, 0.82, 0.55)
-        return None
-
-    def glow(t, s, cur):                                         # a mote of light in each gap between shards
-        for (_, t1, o1), (t0, _, o0) in zip(segs, segs[1:]):
-            if t1 + 0.9 <= t <= t0 - 0.9 and abs(s - (o0 + o1) / 2) < 0.5:
-                return tone("violet", 0.9)
-        return None
-    return draw_sword(fn, R["obsid"][0], glow)
+    Placed pixel by pixel on the sword's diagonal (x + y = 31): every blade row is the same four pixels, one
+    step left per row down, so the edges are true 45 degree lines. The cuts run level, along pixel rows."""
+    px = {}
+    lit, core, mid, dark = hx("#64508e"), hx("#a85fff"), hx("#483968"), hx("#281e3c")
+    glow = (hx("#a85fff"), hx("#f5e6ff"), hx("#c58aff"), hx("#8838ec"))       # a cut face, lit from within
+    # (first row, last row, sideways slip): tip, middle, base
+    for top, bottom, slip in ((3, 7, 0), (10, 14, 2), (17, 20, 0)):
+        for y in range(top, bottom + 1):
+            cut = (y == bottom and bottom != 20) or (y == top and top != 3)
+            for k, colour in enumerate(glow if cut else (lit, core, mid, dark)):
+                x = 29 - y + k + slip
+                if x <= 28:                                                   # the point: a square corner
+                    px[x, y] = colour
+    px[27, 3] = hx("#c58aff")                                                 # the thread brightens at the point
+    for xy in ((23, 8), (23, 9), (17, 15), (16, 15), (15, 16), (14, 16)):     # the thread crossing each cut, unbroken
+        px[xy] = hx("#c58aff")
+    # crescent guard: a bar square across the blade, a tall horn on the lit side and a short one below
+    for y in range(18, 26):
+        px[y - 13, y] = hx("#64508e") if y < 21 else hx("#483968")
+        px[y - 12, y] = hx("#483968") if y < 21 else hx("#281e3c")
+    for y, xs in ((17, (6, 7)), (16, (7, 8)), (15, (8, 9))):                  # tall horn
+        px[xs[0], y], px[xs[1], y] = hx("#64508e"), hx("#483968")
+    px[9, 14] = hx("#a85fff")
+    for y, xs in ((24, (13, 14)), (23, (14, 15))):                            # short horn
+        px[xs[0], y], px[xs[1], y] = hx("#483968"), hx("#281e3c")
+    # the Eye of Ender where blade meets guard
+    eye = ("#9af5dc", "#3fd8b0", "#3fd8b0", "#3fd8b0", "#041a16", "#1bb08d", "#1bb08d", "#1bb08d", "#12856c")
+    for n, code in enumerate(eye):
+        px[8 + n % 3, 20 + n // 3] = hx(code)
+    for y in range(23, 27):                                                   # grip: void cloth, two tones
+        px[30 - y, y] = hx("#5a2d89") if y % 2 else hx("#45226c")
+        px[31 - y, y] = hx("#331951") if y % 2 else hx("#231139")
+    gem = ("#e0baff", "#c58aff", "#a85fff", "#c58aff", "#a85fff", "#8838ec", "#a85fff", "#8838ec", "#6420c2")
+    for n, code in enumerate(gem):                                            # pommel: an end crystal
+        px[2 + n % 3, 27 + n // 3] = hx(code)
+    return plot_sword(px, R["obsid"][0], keep_open=lambda x, y: y in (8, 9, 15, 16) and x >= 11)
 
 
 def thirst():
@@ -406,41 +428,47 @@ def covenant():
 
 
 def briar():
-    """A living blade: a bough of dark thornwood bent like a sabre, green along its cutting edge, thorns down
-    its back. Two leaves make the guard round a red rose; vine binds the grip to a root-knot pommel."""
-    length = 33.0
-    thorns = (11.5, 15.5, 19.5, 23.5, 27.0)
+    """A living blade: a bough of dark thornwood that starts true and bows up toward the point like a sabre,
+    green along its cutting edge, hooked thorns down its back. Two leaves make the guard round a red rose;
+    vine binds the grip to a root-knot pommel.
 
-    def fn(t, s):
-        a = abs(s)
-        if t < -0.8:
-            return None
-        if t < 1.9:                                              # root-knot pommel
-            return lit_side("bark", s, 0.7, 0.4) if math.hypot(t - 0.6, s) <= 1.6 else None
-        if t < 5.4:                                              # grip: vine over bark
-            return (tone("leaf", 0.7) if int(t * 1.4) % 2 else tone("bark", 0.45)) if a <= 0.75 else None
-        r = math.hypot(t - 7.0, s)
-        if r <= 1.5:                                             # the rose
-            return tone("rose", 0.15) if r < 0.6 else tone("rose", 0.8 if s < 0 else 0.5)
-        if 0.8 <= a <= 4.8:                                      # leaf guard
-            half = 0.25 + 1.35 * max(0.0, math.sin(math.pi * (a - 0.8) / 4.0)) ** 0.7
-            if abs(t - 7.0) <= half:
-                return tone("leaf", 0.95) if abs(t - 7.0) < 0.36 else tone("leaf", 0.7 if s < 0 else 0.45)
-        if t < 7.6 or t > length + 0.3:
-            return None
-        bend = -0.0065 * (t - 7.0) ** 2                          # bows toward the lit side
-        ss = s - bend
-        w = 1.5 if t < length - 5.0 else max(0.0, 1.5 * (length + 0.3 - t) / 5.3)
-        for tk in thorns:                                        # thorns on the back of the bow
-            h = -ss - w
-            if 0 < h <= 2.5 and 0 <= (t - tk) - h * 0.3 <= 1.6 - h * 0.36:
-                return tone("bone", 0.9) if h > 1.3 else tone("bark", 0.75)
-        if abs(ss) > w + 0.15:
-            return None
-        if ss > w - 0.95:
-            return tone("leaf", 0.85 if int(t) % 3 else 0.6)        # the living edge
-        return tone("bark", 0.65 if ss < -0.4 else 0.45)
-    return draw_sword(fn, R["bark"][0])
+    Placed pixel by pixel. The blade is four pixels to a row; `back` gives the first of them for each row, one
+    step per row at first, then every second row, then every third, which is what makes the curve smooth."""
+    px = {}
+    bark_l, bark_m, leaf_d, leaf_l, leaf_h = hx("#987449"), hx("#644a2e"), hx("#3d852c"), hx("#7cc456"), hx("#a8de7c")
+    back = {20: 9, 19: 10, 18: 11, 17: 12, 16: 13, 15: 14, 14: 15, 13: 16, 12: 17, 11: 18, 10: 18, 9: 19, 8: 19,
+            7: 20, 6: 20, 5: 20, 4: 21, 3: 21}
+    for y, x in back.items():
+        row = [bark_l, bark_m, leaf_d, leaf_h if y % 3 == 0 else leaf_l]
+        if y == 4:
+            row = [bark_l, bark_m, leaf_l]                                     # the edge sweeps in to the point
+        elif y == 3:
+            row = [bark_m, leaf_l]
+        for k, colour in enumerate(row):
+            px[x + k, y] = colour
+    px[21, 2] = leaf_h
+    for y in (17, 13, 9):                                                     # thorns, hooked back toward the hilt
+        px[back[y] - 1, y] = hx("#4f3923")
+        px[back[y] - 2, y] = hx("#efebda")
+    # leaf guard: one leaf up and back, one down and forward, each with a pale vein
+    for (x, y), code in {(7, 20): "#a8de7c", (6, 19): "#a8de7c", (5, 18): "#a8de7c", (4, 17): "#7cc456",
+                         (7, 19): "#7cc456", (6, 18): "#7cc456", (5, 17): "#57a53c",
+                         (6, 20): "#3d852c", (5, 19): "#3d852c", (4, 18): "#2a6620",
+                         (11, 22): "#a8de7c", (12, 23): "#a8de7c", (13, 24): "#a8de7c", (14, 25): "#57a53c",
+                         (12, 22): "#7cc456", (13, 23): "#7cc456", (14, 24): "#57a53c",
+                         (11, 23): "#3d852c", (12, 24): "#3d852c", (13, 25): "#2a6620"}.items():
+        px[x, y] = hx(code)
+    rose = ("#ff9aa5", "#ee6274", "#d8344a", "#ee6274", "#5e0b1c", "#b51d36", "#d8344a", "#b51d36", "#8a1228")
+    for n, code in enumerate(rose):
+        px[8 + n % 3, 20 + n // 3] = hx(code)
+    for y in range(23, 27):                                                   # grip: bark bound with vine
+        vine = y % 2 == 0
+        px[30 - y, y] = hx("#57a53c") if vine else hx("#7c5d3a")
+        px[31 - y, y] = hx("#2a6620") if vine else hx("#4f3923")
+    knot = ("#987449", "#7c5d3a", "#644a2e", "#7c5d3a", "#3b2a1a", "#4f3923", "#644a2e", "#4f3923", "#3b2a1a")
+    for n, code in enumerate(knot):                                           # pommel: a root knot
+        px[2 + n % 3, 27 + n // 3] = hx(code)
+    return plot_sword(px, R["bark"][0])
 
 
 def hush():
