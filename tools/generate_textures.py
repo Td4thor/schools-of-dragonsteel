@@ -256,255 +256,201 @@ def outline(img, colour):
 
 
 # ---------------------------------------------------------------------------------------------
-# The five drawn school swords (0.1.0-dev.11). Like Dawn, every pixel is placed by t (along the sword from the
-# pommel, bottom-left, to the tip) and s (across it; negative is the lit upper-left side), then outlined.
+# The five drawn school swords. Every pixel is placed by hand on the sword's diagonal: the hilt is centred on
+# x + y = 30, each blade row is the same run of pixels one step left per row down, and guards are drawn for the
+# lit side and mirrored across the blade for the other. Formula-drawn versions (0.1.0-dev.11) came out ragged.
 # ---------------------------------------------------------------------------------------------
-SWORD_P0 = (3.0, 28.0)
-SWORD_K = 1 / math.sqrt(2)
-SWORD_LENGTH = math.hypot(28.5 - 3.0, 28.0 - 3.5)   # 35.4, the same reach as Dawn
-
-
-def tone(name, t):
-    return ramp(name, max(0.0, min(1.0, t)))
-
-
-def draw_sword(fn, edge, after=None):
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    px = img.load()
-    for y in range(32):
-        for x in range(32):
-            cx, cy = x + 0.5 - SWORD_P0[0], y + 0.5 - SWORD_P0[1]
-            t, s = (cx - cy) * SWORD_K, (cx + cy) * SWORD_K
-            col = fn(t, s)
-            if col is not None:
-                px[x, y] = col
-    outline(img, edge)
-    if after:
-        for y in range(32):
-            for x in range(32):
-                cx, cy = x + 0.5 - SWORD_P0[0], y + 0.5 - SWORD_P0[1]
-                col = after((cx - cy) * SWORD_K, (cx + cy) * SWORD_K, px[x, y])
-                if col is not None:
-                    px[x, y] = col
-    return img
-
-
-def lit_side(name, s, lit, shade):
-    return tone(name, lit if s < 0 else shade)
-
-
-# ---------------------------------------------------------------------------------------------
-def plot_sword(pixels, edge, keep_open=None):
-    """Hand-placed pixels plus the 1 px outline. Cells where keep_open(x, y) is true get no outline, so a cut
-    through the blade can stay open."""
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    px = img.load()
-    for (x, y), colour in pixels.items():
-        px[x, y] = colour
-    outline(img, edge)
-    if keep_open:
-        for y in range(32):
-            for x in range(32):
-                if (x, y) not in pixels and keep_open(x, y):
-                    px[x, y] = (0, 0, 0, 0)
-    return img
-
-
 def hx(code):
     return hexes(code)[0]
 
 
-def elsewhere():
-    """A blade cut clean through in two places, the middle length slid out of line, the pieces held by a thread
-    of violet light. A crescent guard, one horn taller, round an Eye of Ender.
+def plot_sword(pixels, edge, keep_open=None):
+    """Draw the placed pixels and give them a 1 px outline tinted by what it borders (dark gold round gold, dark
+    teal round a teal gem), as vanilla's swords have. Cells where keep_open(x, y) is true get no outline."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    px = img.load()
+    for (x, y), colour in pixels.items():
+        px[x, y] = colour
+    for y in range(32):
+        for x in range(32):
+            if (x, y) in pixels or (keep_open and keep_open(x, y)):
+                continue
+            near = [pixels[q] for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)) if q in pixels]
+            if near:
+                px[x, y] = tuple(min(255, int(sum(c[i] for c in near) / len(near) * 0.22 + edge[i] * 0.6))
+                                 for i in range(3)) + (255,)
+    return img
 
-    Placed pixel by pixel on the sword's diagonal (x + y = 31): every blade row is the same four pixels, one
-    step left per row down, so the edges are true 45 degree lines. The cuts run level, along pixel rows."""
+
+def put(px, key, cells):
+    """cells: {palette letter: [(x, y), ...]}"""
+    for letter, spots in cells.items():
+        for spot in spots:
+            px[spot] = hx(key[letter])
+
+
+def mirrored(cells):
+    """The same cells reflected across the blade (x + y = 30), for the guard's far side."""
+    return {letter: [(30 - y, 30 - x) for x, y in spots] for letter, spots in cells.items()}
+
+
+def block3(px, x, y, codes):
+    """A 3x3 gem or pommel, nine colours row by row."""
+    for n, code in enumerate(codes):
+        px[x + n % 3, y + n // 3] = hx(code)
+
+
+def grip(px, rows):
+    """Three pixels to a row down the hilt, rows 23 to 25."""
+    for y, codes in zip((23, 24, 25), rows):
+        for k, code in enumerate(codes):
+            px[29 - y + k, y] = hx(code)
+
+
+def elsewhere():
+    """A blade of dusk with an edge of light: deep violet inside a bright rim. It is cut clean through in two
+    places and the middle length has slid out of line; the cut faces blaze and a thread of light joins them.
+    A crescent guard rimmed in the same light, its lit horn the taller, round an Eye of Ender."""
     px = {}
-    lit, core, mid, dark = hx("#64508e"), hx("#a85fff"), hx("#483968"), hx("#281e3c")
-    glow = (hx("#a85fff"), hx("#f5e6ff"), hx("#c58aff"), hx("#8838ec"))       # a cut face, lit from within
-    # (first row, last row, sideways slip): tip, middle, base
-    for top, bottom, slip in ((3, 7, 0), (10, 14, 2), (17, 20, 0)):
+    body = ("#c58aff", "#5a2d89", "#331951", "#45226c", "#8838ec")
+    cut = ("#e0baff", "#f5e6ff", "#f5e6ff", "#e0baff", "#c58aff")
+    for top, bottom, slip in ((3, 7, 0), (10, 14, 2), (17, 20, 0)):           # tip, middle, base
         for y in range(top, bottom + 1):
-            cut = (y == bottom and bottom != 20) or (y == top and top != 3)
-            for k, colour in enumerate(glow if cut else (lit, core, mid, dark)):
-                x = 29 - y + k + slip
-                if x <= 28:                                                   # the point: a square corner
-                    px[x, y] = colour
-    px[27, 3] = hx("#c58aff")                                                 # the thread brightens at the point
-    for xy in ((23, 8), (23, 9), (17, 15), (16, 15), (15, 16), (14, 16)):     # the thread crossing each cut, unbroken
-        px[xy] = hx("#c58aff")
-    # crescent guard: a bar square across the blade, a tall horn on the lit side and a short one below
-    for y in range(18, 26):
-        px[y - 13, y] = hx("#64508e") if y < 21 else hx("#483968")
-        px[y - 12, y] = hx("#483968") if y < 21 else hx("#281e3c")
-    for y, xs in ((17, (6, 7)), (16, (7, 8)), (15, (8, 9))):                  # tall horn
-        px[xs[0], y], px[xs[1], y] = hx("#64508e"), hx("#483968")
-    px[9, 14] = hx("#a85fff")
-    for y, xs in ((24, (13, 14)), (23, (14, 15))):                            # short horn
-        px[xs[0], y], px[xs[1], y] = hx("#483968"), hx("#281e3c")
-    # the Eye of Ender where blade meets guard
-    eye = ("#9af5dc", "#3fd8b0", "#3fd8b0", "#3fd8b0", "#041a16", "#1bb08d", "#1bb08d", "#1bb08d", "#12856c")
-    for n, code in enumerate(eye):
-        px[8 + n % 3, 20 + n // 3] = hx(code)
-    for y in range(23, 27):                                                   # grip: void cloth, two tones
-        px[30 - y, y] = hx("#5a2d89") if y % 2 else hx("#45226c")
-        px[31 - y, y] = hx("#331951") if y % 2 else hx("#231139")
-    gem = ("#e0baff", "#c58aff", "#a85fff", "#c58aff", "#a85fff", "#8838ec", "#a85fff", "#8838ec", "#6420c2")
-    for n, code in enumerate(gem):                                            # pommel: an end crystal
-        px[2 + n % 3, 27 + n // 3] = hx(code)
+            face = (y == bottom and bottom != 20) or (y == top and top != 3)
+            for k, code in enumerate(cut if face else body):
+                if 28 - y + k + slip <= 28:
+                    px[28 - y + k + slip, y] = hx(code)
+    for spot in ((25, 3), (26, 3), (27, 3)):                                  # the rim closes over the point
+        px[spot] = hx("#c58aff")
+    px[28, 3] = hx("#8838ec")
+    for spot in ((23, 8), (23, 9), (17, 15), (16, 15), (15, 16), (14, 16)):   # the thread across each cut
+        px[spot] = hx("#e0baff")
+    put(px, {"1": "#c58aff", "3": "#45226c", "v": "#e0baff"},
+        {"1": [(6, 20), (5, 19), (4, 18), (4, 17), (5, 16), (6, 15), (7, 14)],
+         "3": [(7, 21), (7, 20), (6, 19), (5, 18), (5, 17), (6, 16), (7, 15), (8, 14)], "v": [(8, 13)]})
+    put(px, {"3": "#8838ec", "5": "#281e3c", "w": "#a85fff"},
+        {"3": [(9, 23), (10, 24), (11, 25), (12, 26)], "5": [(10, 23), (11, 24), (12, 25), (13, 25), (13, 26)], "w": [(14, 25)]})
+    block3(px, 8, 20, ("#9af5dc", "#3fd8b0", "#3fd8b0", "#3fd8b0", "#041a16", "#1bb08d", "#1bb08d", "#1bb08d", "#12856c"))
+    grip(px, (("#5a2d89", "#45226c", "#331951"), ("#c58aff", "#8838ec", "#6420c2"), ("#5a2d89", "#45226c", "#331951")))
+    block3(px, 2, 26, ("#f5e6ff", "#c58aff", "#a85fff", "#c58aff", "#a85fff", "#8838ec", "#a85fff", "#8838ec", "#6420c2"))
     return plot_sword(px, R["obsid"][0], keep_open=lambda x, y: y in (8, 9, 15, 16) and x >= 11)
 
 
 def thirst():
-    """A flamberge: a waving blade with a blood channel down its heart, raised bat-wing quillons with gold
-    claws, a blood jewel in the guard and a gold skull for a pommel."""
-    def fn(t, s):
-        a = abs(s)
-        if t < -1.2:
-            return None
-        if t < 2.4:                                              # skull pommel
-            r = math.hypot(t - 0.8, s)
-            if r > 2.0:
-                return None
-            return tone("crimson", 0.0) if abs(a - 0.8) < 0.42 and 0.7 < t < 1.7 else tone("gold", 0.85 if s < 0 else 0.55)
-        if t < 6.0:                                              # grip: black leather, crimson cord
-            return (tone("crimson", 0.55) if int(t * 1.4) % 3 == 0 else tone("iron", 0.35)) if a <= 0.75 else None
-        u = t - 6.7 - a * 0.5                                    # quillons swept up toward the blade
-        if a <= 5.0 and -0.9 <= u <= 0.9:
-            if a <= 1.0:
-                return tone("crimson", 0.95 if s < 0 else 0.7)      # the jewel
-            return tone("gold", 1.0) if a > 4.1 else lit_side("gold", s, 0.8, 0.55)
-        if t < 7.4:
-            return None
-        w = 1.45 + 0.75 * math.sin((t - 7.4) * 1.15)
-        if t > SWORD_LENGTH - 5.0:
-            w = min(w, 1.9 * (SWORD_LENGTH + 0.3 - t) / 5.3)
-        if a > w + 0.2 or t > SWORD_LENGTH + 0.3:
-            return None
-        if a < 0.5:
-            return tone("crimson", 0.86 + 0.14 * math.sin(t * 0.9))
-        return lit_side("crimson", s, 0.6, 0.32)
-    return draw_sword(fn, R["crimson"][0])
+    """A flamberge: the blade snakes from side to side as it rises, a dark blood channel down its heart with
+    beads of blood in it. The guard is a pair of bat wings, three gold fingers to each with crimson skin
+    scalloped between them, round a ruby set in gold; the pommel is a bone skull."""
+    px = {}
+    wave = (0, 0, 1, 1, 0, 0, -1, -1)
+    for y in range(3, 21):
+        slip = 0 if y < 6 else wave[(20 - y) % 8]
+        row = ["#ff8a8f", "#cc2a36", "#3a060b", "#82111c", "#5c0b13"]
+        if y % 4 == 2:
+            row[2] = "#ff8a8f"                                               # a bead of blood in the channel
+        if y in (7, 8, 9):
+            row[1] = "#e8505a"                                               # the glint
+        for k, code in enumerate(row):
+            if 28 - y + k + slip <= 28:
+                px[28 - y + k + slip, y] = hx(code)
+    wing = {"g": [(7, 20), (6, 19), (5, 18), (4, 17), (3, 16), (2, 15),          # the low finger, square to the blade
+                  (5, 17), (5, 16), (4, 15), (4, 14), (3, 13),                   # the middle finger
+                  (6, 18), (6, 17), (6, 16), (7, 15), (7, 14), (7, 13), (8, 12)],  # the high finger
+            "h": [(1, 14), (3, 12), (8, 11)],                                    # claws
+            "n": [(4, 16), (3, 15), (3, 14)],                                    # skin, low panel
+            "m": [(5, 15), (6, 15), (5, 14), (6, 14), (4, 13), (6, 13)]}         # skin, high panel
+    put(px, {"g": "#e6b239", "h": "#ffe993", "m": "#a81a27", "n": "#82111c"}, wing)
+    put(px, {"g": "#c99022", "h": "#e6b239", "m": "#82111c", "n": "#5c0b13"}, mirrored(wing))
+    block3(px, 8, 20, ("#ffe993", "#ff8a8f", "#e6b239", "#ff8a8f", "#cc2a36", "#a81a27", "#e6b239", "#a81a27", "#9c6715"))
+    grip(px, (("#43434e", "#31313a", "#17171c"), ("#cc2a36", "#a81a27", "#5c0b13"), ("#43434e", "#31313a", "#17171c")))
+    skull = {"o": [(2, 26), (3, 26), (1, 27), (2, 27), (3, 27)], "p": [(4, 26), (4, 27), (1, 28), (3, 28)],
+             "r": [(5, 27), (5, 28), (2, 29), (4, 29)], "e": [(2, 28), (4, 28)], "m": [(3, 29)]}
+    put(px, {"o": "#efebda", "p": "#d8d3bd", "r": "#bab49b", "e": "#1c0204", "m": "#3a060b"}, skull)
+    return plot_sword(px, R["crimson"][0])
 
 
 def covenant():
-    """A broad spell-knight's blade of dark steel with a line of gold runes down the fuller, its point split
-    into two ivory fangs. A gold ring guard holds an emerald; a purple sash trails from the pommel."""
-    tc, length = 7.9, 33.5
-
-    def fn(t, s):
-        a = abs(s)
-        if 0.0 <= t <= 1.5 and 1.3 <= s <= 3.2:                  # sash tuft at the pommel
-            return tone("sash", 0.7 if s < 2.3 else 0.45)
-        if t < -0.8:
-            return None
-        if t < 1.8:                                              # pommel cap
-            return lit_side("gold", s, 0.8, 0.5) if a <= 1.35 else None
-        if t < 5.2:                                              # grip: brown leather
-            return tone("leather", 0.55 if int(t * 1.4) % 2 else 0.35) if a <= 0.8 else None
-        r = math.hypot(t - tc, s)
-        if r <= 1.45:                                            # the emerald
-            return tone("emerald", 1.0 if (s < -0.2 and t > tc) else 0.75 if s < 0.3 else 0.5)
-        if r <= 3.1:
-            return lit_side("gold", s, 0.85 if r > 2.4 else 0.65, 0.5)
-        if t < tc + 2.2 or t > length + 0.3:
-            return None
-        w = 2.3
-        far = t - (length - 6.5)
-        if far > 0:                                              # the point parts into two fangs that spread
-            notch = far * 0.36 + max(0.0, far - 5.5) * 0.5
-            if a < notch:
-                return None
-            w = 2.3 + far * 0.16
-        if a > w + 0.15:
-            return None
-        if far > 3.2:
-            return tone("bone", 1.0 if s < 0 else 0.7)              # ivory points
-        if a < 0.55:
-            return tone("gold", 0.75) if int(t / 1.42) % 2 == 0 else tone("slate", 0.25)
-        return lit_side("slate", s, 0.72, 0.42)
-    return draw_sword(fn, R["slate"][0])
+    """A broad spell-knight's blade of dark steel with a line of gold inlaid down it, its point parted into
+    two ivory fangs. A gold ring guard holds an emerald, and each quillon ends in a fang; a purple sash binds
+    the grip."""
+    px = {}
+    for y in range(6, 21):
+        row = ["#9aa29b", "#7b847d", "#e6b239" if y % 4 else "#c99022", "#4c534e", "#3a403c"]
+        if y in (9, 10):
+            row[0] = "#dde2eb"
+        for k, code in enumerate(row):
+            px[28 - y + k, y] = hx(code)
+    del px[24, 6]                                                            # the parting runs four rows deep
+    put(px, {"i": "#efebda", "j": "#d8d3bd", "k": "#bab49b", "s": "#9aa29b", "t": "#7b847d"},
+        {"i": [(26, 2), (25, 3), (24, 4)], "j": [(26, 3), (25, 4), (27, 4)], "k": [(28, 4), (26, 5), (27, 5)],
+         "s": [(23, 5)], "t": [(24, 5)]})
+    block3(px, 8, 20, ("#c4ffd9", "#7ff0a9", "#3ddb7a", "#7ff0a9", "#3ddb7a", "#20b863", "#3ddb7a", "#20b863", "#11703c"))
+    put(px, {"h": "#ffe993", "g": "#f6d259", "d": "#c99022", "e": "#9c6715"},
+        {"h": [(8, 19), (9, 19)], "g": [(10, 19), (7, 20), (7, 21)], "d": [(7, 22), (11, 20), (11, 21)],
+         "e": [(9, 23), (10, 23), (11, 22)]})
+    quillon = {"g": [(6, 20), (5, 19), (4, 18)], "d": [(6, 19), (5, 18)], "i": [(4, 17), (4, 16), (5, 15)], "j": [(5, 17), (5, 16)]}
+    put(px, {"g": "#f6d259", "d": "#e6b239", "i": "#efebda", "j": "#d8d3bd"}, quillon)
+    put(px, {"g": "#c99022", "d": "#9c6715", "i": "#d8d3bd", "j": "#bab49b"}, mirrored(quillon))
+    grip(px, (("#7c5332", "#644025", "#382112"), ("#ad78d3", "#7741a3", "#48226c"), ("#7c5332", "#644025", "#382112")))
+    px[8, 23] = hx("#c99022")                                                # the ring sits over the top of the grip
+    block3(px, 2, 26, ("#ffe993", "#f6d259", "#e6b239", "#f6d259", "#3ddb7a", "#c99022", "#e6b239", "#c99022", "#9c6715"))
+    return plot_sword(px, R["slate"][0])
 
 
 def briar():
-    """A living blade: a bough of dark thornwood that starts true and bows up toward the point like a sabre,
-    green along its cutting edge, hooked thorns down its back. Two leaves make the guard round a red rose;
-    vine binds the grip to a root-knot pommel.
-
-    Placed pixel by pixel. The blade is four pixels to a row; `back` gives the first of them for each row, one
-    step per row at first, then every second row, then every third, which is what makes the curve smooth."""
+    """A living blade: a bough of dark thornwood that starts true and bows up to the point like a sabre, green
+    along its cutting edge, three hooked thorns down its back. Two veined leaves, the lit one longer, make the
+    guard round a red rose; vine binds the grip to a root-knot pommel."""
     px = {}
-    bark_l, bark_m, leaf_d, leaf_l, leaf_h = hx("#987449"), hx("#644a2e"), hx("#3d852c"), hx("#7cc456"), hx("#a8de7c")
-    back = {20: 9, 19: 10, 18: 11, 17: 12, 16: 13, 15: 14, 14: 15, 13: 16, 12: 17, 11: 18, 10: 18, 9: 19, 8: 19,
-            7: 20, 6: 20, 5: 20, 4: 21, 3: 21}
+    back = {20: 8, 19: 9, 18: 10, 17: 11, 16: 12, 15: 13, 14: 14, 13: 15, 12: 16, 11: 17, 10: 17, 9: 18, 8: 18,
+            7: 19, 6: 19, 5: 19, 4: 20, 3: 20, 2: 20, 1: 20}
     for y, x in back.items():
-        row = [bark_l, bark_m, leaf_d, leaf_h if y % 3 == 0 else leaf_l]
-        if y == 4:
-            row = [bark_l, bark_m, leaf_l]                                     # the edge sweeps in to the point
-        elif y == 3:
-            row = [bark_m, leaf_l]
-        for k, colour in enumerate(row):
-            px[x + k, y] = colour
-    px[21, 2] = leaf_h
-    for y in (17, 13, 9):                                                     # thorns, hooked back toward the hilt
+        row = ["#b48d5c" if y in (7, 8, 10) else "#987449", "#7c5d3a", "#4f3923", "#3d852c",
+               "#a8de7c" if y % 3 == 0 else "#7cc456"]
+        row = {4: row[:2] + row[3:], 3: [row[1], row[3], row[4]], 2: [row[3], row[4]], 1: ["#a8de7c"]}.get(y, row)
+        for k, code in enumerate(row):
+            px[x + k, y] = hx(code)
+    for y in (17, 13, 9):                                                    # thorns, hooked back toward the hilt
         px[back[y] - 1, y] = hx("#4f3923")
-        px[back[y] - 2, y] = hx("#efebda")
-    # leaf guard: one leaf up and back, one down and forward, each with a pale vein
-    for (x, y), code in {(7, 20): "#a8de7c", (6, 19): "#a8de7c", (5, 18): "#a8de7c", (4, 17): "#7cc456",
-                         (7, 19): "#7cc456", (6, 18): "#7cc456", (5, 17): "#57a53c",
-                         (6, 20): "#3d852c", (5, 19): "#3d852c", (4, 18): "#2a6620",
-                         (11, 22): "#a8de7c", (12, 23): "#a8de7c", (13, 24): "#a8de7c", (14, 25): "#57a53c",
-                         (12, 22): "#7cc456", (13, 23): "#7cc456", (14, 24): "#57a53c",
-                         (11, 23): "#3d852c", (12, 24): "#3d852c", (13, 25): "#2a6620"}.items():
-        px[x, y] = hx(code)
-    rose = ("#ff9aa5", "#ee6274", "#d8344a", "#ee6274", "#5e0b1c", "#b51d36", "#d8344a", "#b51d36", "#8a1228")
-    for n, code in enumerate(rose):
-        px[8 + n % 3, 20 + n // 3] = hx(code)
-    for y in range(23, 27):                                                   # grip: bark bound with vine
-        vine = y % 2 == 0
-        px[30 - y, y] = hx("#57a53c") if vine else hx("#7c5d3a")
-        px[31 - y, y] = hx("#2a6620") if vine else hx("#4f3923")
-    knot = ("#987449", "#7c5d3a", "#644a2e", "#7c5d3a", "#3b2a1a", "#4f3923", "#644a2e", "#4f3923", "#3b2a1a")
-    for n, code in enumerate(knot):                                           # pommel: a root knot
-        px[2 + n % 3, 27 + n // 3] = hx(code)
+        px[back[y] - 2, y] = hx("#c9a36b")
+    leaf = {"v": [(7, 20), (6, 19), (5, 18), (4, 17)], "t": [(3, 16)], "u": [(7, 19), (6, 18), (5, 17)],
+            "l": [(6, 20), (5, 19), (4, 18)]}                                  # long leaf, pale vein to its point
+    put(px, {"v": "#a8de7c", "t": "#7cc456", "u": "#7cc456", "l": "#3d852c"}, leaf)
+    short = {"v": [(7, 20), (6, 19), (5, 18)], "t": [(4, 17)], "u": [(7, 19), (6, 18)], "l": [(6, 20), (5, 19)]}
+    put(px, {"v": "#7cc456", "t": "#57a53c", "u": "#57a53c", "l": "#2a6620"}, mirrored(short))
+    block3(px, 8, 20, ("#ff9aa5", "#ee6274", "#d8344a", "#ee6274", "#5e0b1c", "#b51d36", "#d8344a", "#b51d36", "#8a1228"))
+    grip(px, (("#987449", "#7c5d3a", "#4f3923"), ("#7cc456", "#57a53c", "#2a6620"), ("#987449", "#7c5d3a", "#4f3923")))
+    block3(px, 2, 26, ("#b48d5c", "#987449", "#7c5d3a", "#987449", "#3b2a1a", "#644a2e", "#7c5d3a", "#644a2e", "#3b2a1a"))
     return plot_sword(px, R["bark"][0])
 
 
 def hush():
-    """A needle of sculk-black steel that narrows all the way from guard to point, a thread of pale light down
-    its heart. The guard is an open eye; a feeler rises from each corner, one longer than the other."""
-    def fn(t, s):
-        a = abs(s)
-        if t < -0.7:
-            return None
-        if t < 2.0:                                              # pommel: a mote of cold light
-            r = math.hypot(t - 0.7, s)
-            return (tone("cyan", 1.0) if r < 0.8 else tone("cyan", 0.45)) if r <= 1.5 else None
-        if t < 5.2:                                              # grip: sculk bound in stone
-            return (tone("deepslate", 0.7) if int(t * 1.4) % 3 == 0 else tone("sculk", 0.55)) if a <= 0.72 else None
-        lid = 2.0 * (1.0 - (a / 4.0) ** 1.6) if a <= 4.0 else -1.0   # the eye across the guard
-        d = abs(t - 7.3)
-        if d <= lid + 0.2:
-            if d > lid - 0.55:
-                return lit_side("deepslate", s, 0.95, 0.7)           # lids
-            r = math.hypot(t - 7.3, s * 0.85)
-            if r < 0.9:
-                return (2, 6, 8, 255)                            # pupil
-            return tone("cyan", 0.7) if r < 2.0 else tone("bone", 0.9)
-        if -4.0 <= s <= -3.0 and 7.3 < t <= 12.2:                # the long feeler
-            return tone("cyan", 0.9) if t > 11.0 else tone("sculk", 0.9)
-        if 3.0 <= s <= 4.0 and 7.3 < t <= 10.0:                  # the short one
-            return tone("cyan", 0.9) if t > 9.0 else tone("sculk", 0.7)
-        if t < 8.6 or t > SWORD_LENGTH + 0.3:
-            return None
-        w = 0.3 + 1.1 * (1.0 - (t - 8.6) / (SWORD_LENGTH - 8.6))
-        if a > w + 0.1:
-            return None
-        if a < 0.4:
-            return tone("cyan", 0.75) if int(t * 0.9) % 3 == 0 else tone("sculk", 0.9)
-        return lit_side("sculk", s, 1.0, 0.6)
-    return draw_sword(fn, R["sculk"][0])
+    """A needle: sculk-black steel that narrows all the way from guard to point, a pulse of pale light running
+    up its heart. The guard is one wide-open eye set across the hilt, bright whites round a cyan iris split by
+    a black slit pupil, between dark lids; a feeler curls from each corner of it, the lit one longer."""
+    px = {}
+    pulse = ("#7ff2f8", "#1fc0cc", "#11949f", "#154049")
+    for y in range(2, 19):                                                   # the eye's upper lid is row 19
+        if y >= 9:
+            row = ["#3f8c93", pulse[y % 4], "#0f2e37"]
+        elif y >= 4:
+            row = ["#3f8c93", pulse[y % 4]]
+        else:
+            row = [None, "#d4fdff" if y == 2 else "#7ff2f8"]
+        for k, code in enumerate(row):
+            if code:
+                px[29 - y + k, y] = hx(code)
+    grip(px, (("#2a6f78", "#154049", "#0a2027"), ("#858b98", "#535864", "#30333b"), ("#2a6f78", "#154049", "#0a2027")))
+    # the eye: upright, nine pixels wide and five tall, so whites, iris and slit still show at inventory size
+    eye = {"L": [(7, 19), (8, 19), (9, 19), (10, 19), (11, 19), (6, 20), (12, 20)], "M": [(5, 21), (13, 21)],
+           "D": [(7, 23), (8, 23), (9, 23), (10, 23), (11, 23), (6, 22), (12, 22)],
+           "W": [(7, 20), (6, 21), (7, 21), (7, 22)], "w": [(11, 20), (11, 21), (12, 21), (11, 22)],
+           "i": [(8, 20), (10, 20)], "j": [(8, 21), (10, 21)], "k": [(8, 22), (10, 22)], "P": [(9, 20), (9, 21), (9, 22)]}
+    put(px, {"L": "#2a6f78", "M": "#3f8c93", "D": "#1d555f", "W": "#efebda", "w": "#d8d3bd", "i": "#29dfeb",
+             "j": "#1fc0cc", "k": "#11949f", "P": "#020608"}, eye)
+    put(px, {"s": "#1fc0cc", "c": "#d4fdff"}, {"s": [(4, 20), (3, 19), (3, 18)], "c": [(4, 17)]})
+    put(px, {"s": "#11949f", "c": "#7ff2f8"}, {"s": [(14, 22), (15, 23)], "c": [(15, 24)]})
+    block3(px, 2, 26, ("#d4fdff", "#7ff2f8", "#29dfeb", "#7ff2f8", "#29dfeb", "#1fc0cc", "#29dfeb", "#1fc0cc", "#11949f"))
+    return plot_sword(px, R["sculk"][0])
 
 
 SWORD_ART = {"elsewhere": elsewhere, "thirst": thirst, "covenant": covenant, "briar": briar, "hush": hush}
