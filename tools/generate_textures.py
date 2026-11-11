@@ -8,7 +8,7 @@ Sources (read straight from jars, never committed):
     are palette-remapped per school, so school dragonsteel reads as part of the same family.
   * Minecraft 1.20.1 client assets (ForgeGradle cache): fire_0/fire_1, water_still and the fire resistance
     effect icon are recoloured for holy fire, the cauldron liquids and the Holy Fire effect.
-Dawn, the staves' textures and every glow/halo detail are drawn here.
+Dawn and every glow/halo detail are drawn here. The staves (models and sheets) come from generate_staves.py.
 See docs/art/CREDITS.md.
 """
 import io
@@ -249,127 +249,6 @@ def outline(img, colour):
 
 
 # ---------------------------------------------------------------------------------------------
-# Staff textures (32x32 sheet used by the 3D item models)
-# ---------------------------------------------------------------------------------------------
-STAFF_LAYOUT = {
-    # region: (u, v, w, h) in texels of a 32x32 sheet; the model JSON uses the same rectangles (/2 for UV)
-    "shaft": (0, 0, 4, 32),
-    "collar": (4, 0, 8, 4),
-    "disc": (12, 0, 12, 12),
-    "side": (12, 12, 12, 12),
-    "gem": (24, 0, 8, 4),
-}
-
-
-def staff_sheet(school):
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    px = img.load()
-    rng = random.Random(f"staff-{school}")
-    u, v, w, h = STAFF_LAYOUT["shaft"]
-    for y in range(h):
-        for x in range(w):
-            if school not in ("holy", "ender"):
-                c = generic_staff_px(school, "shaft", x, y, rng)
-            elif school == "holy":
-                band = (y % 8) in (0, 1)
-                c = ramp("gold", 0.75 if band else 0.35 + 0.1 * (x % 2)) if band or x in (0, 3) else ramp("silver", 0.8 - 0.15 * (x % 2))
-            else:
-                band = (y % 9) == 0
-                c = ramp("purpur", 0.6) if band else ramp("obsid", 0.45 + 0.1 * rng.random())
-                if not band and rng.random() < 0.05:
-                    c = ramp("violet", 0.4)
-            px[u + x, v + y] = c
-    u, v, w, h = STAFF_LAYOUT["collar"]
-    for y in range(h):
-        for x in range(w):
-            c = ramp("gold", 0.85 - 0.12 * y) if school == "holy" else ramp("purpur", 0.75 - 0.12 * y) if school == "ender" \
-                else along(TEX[school]["accent"], 0.85 - 0.12 * y)
-            px[u + x, v + y] = c
-    u, v, w, h = STAFF_LAYOUT["gem"]
-    for y in range(h):
-        for x in range(w):
-            c = ramp("sun", 1.0 - 0.15 * y) if school == "holy" else ramp("violet", 0.9 - 0.15 * y) if school == "ender" \
-                else along(GEM[school], 1.0 - 0.15 * y)
-            px[u + x, v + y] = c
-    for key in ("disc", "side"):
-        u, v, w, h = STAFF_LAYOUT[key]
-        cx, cy = w / 2, h / 2
-        for y in range(h):
-            for x in range(w):
-                dx, dy = x + 0.5 - cx, y + 0.5 - cy
-                d = math.hypot(dx, dy)
-                ang = math.atan2(dy, dx)
-                if school not in ("holy", "ender"):
-                    c = generic_staff_head(school, d, ang, dx, dy)
-                    if c is None:
-                        continue
-                elif school == "holy":
-                    ring = 3.6 <= d <= 4.9
-                    ray = d > 4.9 and d < 6.0 and abs(math.sin(ang * 4)) > 0.82
-                    core = d < 2.0
-                    if core:
-                        c = ramp("sun", 1.0)
-                    elif ring:
-                        c = ramp("sun", 0.55) if d < 4.2 else ramp("gold", 0.6)
-                    elif ray:
-                        c = ramp("sun", 0.4)
-                    else:
-                        continue
-                else:
-                    # crescent prongs opening upward, cradling the crystal
-                    crescent = 3.4 <= d <= 5.6 and dy > -2.5 and not (abs(dx) < 1.6 and dy > 3.6)
-                    tips = d <= 5.6 and dy <= -2.5 and abs(dx) >= 3.6
-                    if crescent or tips:
-                        c = ramp("obsid", 0.65) if d > 4.6 else ramp("purpur", 0.55)
-                        if 4.4 < d < 4.8:
-                            c = ramp("violet", 0.35)
-                    else:
-                        continue
-                px[u + x, v + y] = c
-    return img
-
-
-GEM = {"blood": ("crimson", 0.5, 1.0), "evocation": ("emerald", 0.4, 1.0), "nature": ("moss", 0.45, 1.0),
-       "eldritch": ("cyan", 0.2, 1.0)}
-
-
-def generic_staff_px(school, part, x, y, rng):
-    """Shaft for the newer schools: school metal with accent bands every 8 texels."""
-    c = TEX[school]
-    if (y % 8) in (0, 1):
-        return along(c["accent"], 0.75 if y % 8 == 0 else 0.5)
-    return along(c["metal"], 0.75 - 0.2 * (x % 2) - (0.1 if x == 3 else 0.0))
-
-
-def generic_staff_head(school, d, ang, dx, dy):
-    """Headpiece for the newer schools, one motif each around the gem."""
-    c = TEX[school]
-    if school == "blood":        # a crown of five thorns round a ring
-        ring = 3.4 <= d <= 4.6
-        thorn = 4.6 < d < 6.0 and abs(math.sin(ang * 2.5)) > 0.9 and dy < 1.5
-        if ring:
-            return along(c["metal"], 0.7 if d < 4.0 else 0.4)
-        return ramp("gold", 0.6) if thorn else None
-    if school == "evocation":    # gold ring with four emerald studs
-        ring = 3.6 <= d <= 4.9
-        stud = 4.9 < d < 6.0 and abs(math.sin(ang * 2)) > 0.92
-        if ring:
-            return ramp("gold", 0.75 if d < 4.2 else 0.45)
-        return ramp("emerald", 0.75) if stud else None
-    if school == "nature":       # a wreath of leaves, opening upward
-        wreath = 3.2 <= d <= 5.4 and dy > -3.0
-        leaf = wreath and int((ang + math.pi) * 3) % 2 == 0
-        if not wreath:
-            return None
-        return ramp("moss", 0.75 if leaf else 0.45) if d > 4.2 else ramp("bark", 0.6)
-    ring = 3.6 <= d <= 5.0       # eldritch: a lidless ring of small eyes
-    if not ring:
-        return None
-    eye = abs(math.sin(ang * 3)) > 0.93 and 4.0 < d < 4.6
-    return ramp("cyan", 0.8) if eye else along(c["metal"], 0.55 if d < 4.3 else 0.3)
-
-
-# ---------------------------------------------------------------------------------------------
 # Holy fire, cauldron liquids, effect icon
 # ---------------------------------------------------------------------------------------------
 def holy_fire_frames(name):
@@ -427,7 +306,6 @@ def main():
         save(remap(ingot, ingot_fn(school, tempered=True)), f"item/tempered_{school}_steel.png")
         save(remap(read_png(IAF_JAR, "assets/iceandfire/textures/item/ice_dragon_blood.png"), blood_fn(school)),
              f"item/{school}_dragon_blood.png")
-        save(staff_sheet(school), f"item/{school}_staff.png")
         liquid, meta = tinted_liquid(school)
         save(liquid, f"block/{school}_dragon_blood_still.png", meta)
     save(dawn(), "item/dawn.png")

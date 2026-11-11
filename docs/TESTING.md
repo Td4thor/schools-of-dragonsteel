@@ -55,3 +55,13 @@ Nature (dev.6) and Eldritch (dev.7).
    set on, no skin should show at the waist. Screenshots are welcome.
 7. **Apex domains linger.** Two Apex spells cast in the same place within a few seconds can clash. If a second
    forging seems to do nothing, wait for the first spell's domain to fade.
+
+## Staves (0.1.0-dev.10)
+
+The six Dragon Priest staves are rebuilt as full 3D models (`tools/generate_staves.py`; software previews with
+`tools/render_item_model.py`, sheet in `docs/art/staves_preview.png`). `/give @s dragonsteel_schools:gilded_dragon_priest_staff`
+(also `umbral_`, `sanguine_`, `emerald_`, `verdant_`, `abyssal_`). Check each in the inventory, in first person and
+in third person (F5, both views), by day and at night: the sun core and rays, the crystal and Eye of Ender, the blood
+jewel, the emeralds, the berries, and the great eye with every tendril tip should glow in the dark. Look for
+flicker where parts overlap, parts that seem to hang loose, and whether the heads sit well in the hand next to
+Spellbooks' Crimson, Silver and Thunderous staves.

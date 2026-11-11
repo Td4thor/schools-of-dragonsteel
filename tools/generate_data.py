@@ -8,7 +8,10 @@ Porting to Ice and Fire 2 = edit IAF below (forge recipe type, dragon types, blo
 """
 import json
 import shutil
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src/main/resources"
@@ -86,17 +89,6 @@ BIG_AXE_DISPLAY = {
     "firstperson_lefthand": {"rotation": [-20, -90, -80], "translation": [1.13, 5.2, -0.26], "scale": [1.36, 1.36, 0.68]},
     "gui": {"rotation": [0, 0, 0], "translation": [-1, -1, 0], "scale": [1.1, 1.1, 1.1]},
 }
-# Iron's Spells staff display (graybeard_staff.json)
-STAFF_DISPLAY = {
-    "thirdperson_righthand": {"translation": [0, 3, 1.25]},
-    "thirdperson_lefthand": {"translation": [0, 3, 1.25]},
-    "firstperson_righthand": {"translation": [1.5, 0, -2.75]},
-    "firstperson_lefthand": {"translation": [1.5, 0, -2.75]},
-    "ground": {"translation": [0, 9.5, 0], "scale": [0.5, 0.5, 0.5]},
-    "gui": {"rotation": [-13, 128, 65], "translation": [0.75, 0.5, 0], "scale": [0.75, 0.75, 0.75]},
-    "fixed": {"translation": [0, 1.75, -0.75], "scale": [0.55, 0.55, 0.55]},
-}
-
 written = []
 
 
@@ -129,38 +121,6 @@ def models():
                 write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{name}"}})
         write(A / "models/item" / f"{cfg['sword']}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{cfg['sword']}"}, "display": BIG_SWORD_DISPLAY})
-        write(A / "models/item" / f"{cfg['staff']}.json", staff_model(s))
-
-
-def face(uv, rot=None):
-    f = {"uv": uv, "texture": "#0"}
-    if rot:
-        f["rotation"] = rot
-    return f
-
-
-def staff_model(s):
-    """Iron's-style 3D staff: shaft, two collars, a crossed pair of cut-out headpiece planes and a gem.
-    UVs are in 0-16 units over the 32x32 sheet painted by generate_textures.py (STAFF_LAYOUT / 2)."""
-    shaft_n, shaft_e = [0, 0, 1, 16], [1, 0, 2, 16]
-    collar = [2, 0, 4, 1]
-    disc, side, gem = [6, 0, 12, 6], [6, 6, 12, 12], [12, 0, 13, 1]
-    elements = [
-        {"from": [7.5, -15, 7.5], "to": [8.5, 15, 8.5],
-         "faces": {"north": face(shaft_n), "east": face(shaft_e), "south": face(shaft_n), "west": face(shaft_e),
-                   "up": face([0, 0, 1, 1]), "down": face([0, 15, 1, 16])}},
-        {"from": [7, 12.5, 7], "to": [9, 13.5, 9],
-         "faces": {d: face(collar) for d in ("north", "east", "south", "west", "up", "down")}},
-        {"from": [7, -13, 7], "to": [9, -12, 9],
-         "faces": {d: face(collar) for d in ("north", "east", "south", "west", "up", "down")}},
-        {"from": [5, 14, 8], "to": [11, 20, 8], "faces": {"north": face(disc), "south": face(disc)}},
-        {"from": [8, 14, 5], "to": [8, 20, 11], "faces": {"east": face(side), "west": face(side)}},
-        {"from": [7.25, 16.25, 7.25], "to": [8.75, 17.75, 8.75],
-         "faces": {d: face(gem) for d in ("north", "east", "south", "west", "up", "down")}},
-    ]
-    return {"credit": "Ice and Fire: Schools of Dragonsteel (tools/generate_data.py)", "texture_size": [32, 32],
-            "textures": {"0": f"{MOD}:item/{s}_staff", "particle": f"{MOD}:item/{s}_staff"},
-            "elements": elements, "display": STAFF_DISPLAY}
 
 
 def blocks():
@@ -307,6 +267,10 @@ def main():
         shutil.rmtree(A / sub, ignore_errors=True)
     shutil.rmtree(RES / "data", ignore_errors=True)
     models()
+    import generate_staves   # the staff models and their sheets (needs Pillow); models/ was just wiped
+    problems = generate_staves.generate()
+    if problems:
+        raise SystemExit("\n".join(problems))
     animations()
     cauldrons = blocks()
     lang(cauldrons)
