@@ -338,8 +338,8 @@ def elsewhere():
 
 def thirst():
     """A flamberge: the blade snakes from side to side as it rises, a dark blood channel down its heart with
-    beads of blood in it. The guard is a pair of bat wings, three gold fingers to each with crimson skin
-    scalloped between them, round a ruby set in gold; the pommel is a bone skull."""
+    beads of blood in it. The guard is a pair of small bat wings, two gold fingers to each with crimson skin
+    between them, round a ruby set in gold; the pommel is a bone skull."""
     px = {}
     wave = (0, 0, 1, 1, 0, 0, -1, -1)
     for y in range(3, 21):
@@ -352,12 +352,13 @@ def thirst():
         for k, code in enumerate(row):
             if 28 - y + k + slip <= 28:
                 px[28 - y + k + slip, y] = hx(code)
-    wing = {"g": [(7, 20), (6, 19), (5, 18), (4, 17), (3, 16), (2, 15),          # the low finger, square to the blade
-                  (5, 17), (5, 16), (4, 15), (4, 14), (3, 13),                   # the middle finger
-                  (6, 18), (6, 17), (6, 16), (7, 15), (7, 14), (7, 13), (8, 12)],  # the high finger
-            "h": [(1, 14), (3, 12), (8, 11)],                                    # claws
-            "n": [(4, 16), (3, 15), (3, 14)],                                    # skin, low panel
-            "m": [(5, 15), (6, 15), (5, 14), (6, 14), (4, 13), (6, 13)]}         # skin, high panel
+    # each wing about 5 x 6 (dev.13's were 8 x 10, which Tad found too big)
+    wing = {"g": [(7, 20), (6, 19),                                              # the arm, out from the ruby
+                  (5, 18), (4, 17),                                              # the low finger, square to the blade
+                  (6, 18), (6, 17), (7, 16)],                                    # the high finger, toward the point
+            "h": [(3, 16), (7, 15)],                                             # claws
+            "n": [(5, 17), (5, 16)],                                             # skin between the fingers
+            "m": [(7, 17), (7, 18)]}                                             # skin back to the arm
     put(px, {"g": "#e6b239", "h": "#ffe993", "m": "#a81a27", "n": "#82111c"}, wing)
     put(px, {"g": "#c99022", "h": "#e6b239", "m": "#82111c", "n": "#5c0b13"}, mirrored(wing))
     block3(px, 8, 20, ("#ffe993", "#ff8a8f", "#e6b239", "#ff8a8f", "#cc2a36", "#a81a27", "#e6b239", "#a81a27", "#9c6715"))
