@@ -63,6 +63,11 @@ def main():
                 problems.append(f"no icon for effect {name}")
             if f"effect.{MOD}.{name}" not in lang:
                 problems.append(f"no lang for effect {name}")
+    for piece in ("tip", "middle", "hilt"):   # models baked for ElsewhereRenderer (ModelEvent.RegisterAdditional)
+        check_model(f"item/elsewhere_{piece}")
+        check_model(f"item/elsewhere_{piece}_glow")
+    if not (A / "textures/misc/elsewhere_thread.png").exists():
+        problems.append("missing textures/misc/elsewhere_thread.png (ElsewhereRenderer's beam)")
     for school in ("holy", "ender"):
         for f in (f"geo/{school}_dragonsteel_plate.geo.json", f"textures/models/armor/{school}_dragonsteel_plate.png",
                   f"textures/models/armor/{school}_dragonsteel_plate_glowmask.png", "animations/dragonsteel_plate.animation.json"):

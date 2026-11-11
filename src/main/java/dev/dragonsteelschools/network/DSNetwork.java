@@ -7,7 +7,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class DSNetwork {
-    private static final String VERSION = "2";   // 2: RuleSyncPacket
+    private static final String VERSION = "3";   // 2: RuleSyncPacket; 3: ElsewhereScatterPacket
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DragonsteelSchools.MODID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -24,6 +24,11 @@ public final class DSNetwork {
                 .encoder(RuleSyncPacket::encode)
                 .decoder(RuleSyncPacket::decode)
                 .consumerMainThread(RuleSyncPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(ElsewhereScatterPacket.class, 2, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ElsewhereScatterPacket::encode)
+                .decoder(ElsewhereScatterPacket::decode)
+                .consumerMainThread(ElsewhereScatterPacket::handle)
                 .add();
     }
 }

@@ -20,6 +20,9 @@ Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Tes
    wither bones), and the staff (Spellbooks' base Dragon Priest staff plus school blood in the forge).
 5. **Dawn.** Hit a zombie: gold flames on it, big damage. Knock it into water: the flames stay. Milk cures a player.
 6. **Elsewhere.** Hold it (either hand) and let a skeleton shoot you: you step away instead. Melee still hits.
+   In the hand (0.1.0-dev.15) the tip and middle length hover apart and drift; each swing flings them apart (the tip
+   about a quarter-block) and they close again; a dodge scatters them wide and they reassemble within a second.
+   Beams of light span both cuts. Inventory, dropped item and item frames still show the flat sprite.
 7. **Screenshots for the art pass.** Both armour sets front, back and side (and each piece alone), Dawn and Elsewhere
    in hand (first and third person), both staves, holy fire on a mob and on yourself in first person, the three
    cauldron liquids, and the Holy Fire effect icon.

@@ -10,6 +10,7 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -33,7 +34,8 @@ import java.util.function.Consumer;
  *   <li>Screenshots the world as loaded, HUD and bare arm included (the 0.1.0-dev.1 crash path).</li>
  *   <li>For each school: four armour stands on a sky platform at noon (front, three-quarter, side, back), then a
  *   close front and close back, with FOV 30 so the armour fills the frame; then the player in the full kit in first
- *   person and third person (sword in the main hand, axe in the off hand; Holy also burning with holy fire).</li>
+ *   person and third person (sword in the main hand, axe in the off hand; Holy also burning with holy fire).
+ *   Ender also shoots Elsewhere mid-swing and mid-scatter in both views (the moving in-hand blade).</li>
  * </ol>
  * Screenshots go to run/screenshots. Logs "[DragonsteelSchools/qa] DONE" and quits.
  */
@@ -107,8 +109,14 @@ public final class ClientQA {
             }));
             add(5, s + "_first_person_camera", mc -> camera(mc, CameraType.FIRST_PERSON, false, 70));
             add(30, s + "_first_person", mc -> shot(mc, s + "_4_first_person"));
+            if (school == SchoolSteel.ENDER) {
+                elsewhereShots(s, "4");
+            }
             add(5, s + "_third_person_camera", mc -> camera(mc, CameraType.THIRD_PERSON_FRONT, true, 50));
             add(20, s + "_third_person", mc -> shot(mc, s + "_5_third_person" + (school == SchoolSteel.HOLY ? "_holy_fire" : "")));
+            if (school == SchoolSteel.ENDER) {
+                elsewhereShots(s, "5");
+            }
         }
         add(10, "done", mc -> {
             DragonsteelSchools.LOG.info("[DragonsteelSchools/qa] DONE: {} screenshots", shots);
@@ -117,6 +125,15 @@ public final class ClientQA {
     }
 
     private ClientQA() {
+    }
+
+    /** Elsewhere's in-hand blade at the peak of a swing (3 of its 6 ticks) and early in a dodge's scatter. */
+    private static void elsewhereShots(String s, String view) {
+        add(10, s + "_" + view + "_swing", mc -> mc.player.swing(InteractionHand.MAIN_HAND));
+        add(3, s + "_" + view + "_swing_shot", mc -> shot(mc, s + "_" + view + "b_elsewhere_swing"));
+        add(20, s + "_" + view + "_scatter", mc -> dev.dragonsteelschools.client.ElsewhereClient.scatter(mc.player.getId()));
+        add(4, s + "_" + view + "_scatter_shot", mc -> shot(mc, s + "_" + view + "c_elsewhere_scatter"));
+        add(30, s + "_" + view + "_rest_shot", mc -> shot(mc, s + "_" + view + "d_elsewhere_rest"));
     }
 
     private static void add(int delay, String name, Consumer<Minecraft> action) {

@@ -307,33 +307,86 @@ def grip(px, rows):
             px[29 - y + k, y] = hx(code)
 
 
-def elsewhere():
-    """A blade of dusk with an edge of light: deep violet inside a bright rim. It is cut clean through in two
-    places and the middle length has slid out of line; the cut faces blaze and a thread of light joins them.
-    A crescent guard rimmed in the same light, its lit horn the taller, round an Eye of Ender."""
-    px = {}
+ELSEWHERE_OPEN = lambda x, y: y in (8, 9, 15, 16) and x >= 11     # the two cuts stay open: no outline across them
+
+
+def elsewhere_parts():
+    """Elsewhere's pixels by piece, for the flat sprite and for the moving blade in the hand (ElsewhereRenderer).
+
+    A blade of dusk with an edge of light: deep violet inside a bright rim. It is cut clean through in two places
+    and the middle length has slid out of line; the cut faces blaze and a thread of light joins them. A crescent
+    guard rimmed in the same light, its lit horn the taller, round an Eye of Ender.
+
+    Returns ({"tip", "middle", "hilt", "thread"}: pixel dicts, glow): glow is the set of pixels drawn full-bright
+    in the hand (the four cut faces and the Eye)."""
+    tip, middle, hilt, thread = {}, {}, {}, {}
+    glow = set()
     body = ("#c58aff", "#5a2d89", "#331951", "#45226c", "#8838ec")
     cut = ("#e0baff", "#f5e6ff", "#f5e6ff", "#e0baff", "#c58aff")
-    for top, bottom, slip in ((3, 7, 0), (10, 14, 2), (17, 20, 0)):           # tip, middle, base
+    for top, bottom, slip, piece in ((3, 7, 0, tip), (10, 14, 2, middle), (17, 20, 0, hilt)):
         for y in range(top, bottom + 1):
             face = (y == bottom and bottom != 20) or (y == top and top != 3)
             for k, code in enumerate(cut if face else body):
                 if 28 - y + k + slip <= 28:
-                    px[28 - y + k + slip, y] = hx(code)
+                    piece[28 - y + k + slip, y] = hx(code)
+                    if face:
+                        glow.add((28 - y + k + slip, y))
     for spot in ((25, 3), (26, 3), (27, 3)):                                  # the rim closes over the point
-        px[spot] = hx("#c58aff")
-    px[28, 3] = hx("#8838ec")
+        tip[spot] = hx("#c58aff")
+    tip[28, 3] = hx("#8838ec")
     for spot in ((23, 8), (23, 9), (17, 15), (16, 15), (15, 16), (14, 16)):   # the thread across each cut
-        px[spot] = hx("#e0baff")
-    put(px, {"1": "#c58aff", "3": "#45226c", "v": "#e0baff"},
+        thread[spot] = hx("#e0baff")
+    put(hilt, {"1": "#c58aff", "3": "#45226c", "v": "#e0baff"},
         {"1": [(6, 20), (5, 19), (4, 18), (4, 17), (5, 16), (6, 15), (7, 14)],
          "3": [(7, 21), (7, 20), (6, 19), (5, 18), (5, 17), (6, 16), (7, 15), (8, 14)], "v": [(8, 13)]})
-    put(px, {"3": "#8838ec", "5": "#281e3c", "w": "#a85fff"},
+    put(hilt, {"3": "#8838ec", "5": "#281e3c", "w": "#a85fff"},
         {"3": [(9, 23), (10, 24), (11, 25), (12, 26)], "5": [(10, 23), (11, 24), (12, 25), (13, 25), (13, 26)], "w": [(14, 25)]})
-    block3(px, 8, 20, ("#9af5dc", "#3fd8b0", "#3fd8b0", "#3fd8b0", "#041a16", "#1bb08d", "#1bb08d", "#1bb08d", "#12856c"))
-    grip(px, (("#5a2d89", "#45226c", "#331951"), ("#c58aff", "#8838ec", "#6420c2"), ("#5a2d89", "#45226c", "#331951")))
-    block3(px, 2, 26, ("#f5e6ff", "#c58aff", "#a85fff", "#c58aff", "#a85fff", "#8838ec", "#a85fff", "#8838ec", "#6420c2"))
-    return plot_sword(px, R["obsid"][0], keep_open=lambda x, y: y in (8, 9, 15, 16) and x >= 11)
+    block3(hilt, 8, 20, ("#9af5dc", "#3fd8b0", "#3fd8b0", "#3fd8b0", "#041a16", "#1bb08d", "#1bb08d", "#1bb08d", "#12856c"))
+    glow.update((8 + n % 3, 20 + n // 3) for n in range(9))
+    grip(hilt, (("#5a2d89", "#45226c", "#331951"), ("#c58aff", "#8838ec", "#6420c2"), ("#5a2d89", "#45226c", "#331951")))
+    block3(hilt, 2, 26, ("#f5e6ff", "#c58aff", "#a85fff", "#c58aff", "#a85fff", "#8838ec", "#a85fff", "#8838ec", "#6420c2"))
+    parts = {"tip": tip, "middle": middle, "hilt": hilt, "thread": thread}
+    seen = [xy for piece in parts.values() for xy in piece]
+    assert len(seen) == len(set(seen)), "Elsewhere's pieces overlap"
+    return parts, glow
+
+
+def elsewhere():
+    """The flat sprite: inventory, dropped item, item frames (and the in-hand model's display transforms)."""
+    parts, _ = elsewhere_parts()
+    px = {}
+    for piece in parts.values():
+        px.update(piece)
+    return plot_sword(px, R["obsid"][0], keep_open=ELSEWHERE_OPEN)
+
+
+def elsewhere_pieces():
+    """The in-hand pieces as (texture name, image). Each piece is outlined alone, with the cuts left open as on the
+    flat sprite; its glowing pixels move to a separate _glow layer that ElsewhereRenderer draws full-bright. The
+    thread is left out: the renderer strings a beam of light across each cut as it widens."""
+    parts, glow = elsewhere_parts()
+    out = []
+    for name in ("tip", "middle", "hilt"):
+        piece = parts[name]
+        body = plot_sword(piece, R["obsid"][0], keep_open=ELSEWHERE_OPEN)
+        lit = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+        bp, lp = body.load(), lit.load()
+        for xy in piece:
+            if xy in glow:
+                lp[xy] = bp[xy]
+                bp[xy] = (0, 0, 0, 0)
+        out += [(f"elsewhere_{name}", body), (f"elsewhere_{name}_glow", lit)]
+    return out
+
+
+def elsewhere_thread():
+    """The beam's texture: white, soft across its width (the renderer tints it)."""
+    img = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
+    px = img.load()
+    for x, alpha in enumerate((0, 60, 170, 255, 255, 170, 60, 0)):
+        for y in range(8):
+            px[x, y] = (255, 255, 255, alpha)
+    return img
 
 
 def thirst():
@@ -520,6 +573,9 @@ def main():
     save(dawn(), "item/dawn.png")
     for name, art in SWORD_ART.items():
         save(art(), f"item/{name}.png")
+    for name, img in elsewhere_pieces():                                    # Elsewhere in the hand
+        save(img, f"item/{name}.png")
+    save(elsewhere_thread(), "misc/elsewhere_thread.png")
     liquid, meta = tinted_liquid(None)
     save(liquid, "block/dragons_breath_still.png", meta)
     for i in (0, 1):

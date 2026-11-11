@@ -2,6 +2,8 @@ package dev.dragonsteelschools.combat;
 
 import dev.dragonsteelschools.DragonsteelSchools;
 import dev.dragonsteelschools.config.DSConfig;
+import dev.dragonsteelschools.network.DSNetwork;
+import dev.dragonsteelschools.network.ElsewhereScatterPacket;
 import dev.dragonsteelschools.registry.ModItems;
 import dev.dragonsteelschools.school.SchoolSteel;
 import net.minecraft.core.BlockPos;
@@ -24,6 +26,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
 /**
  * Elsewhere: while the blade is held, a projectile that would strike its wielder finds them gone. The step is an
@@ -55,6 +58,8 @@ public final class ElsewhereDodge {
         }
         if (step(target, DSConfig.get(DSConfig.ELSEWHERE_RADIUS), DSConfig.get(DSConfig.ELSEWHERE_VERTICAL))) {
             event.setCanceled(true);
+            // the wielder and everyone watching see the blade fly apart and reassemble (ElsewhereRenderer)
+            DSNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), new ElsewhereScatterPacket(target.getId()));
             int cooldown = DSConfig.ticks(DSConfig.ELSEWHERE_COOLDOWN_SECONDS);
             if (cooldown > 0 && target instanceof Player player) {
                 player.getCooldowns().addCooldown(blade, cooldown);
