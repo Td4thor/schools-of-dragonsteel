@@ -107,9 +107,6 @@ def item(i):
 
 
 # ---------------------------------------------------------------------------------------------
-ELSEWHERE_PIECES = [f"elsewhere_{piece}{layer}" for piece in ("tip", "middle", "hilt") for layer in ("", "_glow")]
-
-
 def models():
     for s, cfg in SCHOOLS.items():
         flat = [f"{s}_dragon_blood", f"tempered_{s}_steel", f"{s}_dragonsteel_ingot"] + [f"{s}_dragonsteel_{p}" for p in PIECES]
@@ -124,7 +121,8 @@ def models():
                 write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{name}"}})
         write(A / "models/item" / f"{cfg['sword']}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{cfg['sword']}"}, "display": BIG_SWORD_DISPLAY})
-    for name in ELSEWHERE_PIECES:   # Elsewhere's lengths, drawn apart in the hand by ElsewhereRenderer; no item of their own
+    from generate_textures import elsewhere_model_names   # Elsewhere's shards and hilt (ElsewhereRenderer); no items
+    for name in elsewhere_model_names():
         write(A / "models/item" / f"{name}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{name}"}})
 
 

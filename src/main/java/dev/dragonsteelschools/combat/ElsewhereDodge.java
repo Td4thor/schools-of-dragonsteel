@@ -56,10 +56,13 @@ public final class ElsewhereDodge {
         if (target instanceof Player player && player.getCooldowns().isOnCooldown(blade)) {
             return;
         }
+        Vec3 origin = target.position();
         if (step(target, DSConfig.get(DSConfig.ELSEWHERE_RADIUS), DSConfig.get(DSConfig.ELSEWHERE_VERTICAL))) {
             event.setCanceled(true);
-            // the wielder and everyone watching see the blade fly apart and reassemble (ElsewhereRenderer)
-            DSNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), new ElsewhereScatterPacket(target.getId()));
+            // the wielder and everyone watching see the blade shatter and reassemble (ElsewhereRenderer), and its
+            // fragments burst where the wielder stood (ElsewhereClient.scatter)
+            DSNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target),
+                    new ElsewhereScatterPacket(target.getId(), origin.x, origin.y, origin.z));
             int cooldown = DSConfig.ticks(DSConfig.ELSEWHERE_COOLDOWN_SECONDS);
             if (cooldown > 0 && target instanceof Player player) {
                 player.getCooldowns().addCooldown(blade, cooldown);

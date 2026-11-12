@@ -7,7 +7,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class DSNetwork {
-    private static final String VERSION = "3";   // 2: RuleSyncPacket; 3: ElsewhereScatterPacket
+    private static final String VERSION = "4";   // 2: RuleSyncPacket; 3: ElsewhereScatterPacket; 4: it carries the dodge origin
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(DragonsteelSchools.MODID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 

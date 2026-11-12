@@ -20,11 +20,16 @@ Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Tes
    wither bones), and the staff (Spellbooks' base Dragon Priest staff plus school blood in the forge).
 5. **Dawn.** Hit a zombie: gold flames on it, big damage. Knock it into water: the flames stay. Milk cures a player.
 6. **Elsewhere.** Hold it (either hand) and let a skeleton shoot you: you step away instead. Melee still hits.
-   In the hand the tip and middle length hover apart and drift. Each swing flings them apart (the tip about a
-   quarter-block, out to the left in first person; the middle the other way) and they stay apart while the arm comes
-   back, then snap together after about 0.8 s (0.1.0-dev.16; dev.15's spread was over before the arm returned). A
-   dodge scatters them wide and spinning; they reassemble within about a second. Pulsing beams with a running glint
-   span both cuts. Inventory, dropped item and item frames still show the flat sprite.
+   In the hand (0.1.0-dev.17) the tip and middle length hover apart on slow layered drifts, and every few seconds
+   one blinks a little way off and drifts home. Each swing flings them apart (the tip about a quarter-block, out to
+   the left in first person; the middle the other way); they stay apart while the arm comes back, ease home and
+   settle with a small wobble, about 0.85 s in all, leaving faint violet afterimages while they move fast. Swing
+   again quickly and they carry on from where they were (no pop). A dodge shatters the whole blade: ten shards burst
+   out every way (in first person a ring round the blade, all of it on screen), spin and hang, then are drawn home
+   along flickering threads from the Eye, spiralling in, guard first and point last, with a glassy break at the
+   start and a chime as the point returns (about 1.1 s). Where you stood, the blade's fragments, white sparks and
+   violet motes burst every way (needs particles above Minimal); portal motes swirl where you land. Pulsing beams
+   with a running glint span both cuts at rest. Inventory, dropped item and item frames still show the flat sprite.
 7. **Screenshots for the art pass.** Both armour sets front, back and side (and each piece alone), Dawn and Elsewhere
    in hand (first and third person), both staves, holy fire on a mob and on yourself in first person, the three
    cauldron liquids, and the Holy Fire effect icon.

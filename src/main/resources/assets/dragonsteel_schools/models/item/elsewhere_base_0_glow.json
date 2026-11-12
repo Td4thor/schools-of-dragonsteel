@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "dragonsteel_schools:item/elsewhere_tip_glow"
+    "layer0": "dragonsteel_schools:item/elsewhere_base_0_glow"
   }
 }

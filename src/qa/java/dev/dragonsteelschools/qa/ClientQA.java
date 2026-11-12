@@ -128,16 +128,29 @@ public final class ClientQA {
     }
 
     /**
-     * Elsewhere's in-hand blade mid-swing (3 ticks in), then with the arm back at rest while the pieces are still
-     * apart (8 ticks in, the moment dev.15 missed), then early in a dodge's scatter, then at rest.
+     * Elsewhere's in-hand blade mid-swing (3 ticks in) and with the arm back while the pieces are still apart (8
+     * ticks in); then a dodge's shatter at its widest (3 ticks), as the shards are drawn home (13) and settling (19),
+     * with the world burst set 2.5 blocks ahead so it is in shot; then at rest.
      */
     private static void elsewhereShots(String s, String view) {
         add(10, s + "_" + view + "_swing", mc -> mc.player.swing(InteractionHand.MAIN_HAND));
         add(3, s + "_" + view + "_swing_shot", mc -> shot(mc, s + "_" + view + "b_elsewhere_swing"));
         add(5, s + "_" + view + "_swing_held_shot", mc -> shot(mc, s + "_" + view + "b2_elsewhere_swing_held"));
-        add(20, s + "_" + view + "_scatter", mc -> dev.dragonsteelschools.client.ElsewhereClient.scatter(mc.player.getId()));
-        add(4, s + "_" + view + "_scatter_shot", mc -> shot(mc, s + "_" + view + "c_elsewhere_scatter"));
-        add(30, s + "_" + view + "_rest_shot", mc -> shot(mc, s + "_" + view + "d_elsewhere_rest"));
+        add(20, s + "_" + view + "_scatter", mc -> {
+            // the burst goes where the camera looks, 3 blocks out (scatter lifts it by 0.6 of the player's height)
+            net.minecraft.world.phys.Vec3 at = mc.gameRenderer.getMainCamera().getPosition()
+                    .add(new net.minecraft.world.phys.Vec3(mc.gameRenderer.getMainCamera().getLookVector()).scale(3.0))
+                    .subtract(0.0, mc.player.getBbHeight() * 0.6, 0.0);
+            mc.options.particles().set(net.minecraft.client.ParticleStatus.ALL);   // the burst is particles; the QA runs on minimal
+            dev.dragonsteelschools.client.ElsewhereClient.scatter(mc.player.getId(), at.x, at.y, at.z);
+        });
+        add(3, s + "_" + view + "_scatter_shot", mc -> shot(mc, s + "_" + view + "c_elsewhere_scatter"));
+        add(10, s + "_" + view + "_recall_shot", mc -> shot(mc, s + "_" + view + "c2_elsewhere_recall"));
+        add(6, s + "_" + view + "_settle_shot", mc -> shot(mc, s + "_" + view + "c3_elsewhere_settle"));
+        add(30, s + "_" + view + "_rest_shot", mc -> {
+            mc.options.particles().set(net.minecraft.client.ParticleStatus.MINIMAL);
+            shot(mc, s + "_" + view + "d_elsewhere_rest");
+        });
     }
 
     private static void add(int delay, String name, Consumer<Minecraft> action) {

@@ -63,9 +63,17 @@ def main():
                 problems.append(f"no icon for effect {name}")
             if f"effect.{MOD}.{name}" not in lang:
                 problems.append(f"no lang for effect {name}")
-    for piece in ("tip", "middle", "hilt"):   # models baked for ElsewhereRenderer (ModelEvent.RegisterAdditional)
-        check_model(f"item/elsewhere_{piece}")
-        check_model(f"item/elsewhere_{piece}_glow")
+    shards_java = (ROOT / "src/main/java/dev/dragonsteelschools/client/ElsewhereShards.java").read_text(encoding="utf-8")
+    names = re.findall(r'"(elsewhere_[a-z]+_\d+)"', shards_java.split("NAMES = {", 1)[1].split("};", 1)[0])
+    glows = re.findall(r"true|false", shards_java.split("GLOW = {", 1)[1].split("};", 1)[0])
+    if not names or len(names) != len(glows):
+        problems.append("ElsewhereShards.java: NAMES and GLOW do not line up")
+    for name, lit in zip(names, glows):   # models baked for ElsewhereRenderer (ModelEvent.RegisterAdditional)
+        check_model(f"item/{name}")
+        if lit == "true":
+            check_model(f"item/{name}_glow")
+    check_model("item/elsewhere_hilt")
+    check_model("item/elsewhere_hilt_glow")
     if not (A / "textures/misc/elsewhere_thread.png").exists():
         problems.append("missing textures/misc/elsewhere_thread.png (ElsewhereRenderer's beam)")
     for school in ("holy", "ender"):

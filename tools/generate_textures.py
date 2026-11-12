@@ -317,13 +317,14 @@ def elsewhere_parts():
     and the middle length has slid out of line; the cut faces blaze and a thread of light joins them. A crescent
     guard rimmed in the same light, its lit horn the taller, round an Eye of Ender.
 
-    Returns ({"tip", "middle", "hilt", "thread"}: pixel dicts, glow): glow is the set of pixels drawn full-bright
-    in the hand (the four cut faces and the Eye)."""
-    tip, middle, hilt, thread = {}, {}, {}, {}
+    Returns ({"tip", "middle", "base", "hilt", "thread"}: pixel dicts, glow). base is the blade's lowest length (it
+    stays with the hilt until the blade shatters); hilt is the guard, Eye, grip and pommel. glow is the set of
+    pixels drawn full-bright in the hand (the four cut faces and the Eye)."""
+    tip, middle, base, hilt, thread = {}, {}, {}, {}, {}
     glow = set()
     body = ("#c58aff", "#5a2d89", "#331951", "#45226c", "#8838ec")
     cut = ("#e0baff", "#f5e6ff", "#f5e6ff", "#e0baff", "#c58aff")
-    for top, bottom, slip, piece in ((3, 7, 0, tip), (10, 14, 2, middle), (17, 20, 0, hilt)):
+    for top, bottom, slip, piece in ((3, 7, 0, tip), (10, 14, 2, middle), (17, 20, 0, base)):
         for y in range(top, bottom + 1):
             face = (y == bottom and bottom != 20) or (y == top and top != 3)
             for k, code in enumerate(cut if face else body):
@@ -342,10 +343,12 @@ def elsewhere_parts():
     put(hilt, {"3": "#8838ec", "5": "#281e3c", "w": "#a85fff"},
         {"3": [(9, 23), (10, 24), (11, 25), (12, 26)], "5": [(10, 23), (11, 24), (12, 25), (13, 25), (13, 26)], "w": [(14, 25)]})
     block3(hilt, 8, 20, ("#9af5dc", "#3fd8b0", "#3fd8b0", "#3fd8b0", "#041a16", "#1bb08d", "#1bb08d", "#1bb08d", "#12856c"))
-    glow.update((8 + n % 3, 20 + n // 3) for n in range(9))
+    for n in range(9):                                                        # the Eye sits over the blade's foot
+        base.pop((8 + n % 3, 20 + n // 3), None)
+        glow.add((8 + n % 3, 20 + n // 3))
     grip(hilt, (("#5a2d89", "#45226c", "#331951"), ("#c58aff", "#8838ec", "#6420c2"), ("#5a2d89", "#45226c", "#331951")))
     block3(hilt, 2, 26, ("#f5e6ff", "#c58aff", "#a85fff", "#c58aff", "#a85fff", "#8838ec", "#a85fff", "#8838ec", "#6420c2"))
-    parts = {"tip": tip, "middle": middle, "hilt": hilt, "thread": thread}
+    parts = {"tip": tip, "middle": middle, "base": base, "hilt": hilt, "thread": thread}
     seen = [xy for piece in parts.values() for xy in piece]
     assert len(seen) == len(set(seen)), "Elsewhere's pieces overlap"
     return parts, glow
@@ -360,23 +363,148 @@ def elsewhere():
     return plot_sword(px, R["obsid"][0], keep_open=ELSEWHERE_OPEN)
 
 
-def elsewhere_pieces():
-    """The in-hand pieces as (texture name, image). Each piece is outlined alone, with the cuts left open as on the
-    flat sprite; its glowing pixels move to a separate _glow layer that ElsewhereRenderer draws full-bright. The
-    thread is left out: the renderer strings a beam of light across each cut as it widens."""
+# Where each length of the blade breaks when it shatters: one seed per shard (sprite pixels, y down); every pixel
+# goes to its nearest seed. Irregular on purpose, like broken glass.
+ELSEWHERE_SEEDS = {
+    "tip": [(26.6, 3.7), (24.1, 5.6), (21.9, 7.0)],
+    "middle": [(23.7, 10.2), (21.2, 11.4), (19.6, 12.9), (17.1, 13.8)],
+    "base": [(14.3, 17.3), (12.0, 18.3), (10.4, 19.6)],
+}
+ELSEWHERE_BLADE_CENTRE = (19.5, 11.0)    # shards fly out from here
+
+
+def _hash(i, k):
+    """Fixed pseudo-random 0..1, so the shatter is the same every build."""
+    v = math.sin(i * 12.9898 + k * 78.233) * 43758.5453
+    return v - math.floor(v)
+
+
+def elsewhere_shards():
+    """The in-hand pieces: every length of the blade broken into shards, plus the hilt.
+
+    Returns a list of dicts: name, segment (tip, middle, base or hilt), body (image), glow (image or None), centre
+    (sprite pixels) and, for blade shards, flight (unit direction in model space, distance in pixels, spin axis,
+    spin in degrees, recall stagger in ticks). Each pixel of the flat sprite's outline goes to the piece it borders,
+    so at rest the pieces recompose the flat sprite exactly, less the thread (the renderer draws its own beams)."""
     parts, glow = elsewhere_parts()
-    out = []
-    for name in ("tip", "middle", "hilt"):
-        piece = parts[name]
-        body = plot_sword(piece, R["obsid"][0], keep_open=ELSEWHERE_OPEN)
+    pieces = []
+    owner = {}
+    for segment, seeds in ELSEWHERE_SEEDS.items():
+        cells = [dict() for _ in seeds]
+        for (x, y), colour in sorted(parts[segment].items()):
+            k = min(range(len(seeds)), key=lambda n: ((x + 0.5 - seeds[n][0]) ** 2 + (y + 0.5 - seeds[n][1]) ** 2, n))
+            cells[k][x, y] = colour
+        for k, cell in enumerate(cells):
+            assert len(cell) >= 3, f"shard {segment}_{k} has {len(cell)} pixels"
+            pieces.append({"name": f"elsewhere_{segment}_{k}", "segment": segment, "pixels": cell})
+    pieces.append({"name": "elsewhere_hilt", "segment": "hilt", "pixels": dict(parts["hilt"])})
+    for piece in pieces:
+        piece["own"] = set(piece["pixels"])
+        for xy in piece["pixels"]:
+            owner[xy] = piece
+    flat = elsewhere().load()
+    taken = sorted(owner)
+    for y in range(32):
+        for x in range(32):
+            if flat[x, y][3] and (x, y) not in owner and (x, y) not in parts["thread"]:
+                near = min(taken, key=lambda q: (abs(q[0] - x) + abs(q[1] - y), q))
+                owner[near]["pixels"][x, y] = flat[x, y]
+    bx, by = ELSEWHERE_BLADE_CENTRE
+    blade = [p for p in pieces if p["segment"] != "hilt"]
+    for piece in blade:
+        own = piece["own"]
+        cx, cy = sum(x for x, _ in own) / len(own) + 0.5, sum(y for _, y in own) / len(own) + 0.5
+        piece["along"] = ((cx - 10) + (22 - cy)) / 35        # 0 at the guard, 1 at the point
+    for rank, piece in enumerate(sorted(blade, key=lambda p: p["along"])):
+        # First person: a starburst on screen. Up the blade the shards go from straight down to straight up,
+        # alternately out to the right and to the left, so the ring has no gap.
+        u = piece["along"]
+        jitter = 20 * (_hash(rank, 9) - 0.5)
+        piece["screen"] = (-55 + 110 * u if rank % 2 == 0 else 245 - 130 * u) + jitter
+    for index, piece in enumerate(pieces):
+        body = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
         lit = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
         bp, lp = body.load(), lit.load()
-        for xy in piece:
-            if xy in glow:
-                lp[xy] = bp[xy]
-                bp[xy] = (0, 0, 0, 0)
-        out += [(f"elsewhere_{name}", body), (f"elsewhere_{name}_glow", lit)]
-    return out
+        for xy, colour in piece["pixels"].items():
+            (lp if xy in glow and xy in piece["own"] else bp)[xy] = colour
+        piece["body"] = body
+        piece["glow"] = lit if any(xy in glow for xy in piece["own"]) else None
+        own = piece["own"]
+        piece["centre"] = (sum(x for x, _ in own) / len(own) + 0.5, sum(y for _, y in own) / len(own) + 0.5)
+        if piece["segment"] == "hilt":
+            continue
+        cx, cy = piece["centre"]
+        rx, ry = cx - bx, -(cy - by)                                   # model space: y up
+        n = math.hypot(rx, ry) or 1.0
+        rx, ry = rx / n, ry / n
+        side = 1 if index % 2 == 0 else -1
+        wide = 0.8 * (0.5 + _hash(index, 1)) * side
+        dx, dy = rx - ry * wide, ry + rx * wide
+        dz = (2 * _hash(index, 2) - 1) * 1.1
+        n = math.sqrt(dx * dx + dy * dy + dz * dz)
+        ax, ay, az = _hash(index, 4) - 0.5, _hash(index, 5) - 0.5, _hash(index, 6) - 0.5 + 0.3
+        m = math.sqrt(ax * ax + ay * ay + az * az)
+        piece["flight"] = (dx / n, dy / n, dz / n, 9.0 + 6.0 * _hash(index, 3), ax / m, ay / m, az / m,
+                           (200.0 + 220.0 * _hash(index, 7)) * (1 if _hash(index, 8) < 0.5 else -1), 8.0 * piece["along"],
+                           piece["screen"])
+    return pieces
+
+
+def elsewhere_model_names():
+    """Every model ElsewhereRenderer bakes (generate_data writes them; ElsewhereShards.java lists them)."""
+    names = []
+    for piece in elsewhere_shards():
+        names.append(piece["name"])
+        if piece["glow"] is not None:
+            names.append(piece["name"] + "_glow")
+    return names
+
+
+def write_elsewhere_shards_java(pieces):
+    """ElsewhereShards.java: the shard table the renderer reads, so the Java and the textures never disagree."""
+    shards = [p for p in pieces if p["segment"] != "hilt"]
+    seg = {"tip": 0, "middle": 1, "base": 2}
+
+    def holder(xy):
+        return next(n for n, p in enumerate(shards) if xy in p["own"])
+
+    f = lambda v: f"{v:.4f}F"
+    lines = [
+        "// Generated by tools/generate_textures.py (write_elsewhere_shards_java). Do not edit; rerun the generator.",
+        "package dev.dragonsteelschools.client;",
+        "",
+        "/** Elsewhere's blade shards, as tools/generate_textures.py cut them (see elsewhere_shards there). */",
+        "final class ElsewhereShards {",
+        "    /** Model names: item/NAME, plus item/NAME_glow where GLOW is true. */",
+        "    static final String[] NAMES = {" + ", ".join(f'"{p["name"]}"' for p in shards) + "};",
+        "    /** 0 tip, 1 middle, 2 base (the lowest length, which stays with the hilt until the blade shatters). */",
+        "    static final int[] SEGMENT = {" + ", ".join(str(seg[p["segment"]]) for p in shards) + "};",
+        "    static final boolean[] GLOW = {" + ", ".join("true" if p["glow"] is not None else "false" for p in shards) + "};",
+        "    /** Each shard's centre on the sprite (pixels, y down). */",
+        "    static final float[][] CENTRE = {",
+        *[f"            {{{f(p['centre'][0])}, {f(p['centre'][1])}}}," for p in shards],
+        "    };",
+        "    /**",
+        "     * Shatter flight: unit direction (model x, y, z), distance (sprite pixels), spin axis (unit x, y, z), spin",
+        "     * (degrees), recall stagger (ticks: the blade re-forms from the guard to the point), first-person screen",
+        "     * angle (degrees, 0 right, 90 up).",
+        "     */",
+        "    static final float[][] FLIGHT = {",
+        *[f"            {{{', '.join(f(v) for v in p['flight'])}}}," for p in shards],
+        "    };",
+        "    /** The shards that hold the beams' ends: upper cut (tip side, middle side), lower cut (middle side, base side). */",
+        f"    static final int UPPER_TIP = {holder((23, 7))};",
+        f"    static final int UPPER_MIDDLE = {holder((23, 10))};",
+        f"    static final int LOWER_MIDDLE = {holder((17, 14))};",
+        f"    static final int LOWER_BASE = {holder((14, 17))};",
+        "",
+        "    private ElsewhereShards() {",
+        "    }",
+        "}",
+        "",
+    ]
+    path = ROOT / "src/main/java/dev/dragonsteelschools/client/ElsewhereShards.java"
+    path.write_bytes("\n".join(lines).encode("utf-8"))
 
 
 def elsewhere_thread():
@@ -578,8 +706,12 @@ def main():
     save(dawn(), "item/dawn.png")
     for name, art in SWORD_ART.items():
         save(art(), f"item/{name}.png")
-    for name, img in elsewhere_pieces():                                    # Elsewhere in the hand
-        save(img, f"item/{name}.png")
+    shards = elsewhere_shards()                                              # Elsewhere in the hand
+    for piece in shards:
+        save(piece["body"], f"item/{piece['name']}.png")
+        if piece["glow"] is not None:
+            save(piece["glow"], f"item/{piece['name']}_glow.png")
+    write_elsewhere_shards_java(shards)
     save(elsewhere_thread(), "misc/elsewhere_thread.png")
     liquid, meta = tinted_liquid(None)
     save(liquid, "block/dragons_breath_still.png", meta)
