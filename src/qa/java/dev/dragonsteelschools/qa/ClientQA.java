@@ -69,6 +69,11 @@ public final class ClientQA {
             player.getAbilities().flying = true;
             player.onUpdateAbilities();
         }));
+        add(1, "no_tutorial", mc -> {   // the "Move with W, A, S and D" toast stays out of the gallery shots
+            mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
+            mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
+            mc.getToasts().clear();
+        });
         add(300, "settle", mc -> { });   // let teleport and chunk particles die away before the first lineup
         String only = System.getProperty("dragonsteel_schools.qa.schools", "");
         for (SchoolSteel school : SchoolSteel.values()) {

@@ -8,6 +8,7 @@ Built 2026-11-17 from the tree tagged `v1.0.0`, JDK 17.0.20, ForgeGradle 6, Forg
 | Resource scan (`tools/check_assets.py`) | OK: 78 item, 7 block, 1 effect models checked | run before the gate |
 | Plain Forge server, the jar alone (plus its mandatory closure: Iron's Spells 3.16.3, irons_lib, Curios, GeckoLib, playerAnimator) | `Done`, clean stop; Ice and Fire, Spellbooks and Apex Arcana reported absent; rule LEGENDARY | `server_smoke_jar_alone.txt` |
 | Plain Forge server with every optional dependency (Ice and Fire beta-5, Citadel, Ice and Fire: Spellbooks 2.3.2, Apex Arcana 1.3.0, JEI 15.56) and the Apex Only add-on | `Done`, clean stop; all loaded; rule APEX_ONLY (forced by the add-on) | `server_smoke_all_optional.txt` |
+| The same with the newest Apex Arcana (1.6.1) and JEI (15.74.0.234) | `Done`, clean stop; all 12 default Apex spell ids still present in 1.6.1, schools unchanged in its self-check | `server_smoke_newest_optional.txt` |
 | Dev client with JEI 15.56 (`run_client_qa.sh`, no schools) | 81 Dragonsteel Finishing pages, 6 School Dragon Blood pages, information pages open; no plugin errors | `jei_pages.png` |
 
 SHA-256:
