@@ -79,6 +79,11 @@ repositories {
         url = 'https://maven.kosmx.dev/'
         content { includeGroup 'dev.kosmx.player-anim' }
     }
+    maven {
+        name = 'JEI'
+        url = 'https://maven.blamejared.com/'
+        content { includeGroup 'mezz.jei' }
+    }
     // Ice and Fire, Citadel, Ice and Fire: Spellbooks and Apex Arcana: copied by tools/prepare_dependencies.py.
     flatDir { dirs 'libs' }
     mavenCentral()
@@ -98,6 +103,14 @@ dependencies {
     runtimeOnly fg.deobf("local:citadel:${citadel_version}")
     runtimeOnly fg.deobf("local:ice_and_fire_spellbooks:${iafsb_version}")
     runtimeOnly fg.deobf("local:grandsigil:${grandsigil_version}")
+
+    // JEI pages (compat/jei). Optional: only JEI loads that package. Built against the API of the oldest JEI in
+    // Tad's instances; the dev client loads the full JEI only for the QA harness (-Pdsqa).
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    if (project.hasProperty('dsqa')) {
+        runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    }
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
@@ -137,7 +150,16 @@ tasks.register('verifyGameTests', Exec) {
     commandLine 'python', 'tools/verify_gametest_log.py', 'build/gametest-run/logs/latest.log'
 }
 
+// Ice and Fire: Schools of Dragonsteel is LGPL-3.0-only (some of its sprites are derived from Ice and Fire's
+// LGPL-3.0 art). The licence travels inside every jar, and the release ships a sources jar as its Corresponding Source.
+def licenceFiles = { CopySpec spec ->
+    spec.from('LICENSE') { rename { 'LICENSE_dragonsteel_schools' } }
+    spec.from('COPYING') { rename { 'COPYING_dragonsteel_schools' } }
+    spec.from('docs/art/CREDITS.md') { rename { 'CREDITS_dragonsteel_schools.md' } }
+}
+
 tasks.named('jar', Jar) {
+    licenceFiles(it)
     manifest {
         attributes(
             'Specification-Title'   : mod_id,
@@ -155,6 +177,7 @@ tasks.named('jar', Jar) {
 tasks.register('apexOnlyJar', Jar) {
     archiveBaseName = 'schools_of_dragonsteel_apex_only'
     from sourceSets.apexonly.output
+    licenceFiles(it)
     manifest {
         attributes(
             'Specification-Title'   : 'dragonsteel_schools_apex_only',
@@ -166,4 +189,16 @@ tasks.register('apexOnlyJar', Jar) {
         )
     }
 }
-tasks.named('build') { dependsOn 'apexOnlyJar' }
+// The Corresponding Source the LGPL asks for: everything needed to rebuild both jars (third-party jars excepted;
+// tools/prepare_dependencies.py fetches those into libs/).
+tasks.register('releaseSourcesJar', Jar) {
+    archiveBaseName = 'schools_of_dragonsteel'
+    archiveClassifier = 'sources'
+    from(projectDir) {
+        include 'src/main/**', 'src/apexonly/**', 'src/gametest/**', 'src/qa/**', 'tools/**', 'docs/*.md', 'docs/art/CREDITS.md'
+        include 'build.gradle', 'settings.gradle', 'gradle.properties', 'gradlew', 'gradlew.bat', 'gradle/**'
+        include 'LICENSE', 'COPYING', 'README.md', 'CHANGELOG.md', '.gitignore', '.gitattributes'
+        exclude '**/__pycache__/**'
+    }
+}
+tasks.named('build') { dependsOn 'apexOnlyJar', 'releaseSourcesJar' }

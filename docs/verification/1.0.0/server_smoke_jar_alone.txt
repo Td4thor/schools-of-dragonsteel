@@ -1,0 +1,7 @@
+[17Nov2026 17:51:08.373] [modloading-worker-0/INFO] [dev.dragonsteelschools.DragonsteelSchools/]: [DragonsteelSchools/runtime] loaded irons_spellbooks 1.20.1-3.16.3
+[17Nov2026 17:51:08.374] [modloading-worker-0/INFO] [dev.dragonsteelschools.DragonsteelSchools/]: [DragonsteelSchools/runtime] absent iceandfire
+[17Nov2026 17:51:08.374] [modloading-worker-0/INFO] [dev.dragonsteelschools.DragonsteelSchools/]: [DragonsteelSchools/runtime] absent ice_and_fire_spellbooks
+[17Nov2026 17:51:08.374] [modloading-worker-0/INFO] [dev.dragonsteelschools.DragonsteelSchools/]: [DragonsteelSchools/runtime] absent grandsigil
+[17Nov2026 17:51:08.374] [modloading-worker-0/INFO] [dev.dragonsteelschools.DragonsteelSchools/]: [DragonsteelSchools/runtime] finishing rule LEGENDARY (config)
+[17Nov2026 17:51:13.267] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (2.653s)! For help, type "help"
+[17Nov2026 17:51:21.749] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved

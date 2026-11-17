@@ -1,11 +1,12 @@
 modLoader="javafml"
 loaderVersion="[47,)"
-license="All Rights Reserved"
+license="LGPL-3.0-only"
 
 [[mods]]
 modId="dragonsteel_schools"
 version="${mod_version}"
 displayName="Ice and Fire: Schools of Dragonsteel"
+logoFile="dragonsteel_schools_logo.png"
 authors="Td4thor and Hastur"
 description='''Dragonsteel for every school of magic. Holy, Ender, Blood, Evocation, Nature and Eldritch each get their own dragonsteel armour, sword, tools and Dragon Priest staff.
 

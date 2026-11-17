@@ -44,6 +44,8 @@ public final class ClientQA {
     private static final boolean ENABLED = Boolean.getBoolean("dragonsteel_schools.qa");
     private static final List<Step> STEPS = new ArrayList<>();
     private static int ticksInWorld;
+    /** True while the JEI steps run: their shots are of screens, so an open screen must not stall the harness. */
+    private static boolean screensAllowed;
     private static int stepIndex;
     private static int waitUntil;
     private static int shots;
@@ -117,6 +119,23 @@ public final class ClientQA {
             if (school == SchoolSteel.ENDER) {
                 elsewhereShots(s, "5");
             }
+        }
+        if (net.minecraftforge.fml.ModList.get().isLoaded("jei")) {   // the mod's JEI pages
+            add(10, "jei_finishing", mc -> {
+                screensAllowed = true;
+                QaJei.showType(true);
+            });
+            add(20, "jei_finishing_shot", mc -> shot(mc, "jei_1_finishing"));
+            add(5, "jei_blood", mc -> QaJei.showType(false));
+            add(20, "jei_blood_shot", mc -> shot(mc, "jei_2_blood"));
+            add(5, "jei_info_tempered", mc -> QaJei.showInfo(ModItems.TEMPERED.get(SchoolSteel.HOLY).get()));
+            add(20, "jei_info_tempered_shot", mc -> shot(mc, "jei_3_info_tempered"));
+            add(5, "jei_info_elsewhere", mc -> QaJei.showInfo(ModItems.SWORD.get(SchoolSteel.ENDER).get()));
+            add(20, "jei_info_elsewhere_shot", mc -> shot(mc, "jei_4_info_elsewhere"));
+            add(5, "jei_close", mc -> {
+                screensAllowed = false;
+                mc.setScreen(null);
+            });
         }
         add(10, "done", mc -> {
             DragonsteelSchools.LOG.info("[DragonsteelSchools/qa] DONE: {} screenshots", shots);
@@ -221,7 +240,7 @@ public final class ClientQA {
         if (mc.screen instanceof net.minecraft.client.gui.screens.PauseScreen) {
             mc.setScreen(null);
         }
-        if (mc.player == null || mc.level == null || mc.screen != null || stepIndex >= STEPS.size()) {
+        if (mc.player == null || mc.level == null || (mc.screen != null && !screensAllowed) || stepIndex >= STEPS.size()) {
             return;
         }
         ticksInWorld++;

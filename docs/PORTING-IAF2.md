@@ -17,3 +17,7 @@ temper in a different way (for example, breath on a cauldron) and keep the finis
 
 Test fixtures (`src/gametest/.../ForgeFixtures.java`) build the 2.1.13 forge from registry names and call
 `onHitWithFlame` reflectively; they need the same update.
+
+The JEI pages (`compat/jei`, 1.0.0) take the forge cores from the same `dragon_forge_cores` tag for their catalysts
+(skipping ids ending in `_disabled`), so they follow step 1 with no change. Ice and Fire's own JEI plugin shows the
+tempering and staff recipes; if Ice and Fire 2 drops it, those recipes would need a category here.

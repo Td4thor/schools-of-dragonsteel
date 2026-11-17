@@ -30,7 +30,10 @@ Instance: `C:/Users/owner/curseforge/minecraft/Instances/Dragonsteel Schools Tes
    start and a chime as the point returns (about 1.1 s). Where you stood, the blade's fragments, white sparks and
    violet motes burst every way (needs particles above Minimal); portal motes swirl where you land. Pulsing beams
    with a running glint span both cuts at rest. Inventory, dropped item and item frames still show the flat sprite.
-7. **Screenshots for the art pass.** Both armour sets front, back and side (and each piece alone), Dawn and Elsewhere
+7. **JEI (1.0.0).** With JEI installed, look up a school's blood (School Dragon Blood page), its tempered steel
+   (Dragonsteel Finishing: one page per spell that finishes it, Apex spells first) and any item's information page.
+   With the Apex Only add-on on the server, the Legendary pages say they do not apply.
+8. **Screenshots for the art pass.** Both armour sets front, back and side (and each piece alone), Dawn and Elsewhere
    in hand (first and third person), both staves, holy fire on a mob and on yourself in first person, the three
    cauldron liquids, and the Holy Fire effect icon.
 

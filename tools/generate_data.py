@@ -171,6 +171,41 @@ def lang(cauldrons):
         "item.dragonsteel_schools.elsewhere.dodge_all": "While held, step aside from arrows and spell projectiles",
         "item.dragonsteel_schools.elsewhere.dodge_arrows": "While held, step aside from arrows",
     }
+    J = "jei.dragonsteel_schools."   # JEI pages (compat/jei); only JEI reads these
+    L.update({
+        J + "finishing": "Dragonsteel Finishing",
+        J + "finishing.apex": "Apex spell, any level",
+        J + "finishing.apex.tip": "On the Apex list: it finishes steel under either rule",
+        J + "finishing.legendary": "Legendary from level %s",
+        J + "finishing.legendary.tip": "Iron's Spells rates it Legendary from level %s (of %s)",
+        J + "finishing.how": "Look at a dragon forge holding the tempered steel and cast it, within %s blocks. One cast finishes up to %s.",
+        J + "finishing.disabled": "Not on this server: it runs the Apex Only add-on, so only Apex spells finish steel.",
+        J + "spell_school": "%s school",
+        J + "blood": "School Dragon Blood",
+        J + "blood.how": "Pour Dragon's Breath into a cauldron, a bottle per level. Look at it and cast any %s spell within %s blocks, then fill glass bottles from it.",
+        J + "blood.any": "Any %s spell will do",
+        J + "blood.example": "For example: %s",
+        J + "info.dragon_breath": "Schools of Dragonsteel: pour Dragon's Breath into a cauldron, one bottle per level, then cast a spell at it to brew that school's dragon blood. Holy, Ender, Blood, Evocation, Nature and Eldritch spells work; Fire, Ice and Lightning do not.",
+        J + "info.blood": "Brewing: pour Dragon's Breath into an empty cauldron, one bottle per level, up to three. Look at the cauldron and cast any %1$s spell from within %2$s blocks. The breath becomes %1$s Dragon Blood; fill glass bottles from it.",
+        J + "info.blood.uses": "Uses: with iron ingots in an Ice and Fire dragon forge it tempers %1$s steel. With Ice and Fire: Spellbooks' Dragon Priest Staff it makes the %1$s staff.",
+        J + "info.tempered": "The dragon's part: put iron ingots and %1$s Dragon Blood in an Ice and Fire dragon forge of any kind (fire, ice or lightning). While a dragon breathes into the forge it tempers one ingot every 50 seconds, the pace of Ice and Fire's own dragonsteel.",
+        J + "info.tempered.finish": "The spell's part: look at the forge and cast a %1$s spell of Legendary rarity, or a %1$s Apex spell. Every piece of tempered %1$s steel in the forge, up to %2$s, becomes %1$s Dragonsteel. Look at the forge when the cast begins or when it ends, from within %3$s blocks. The Dragonsteel Finishing pages list the spells that work.",
+        J + "info.tempered.apex_only": "On a server running the Apex Only add-on, only Apex spells finish the steel.",
+        J + "info.ingot": "%1$s Dragonsteel: finished from tempered %1$s steel at a dragon forge. It makes the %1$s dragonsteel armour, %2$s and the four tools.",
+        J + "info.staff": "Made in a dragon forge from Ice and Fire: Spellbooks' Dragon Priest Staff and %s Dragon Blood, the way Spellbooks makes its own element staves. Needs Ice and Fire: Spellbooks.",
+        J + "info.armor": "Each piece gives +%1$s max mana, +%2$s%% spell power and +%3$s%% %4$s spell power.",
+        J + "info.tools": "%s dragonsteel tools: the same tier as Ice and Fire's dragonsteel (mining level 4, 8,000 uses, mining speed 10).",
+        J + "info.dawn": "+%1$s damage against undead. Each hit sets the target alight with holy fire for %2$s s: %3$s damage a second, %4$s times that on undead. Water does not put it out; milk does.",
+        J + "info.elsewhere": "While you hold it, arrows and spell projectiles that would hit you miss: you step aside, up to %s blocks, like an enderman. Melee and beams still land.",
+        J + "info.elsewhere.arrows": "While you hold it, arrows that would hit you miss: you step aside, up to %s blocks, like an enderman. Spells, melee and beams still land.",
+        J + "info.elsewhere.either_hand": "Works from either hand.",
+        J + "info.elsewhere.main_hand": "Works from the main hand only.",
+        J + "info.elsewhere.cooldown": "After each dodge it rests for %s s.",
+        J + "info.thirst": "Only the sword's own hits count, sweeps included; spells do not.",
+        J + "info.covenant": "The fangs rise in a line from you toward the foe.",
+        J + "info.briar": "The poison and slowness land on every hit.",
+        J + "info.hush": "Players struck are wrapped in Darkness.",
+    })
     for s, cfg in SCHOOLS.items():
         n = cfg["name"]
         L[f"school.dragonsteel_schools.{s}"] = n
