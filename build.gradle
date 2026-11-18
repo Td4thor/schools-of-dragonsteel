@@ -196,7 +196,7 @@ tasks.register('releaseSourcesJar', Jar) {
     archiveClassifier = 'sources'
     from(projectDir) {
         include 'src/main/**', 'src/apexonly/**', 'src/gametest/**', 'src/qa/**', 'tools/**', 'docs/*.md', 'docs/art/CREDITS.md'
-        include 'build.gradle', 'settings.gradle', 'gradle.properties', 'gradlew', 'gradlew.bat', 'gradle/**'
+        include 'build.gradle', 'settings.gradle', 'gradle.properties', 'gradlew', 'gradle/**'   // no gradlew.bat: CurseForge moderation rejects any jar holding .bat or .exe files
         include 'LICENSE', 'COPYING', 'README.md', 'CHANGELOG.md', '.gitignore', '.gitattributes'
         exclude '**/__pycache__/**'
     }
